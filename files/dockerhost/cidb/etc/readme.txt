@@ -1,2 +1,3 @@
 Info:
-- Put here your id_rsa and id_rsa.pub files
+- Adjust your timezone in the ‚timezone‘ file
+- Use ‚stmp.conf.sample‘ as a sample to make your smtp settings and rename it to smtp.conf.
