@@ -1,0 +1,8 @@
+[local]
+servix ansible_connection=local
+
+[dockerhost]
+servix ansible_connection=local
+
+[inventoryhost]
+servix ansible_connection=local

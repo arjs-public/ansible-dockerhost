@@ -1,0 +1,46 @@
+---
+- name: Create a new '{{ environment }}' environment config based on '.template.json.j2'
+  hosts: dockerhost
+  sudo: False
+
+  vars_files:
+    - ../../roles/dockerhost/vars/base.yml
+
+  pre_tasks:
+    - include: ../../roles/dockerhost/tasks/check_connection.yml
+
+    # - debug: vars=ansible_env msg="{{ ansible_env }}"
+    #
+    # - debug: vars=local_base msg="{{ local_base | realpath }}"
+    #
+    # - debug: vars=config_base msg="{{ config_base }}"
+    #
+    # - debug: vars=env_name msg="{{ env_name }}"
+
+
+    - name: Check directory "{{ config_base }}" and create if not found
+      file: dest={{ config_base }} state=directory
+      register: checkout
+
+    - fail: msg="Create failed!"
+      when: checkout.state != 'directory'
+
+  tasks:
+    - name: Process template to new environment
+      template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"
+      with_fileglob:
+        - "{{ config_base }}/**/.template.json.j2"
+
+    - name: Create '{{ jenkins_base }}/{{ env_name }}' folder
+      file: dest='{{ jenkins_base }}/{{ env_name }}' state=directory mode=0775
+      register: checkout
+
+    - fail: msg="Create failed!"
+      when: checkout.state != 'directory'
+
+    - name: Create '{{ jenkins_data_base }}/{{ env_name }}' folder
+      file: dest='{{ jenkins_data_base }}/{{ env_name }}' state=directory mode=0775
+      register: checkout
+
+    - fail: msg="Create failed!"
+      when: checkout.state != 'directory'

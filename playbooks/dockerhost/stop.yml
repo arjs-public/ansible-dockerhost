@@ -1,0 +1,16 @@
+---
+- name: Stop a running '{{ container_name }}' container based on '{{ image }}'
+  hosts: dockerhost
+  sudo: False
+
+  vars_files:
+    - ../../roles/dockerhost/vars/base.yml
+
+  tasks:
+    - include: ../../roles/dockerhost/tasks/check_connection.yml
+
+    - include: ../../roles/dockerhost/tasks/get_facts.yml
+
+    - include: ../../roles/dockerhost/tasks/add_host.yml
+
+    - include: ../../roles/dockerhost/tasks/stop.yml

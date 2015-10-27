@@ -1,0 +1,56 @@
+---
+- name: Build '{{ image }}' image
+  hosts: dockerhost
+  sudo: False
+
+  vars_files:
+    - ../../roles/dockerhost/vars/base.yml
+
+  tasks:
+    - include: ../../roles/dockerhost/tasks/check_connection.yml
+
+
+    - name: Check directory "{{ image_path }}" and create if not found
+      file: dest={{ image_path }} state=directory
+      register: checkout
+
+    - fail: msg="Create failed!"
+      when: checkout.state != 'directory'
+
+
+    - name: Copy "{{ image }}" docker file to localhost
+      synchronize:
+        src: "{{ ansible_env.PWD }}/../../files/dockerhost/{{ image }}/"
+        dest: "{{ image_path }}{{ image }}/"
+        copy_links: yes
+
+    - name: Check "{{ image }}" docker file in localhost
+      stat: path="{{ image_path }}{{ image }}/"
+      register: checkout
+
+    - fail: msg="Copy failed!"
+      when: checkout.stat.exists == False
+
+    - name: ensure private key file is protected
+      file:
+        # path: "{{ ansible_env.PWD }}/files/keys/id_rsa"
+        path: "{{ image_path }}{{ image }}/keys/id_rsa"
+        mode: 0600
+
+    - name: ensure public key file is protected
+      file:
+        # path: "{{ ansible_env.PWD }}/files/keys/id_rsa"
+        path: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
+        mode: 0644
+
+
+    - name: Create "{{ image }}" docker image
+      # docker_image:
+      #  name: base
+      #  path: /home/homeboy/work/playbooks/local_test/files/docker/base
+      #  state: build
+      command: docker build -t {{ image }} "{{ image_path }}{{ image }}"
+      register: buildout
+
+#    - fail: msg="Build failed!"
+#      when: buildout.rc != 0

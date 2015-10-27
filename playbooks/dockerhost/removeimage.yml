@@ -1,0 +1,12 @@
+---
+- name: Remove image based on '{{ image }}'
+  hosts: dockerhost
+  sudo: False
+
+  vars_files:
+    - ../../roles/dockerhost/vars/base.yml
+
+  tasks:
+    - include: ../../roles/dockerhost/tasks/check_connection.yml
+
+    - include: ../../roles/dockerhost/tasks/removeimage.yml

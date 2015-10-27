@@ -1,0 +1,7 @@
+---
+    - name: remove obsolete container
+      docker:
+        docker_api_version: 1.17
+        name: "{{ container_name }}"
+        image: "{{ image }}"
+        state: absent

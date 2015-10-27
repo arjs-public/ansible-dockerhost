@@ -1,0 +1,7 @@
+{
+  "container_name": "ci_{{ env_name }}",
+  "ports": ["{{ port_pre }}{{ port }}:8080"],
+  "volumes": ["{{ jenkins_base }}/{{ env_name }}:/var/jenkins_home"],
+  "links": "cidb_{{ env_name }}:redis",
+  "has_custom_command": false
+}

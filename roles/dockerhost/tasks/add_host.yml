@@ -1,0 +1,18 @@
+---
+    - name: add container '{{ container_name }}' to the hosts inventory
+      add_host:
+        hostname: "{{ container_name }}"
+        groups: docker
+        ansible_ssh_host: "{{ item.value.docker_networksettings.IPAddress }}"
+        ansible_ssh_port: 22
+      with_dict: docker_containers
+      when: item.value.docker_state.Running == True and item.key == container_name
+
+#    - debug: vars=hostvars msg="{{ hostvars[container_name] }}"
+#      with_dict: docker_containers
+#      when: item.value.docker_state.Running == True and item.key == container_name
+
+    - name: ping '{{ container_name }}'
+      shell: echo ping -c 1 "{{ item.value.docker_networksettings.IPAddress }}"
+      with_dict: docker_containers
+      when: item.value.docker_state.Running == True and item.key == container_name

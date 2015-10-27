@@ -1,0 +1,6 @@
+---
+    - name: Get facts about containers
+      local_action:
+        module: docker_facts
+        docker_api_version: 1.17
+        name: "{{ container_name }}"

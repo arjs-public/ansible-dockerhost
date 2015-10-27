@@ -1,0 +1,30 @@
+---
+- name: Create and start a running '{{ container_name }}' container based on '{{ image }}'
+  hosts: dockerhost
+  sudo: False
+
+  vars_files:
+    - ../../roles/dockerhost/vars/base.yml
+
+  tasks:
+    - include: ../../roles/dockerhost/tasks/check_connection.yml
+
+    - include: ../../roles/dockerhost/tasks/start.yml
+
+    - include: ../../roles/dockerhost/tasks/get_facts.yml
+
+    - include: ../../roles/dockerhost/tasks/add_host.yml
+
+#    - name: ping '{{ container_name }}'
+#      shell: ping -c 1 "{{ hostvars[container_name].ansible_ssh_host }}"
+      # ping:
+      # shell: ping -c 1 "{{ item.value.docker_networksettings.IPAddress }}"
+      # when: item.value.docker_state.Running == True
+      # with_dict: docker_containers
+#      register: output
+
+#    - name: Output
+#      debug: msg="[echo] {{ output.rc }}"
+#      # debug: msg="[echo] {{ output.results[0].rc }}"
+#    - name: Output
+#      debug: msg="[echo] {{ hostvars[container_name].ansible_ssh_host }}"

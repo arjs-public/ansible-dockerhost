@@ -1,0 +1,9 @@
+---
+    - name: stop client container
+      docker:
+        docker_api_version: 1.17
+        image: "{{ image }}"
+        name: "{{ container_name }}"
+        state: stopped
+      with_dict: docker_containers
+      when: item.value.docker_state.Running == True and item.key == container_name

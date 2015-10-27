@@ -1,0 +1,7 @@
+{
+  "container_name": "ci_test",
+  "ports": ["8081:8080"],
+  "volumes": ["/extra/jenkins/test:/var/jenkins_home"],
+  "links": "cidb_test:redis",
+  "has_custom_command": false
+}

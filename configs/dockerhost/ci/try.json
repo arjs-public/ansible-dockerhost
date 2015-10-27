@@ -1,0 +1,7 @@
+{
+  "container_name": "ci_try",
+  "ports": ["8085:8080"],
+  "volumes": ["/extra/jenkins/try:/var/jenkins_home"],
+  "links": "cidb_try:redis",
+  "has_custom_command": false
+}
