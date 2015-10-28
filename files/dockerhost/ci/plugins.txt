@@ -1,12 +1,15 @@
+antisamy-markup-formatter:latest
+ant:latest
 credentials:latest
 cvs:latest
+external-monitor-job:latest
 javadoc:latest
 junit:latest
+ldap:latest
 mailer:latest
 matrix-auth:latest
 matrix-project:latest
 maven-plugin:latest
-antisamy-markup-formatter:latest
 pam-auth:latest
 script-security:latest
 ssh-credentials:latest
