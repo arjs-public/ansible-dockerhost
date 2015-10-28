@@ -1,0 +1,16 @@
+credentials:latest
+cvs:latest
+javadoc:latest
+junit:latest
+mailer:latest
+matrix-auth:latest
+matrix-project:latest
+maven-plugin:latest
+antisamy-markup-formatter:latest
+pam-auth:latest
+script-security:latest
+ssh-credentials:latest
+ssh-slaves:latest
+subversion:latest
+translation:latest
+windows-slaves:latest
