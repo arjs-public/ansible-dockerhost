@@ -190,10 +190,9 @@ cleanup: verify_infra
 	@for l in `cat $(CNFG_D)/infra_$(INFRA).txt`; \
 	do \
 		echo Removing $$l; \
-		make APP=$$l ENV=$(ENV) remove; \
+		make APP=$$l ENV=$(ENV) destroy; \
 		echo; \
 	done
-	@docker ps -a
 
 list:
 	@echo "--- List Infrastructures [$(CNFG_D)] ------------------------"
