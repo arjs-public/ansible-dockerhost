@@ -196,13 +196,13 @@ cleanup: verify_infra
 	done
 
 list:
-	@echo "--- List Infrastructures [$(CNFG_D)] ------------------------"
+	@echo "--- List Infrastructures [$(CNFG_D)/infra/] ------------------------"
 	@pushd $(CNFG_D)/infra/ > /dev/null; ls -1 *.txt | cut -d _ -f 2 | cut -d . -f 1; popd > /dev/null
 	@echo
-	@echo "--- List Application Stacks [$(CNFG_D)] ------------------------"
+	@echo "--- List Application Stacks [$(CNFG_D)/envs/] ------------------------"
 	@pushd $(CNFG_D)/envs/ > /dev/null; ls -1dR */; popd > /dev/null
 	@echo
-	@echo "--- List Environments in Application Stacks [$(CNFG_D)] ------------------------"
+	@echo "--- List Environments in Application Stacks [$(CNFG_D)/envs/] ------------------------"
 	@pushd $(CNFG_D)/envs/ > /dev/null; ls -1dR **/*.json | cut -d / -f 2 | cut -d . -f 1 | sort -u; popd > /dev/null
 	@echo
 	@echo "--- List Custom Docker Images [$(TAG_D)] ------------------------"
