@@ -181,7 +181,7 @@ construct: verify_infra
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo Building $$l; \
-		echo make TAG=$$l build; \
+		make TAG=$$l build; \
 		echo; \
 	done
 	@docker ps -a
