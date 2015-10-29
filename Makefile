@@ -10,14 +10,15 @@ SHELL := /bin/bash
 ENV = develop
 DOCKERHOST = dockerhost
 BASE_D = .
-TAG_D = $(BASE_D)/files/$(DOCKERHOST)
-CNFG_D = $(BASE_D)/configs/$(DOCKERHOST)
+PB_D = $(BASE_D)/playbooks/$(DOCKERHOST)
+TAG_D = $(BASE_D)/roles/$(DOCKERHOST)/files
+CNFG_D = $(BASE_D)/roles/$(DOCKERHOST)/defaults
 A_CFG = $(BASE_D)/configs/ansible.cfg
 
-ifeq ($(wildcard $(BASE_D)/configs/$(DOCKERHOST)/$(APP)/$(ENV).json),)
+ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),)
 CONFIGS =
 else
-CONFIGS = -e "@$(BASE_D)/configs/$(DOCKERHOST)/$(APP)/$(ENV).json"
+CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"
 endif
 
 # --------- Rules
@@ -46,7 +47,7 @@ help:
 # -------- Playbook handling
 
 verify_playbook:
-	$(eval PLAYBOOKPATH=$(BASE_D)/playbooks/$(DOCKERHOST)/$(PLAYBOOK).yml)
+	$(eval PLAYBOOKPATH=$(PB_D)/$(PLAYBOOK).yml)
 	@test -f $(PLAYBOOKPATH) || (echo "Error: No playbook found!" && exit 1)
 
 execute: verify_playbook
@@ -62,8 +63,8 @@ endif
 # -------- Application handling
 
 verify:
-	@test "$(APP)" && test -d $(CNFG_D)/$(APP)/ || (echo "Error: APP not set or APP folder not found! ($(CNFG_D)/$(APP)/" && exit 1)
-	@test "$(ENV)" && test -s $(CNFG_D)/$(APP)/$(ENV).json || (echo "Error: ENV not set or ENV json not found! ($(CNFG_D)/$(APP)/$(ENV).json)" && exit 1)
+	@test "$(APP)" && test -d $(CNFG_D)/envs/$(APP)/ || (echo "Error: APP not set or APP folder not found! ($(CNFG_D)/envs/$(APP)/" && exit 1)
+	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(ENV).json || (echo "Error: ENV not set or ENV json not found! ($(CNFG_D)/envs/$(APP)/$(ENV).json)" && exit 1)
 
 boot: PLAYBOOK=start
 boot: verify execute stats status
@@ -153,11 +154,11 @@ wipeout:
 # -------- Infra handling
 
 verify_infra:
-	@test "$(INFRA)" && test -s $(CNFG_D)/infra_$(INFRA).txt || (echo "Error: INFRA not set or INFRA txt not found! ($(CNFG_D)/infra_$(INFRA).txt)" && exit 1)
+	@test "$(INFRA)" && test -s $(CNFG_D)/infra/$(INFRA).txt || (echo "Error: INFRA not set or INFRA txt not found! ($(CNFG_D)/infra/$(INFRA).txt)" && exit 1)
 
 startup: verify_infra
 	@echo "--- Startup '$(INFRA)' ------------------------"
-	@for l in `cat $(CNFG_D)/infra_$(INFRA).txt`; \
+	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo Booting $$l; \
 		make APP=$$l ENV=$(ENV) boot; \
@@ -167,7 +168,7 @@ startup: verify_infra
 
 teardown: verify_infra
 	@echo "--- Teardown '$(INFRA)' -----------------------"
-	@for l in `tac $(CNFG_D)/infra_$(INFRA).txt`; \
+	@for l in `tac $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo Shuting down $$l; \
 		make APP=$$l ENV=$(ENV) shutdown; \
@@ -177,7 +178,7 @@ teardown: verify_infra
 
 construct: verify_infra
 	@echo "--- Construct '$(INFRA)' ------------------------"
-	@for l in `cat $(CNFG_D)/infra_$(INFRA).txt`; \
+	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo Building $$l; \
 		echo make TAG=$$l build; \
@@ -187,7 +188,7 @@ construct: verify_infra
 
 cleanup: verify_infra
 	@echo "--- Cleanup '$(INFRA)' ------------------------"
-	@for l in `cat $(CNFG_D)/infra_$(INFRA).txt`; \
+	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo Removing $$l; \
 		make APP=$$l ENV=$(ENV) destroy; \
@@ -196,13 +197,13 @@ cleanup: verify_infra
 
 list:
 	@echo "--- List Infrastructures [$(CNFG_D)] ------------------------"
-	@pushd $(CNFG_D) > /dev/null; ls -1 infra_*.txt | cut -d _ -f 2 | cut -d . -f 1; popd > /dev/null
+	@pushd $(CNFG_D)/infra/ > /dev/null; ls -1 *.txt | cut -d _ -f 2 | cut -d . -f 1; popd > /dev/null
 	@echo
 	@echo "--- List Application Stacks [$(CNFG_D)] ------------------------"
-	@pushd $(CNFG_D) > /dev/null; ls -1dR */; popd > /dev/null
+	@pushd $(CNFG_D)/envs/ > /dev/null; ls -1dR */; popd > /dev/null
 	@echo
 	@echo "--- List Environments in Application Stacks [$(CNFG_D)] ------------------------"
-	@pushd $(CNFG_D) > /dev/null; ls -1dR **/*.json | cut -d / -f 2 | cut -d . -f 1 | sort -u; popd > /dev/null
+	@pushd $(CNFG_D)/envs/ > /dev/null; ls -1dR **/*.json | cut -d / -f 2 | cut -d . -f 1 | sort -u; popd > /dev/null
 	@echo
 	@echo "--- List Custom Docker Images [$(TAG_D)] ------------------------"
 	@pushd $(TAG_D) > /dev/null; ls -1dR */; popd > /dev/null

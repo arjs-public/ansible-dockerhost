@@ -18,19 +18,6 @@
       when: checkout.state != 'directory'
 
 
-    - name: Copy "{{ image }}" docker file to localhost
-      synchronize:
-        src: "{{ ansible_env.PWD }}/../../files/dockerhost/{{ image }}/"
-        dest: "{{ image_path }}{{ image }}/"
-        copy_links: yes
-
-    - name: Check "{{ image }}" docker file in localhost
-      stat: path="{{ image_path }}{{ image }}/"
-      register: checkout
-
-    - fail: msg="Copy failed!"
-      when: checkout.stat.exists == False
-
     - name: ensure private key file is protected
       file:
         # path: "{{ ansible_env.PWD }}/files/keys/id_rsa"
@@ -42,6 +29,19 @@
         # path: "{{ ansible_env.PWD }}/files/keys/id_rsa"
         path: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
         mode: 0644
+
+    - name: Copy "{{ image }}" docker file to localhost
+      synchronize:
+        src: "../../roles/dockerhost//files/{{ image }}/"
+        dest: "{{ image_path }}{{ image }}/"
+        copy_links: yes
+
+    - name: Check "{{ image }}" docker file in localhost
+      stat: path="{{ image_path }}{{ image }}/"
+      register: checkout
+
+    - fail: msg="Copy failed!"
+      when: checkout.stat.exists == False
 
 
     - name: Create "{{ image }}" docker image
