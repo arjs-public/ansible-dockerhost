@@ -33,7 +33,7 @@ help:
 	@echo "* make IMG=<image from images> *) destroyi"
 	@echo "* make status | images | list | wipeout ***)"
 	@echo
-	@echo "*) see 'make list' output for available options"
+	@echo "*) see 'make list' output for available options; default: ENV = develop"
 	@echo "**) Port extension to use with normal prefix 80 or db prefix 90; e.g. normal (80) + extenison (85) = port (8085)"
 	@echo "***) Very dangerous, since deletes all associated folders on 'dockerhost'"
 	@echo "****) Very dangerous, since it kills all docker containers on 'dockerhost'"
