@@ -184,7 +184,7 @@ construct: verify_infra
 		make TAG=$$l build; \
 		echo; \
 	done
-	@docker ps -a
+	@docker images
 
 cleanup: verify_infra
 	@echo "--- Cleanup '$(INFRA)' ------------------------"
@@ -194,6 +194,7 @@ cleanup: verify_infra
 		make APP=$$l ENV=$(ENV) destroy; \
 		echo; \
 	done
+	@docker ps -a
 
 list:
 	@echo "--- List Infrastructures [$(CNFG_D)/infra/] ------------------------"
