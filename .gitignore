@@ -5,3 +5,4 @@ configs/.secrets/**
 **/id_rsa
 **/id_rsa.pub
 **/stmp.conf
+**/smtp.conf
