@@ -2,6 +2,7 @@
   "container_name": "cidb_develop",
   "ports": ["9082:6379"],
   "volumes": ["/extra/data/jenkins/develop:/data"],
+  "env_name": "develop",
   "has_custom_command": true,
   "command": "redis-server --appendonly yes"
 }

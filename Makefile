@@ -2,13 +2,14 @@
 # docker Makefile -- combine some usefull stuff
 #
 
-.PHONY: help boot shutdown destroy stats status destroy images fetch destroyi startup teardown construct cleanup wipeout list create delete
+.PHONY: help boot shutdown destroy stats status destroy plugins images fetch destroyi startup teardown construct cleanup wipeout list create delete
 SHELL := /bin/bash
 
 # --------- Defaults
 
-ENV = develop
 DOCKERHOST = dockerhost
+ENV = develop
+PLUGINS = plugins.ini
 BASE_D = .
 PB_D = $(BASE_D)/playbooks/$(DOCKERHOST)
 TAG_D = $(BASE_D)/roles/$(DOCKERHOST)/files
@@ -40,6 +41,7 @@ help:
 	@echo
 	@echo "-- Defaults ---------"
 	@echo "* ENV = $(ENV)"
+	@echo "* PLUGINS = $(PLUGINS)"
 	@echo "* TAG_D = $(TAG_D)"
 	@echo "* CNFG_D = $(CNFG_D)"
 	@echo "* A_CFG = $(A_CFG)"
@@ -89,6 +91,11 @@ stats: verify
 status:
 	@echo "--- Status ------------------------"
 	@docker ps -a
+	@echo
+
+plugins: PLAYBOOK=plugins
+plugins: verify execute
+	@echo "--- Plugins ------------------------"
 	@echo
 
 # -------- Environment handling
@@ -161,6 +168,7 @@ startup: verify_infra
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo Booting $$l; \
+		[[ -f $(CNFG_D)/envs/$$l/$(PLUGINS) ]] && make APP=$$l ENV=$(ENV) plugins; \
 		make APP=$$l ENV=$(ENV) boot; \
 		echo; \
 	done

@@ -1,5 +1,6 @@
 .DS_Store
 ._.DS_Store
+**/._*
 icon.png
 configs/.secrets/**
 **/id_rsa

@@ -1,7 +1,9 @@
 {
-  "container_name": "ci_{{ env_name }}",
+  "container_name": "{{ image_name }}_{{ env_name }}",
   "ports": ["{{ port_pre }}{{ port }}:8080"],
   "volumes": ["{{ jenkins_base }}/{{ env_name }}:/var/jenkins_home"],
   "links": "cidb_{{ env_name }}:redis",
-  "has_custom_command": false
+  "env_name": "{{ env_name }}",
+  "has_custom_command": false,
+  "jenkins_extra_plugins": ["plugins.ini"]
 }

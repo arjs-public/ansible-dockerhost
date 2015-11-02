@@ -1,7 +1,9 @@
 {
-  "container_name": "ci_develop",
+  "container_name": "cictl_develop",
   "ports": ["8082:8080"],
   "volumes": ["/extra/jenkins/develop:/var/jenkins_home"],
   "links": "cidb_develop:redis",
-  "has_custom_command": false
+  "env_name": "develop",
+  "has_custom_command": false,
+  "jenkins_extra_plugins": ["plugins.ini"]
 }

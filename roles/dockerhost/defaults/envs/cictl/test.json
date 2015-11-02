@@ -3,5 +3,7 @@
   "ports": ["8081:8080"],
   "volumes": ["/extra/jenkins/test:/var/jenkins_home"],
   "links": "cidb_test:redis",
-  "has_custom_command": false
+  "env_name": "test",
+  "has_custom_command": false,
+  "jenkins_extra_plugins": ["plugins.ini"]
 }

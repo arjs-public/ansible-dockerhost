@@ -2,6 +2,7 @@
   "container_name": "cidb_try",
   "ports": ["9085:6379"],
   "volumes": ["/extra/data/jenkins/try:/data"],
+  "env_name": "try",
   "has_custom_command": true,
   "command": "redis-server --appendonly yes"
 }

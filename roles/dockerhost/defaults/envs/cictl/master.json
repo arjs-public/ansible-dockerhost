@@ -3,5 +3,7 @@
   "ports": ["8080:8080"],
   "volumes": ["/extra/jenkins/master:/var/jenkins_home"],
   "links": "cidb_master:redis",
-  "has_custom_command": false
+  "env_name": "master",
+  "has_custom_command": false,
+  "jenkins_extra_plugins": ["plugins.ini"]
 }

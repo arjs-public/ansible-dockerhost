@@ -1,0 +1,28 @@
+---
+- name: Create/Delete/Disable plugins for an instance
+  hosts: dockerhost
+  sudo: False
+
+  vars_files:
+    - ../../roles/dockerhost/vars/base.yml
+
+  tasks:
+    - include: ../../roles/dockerhost/tasks/check_connection.yml
+
+
+    - file: path="{{ config_base }}{{ image }}/plugins.sh" state=file mode="u=rwx,g=rx,o=rx"
+
+    # - shell: echo "{{ config_base }}{{ image }}/plugins.sh"
+    #   register: output
+
+    # - debug: vars=output msg="{{ output.stdout }}"
+
+    - name: Handle plugins
+      command: bash -x "{{ config_base }}{{ image }}/plugins.sh" "{{ config_base }}{{ image }}/{{ item }}" "{{ jenkins_base }}/{{ env_name }}/plugins"
+      with_items: "{{ jenkins_extra_plugins }}"
+      register: output
+
+    #- debug: vars=output msg="{{ item.stdout_lines }}"
+    #  with_items: "{{ output.results }}"
+
+    - debug: vars=output msg="{{ output.msg }}"
