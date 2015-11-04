@@ -1,5 +1,5 @@
 ---
-- name: Delete a '{{ environment }}' environment config
+- name: Delete a {{ environment }} environment config
   hosts: dockerhost
   sudo: False
 
@@ -21,7 +21,7 @@
     # - debug: vars=env_name msg="{{ env_name }}"
 
 
-    - name: Check directory "{{ config_base }}" and create if not found
+    - name: Check directory {{ config_base }} and create if not found
       file: dest={{ config_base }} state=directory
       register: checkout
 
@@ -30,16 +30,14 @@
 
   tasks:
     - name: Cleanup environment config files
-      file: dest='{{ item }}' state=absent
+      file: dest="{{ item }}" state=absent
       with_fileglob:
         - "{{ config_base }}/**/{{ env_name }}.json"
 
-    - name: Delete '{{ jenkins_base }}/{{ env_name }}' folder
-      file: dest='{{ jenkins_base }}/{{ env_name }}' state=absent
-      register: checkout
+    - name: Delete {{ jenkins_base }}/{{ env_name }} folder
+      file: dest="{{ jenkins_base }}/{{ env_name }}" state=absent
       when: clean_up
 
-    - name: Delete '{{ jenkins_data_base }}/{{ env_name }}' folder
-      file: dest='{{ jenkins_data_base }}/{{ env_name }}' state=absent
-      register: checkout
+    - name: Delete {{ jenkins_data_base }}/{{ env_name }} folder
+      file: dest="{{ jenkins_data_base }}/{{ env_name }}" state=absent
       when: clean_up

@@ -6,23 +6,57 @@
   vars_files:
     - ../../roles/dockerhost/vars/base.yml
 
-  tasks:
+  pre_tasks:
     - include: ../../roles/dockerhost/tasks/check_connection.yml
 
+    # - debug: vars=ansible_env msg="{{ ansible_env }}"
+
+    # - debug: vars=local_base msg="{{ local_base | realpath }}"
+
+    # - debug: vars=config_base msg="{{ config_base }}"
+
+    # - debug: vars=files_base msg="{{ files_base }}"
+
+    # - debug: vars=image msg="{{ image }}"
+
+    # - debug: vars=env_name msg="{{ env_name }}"
+
+
+    - name: Check directory "{{ config_base }}" and create if not found
+      file: dest={{ config_base }} state=directory
+      register: checkout
+      failed_when: checkout.state != "directory"
+    # - debug: vars=checkout msg="{{checkout}}"
+
+    - name: Create "{{ jenkins_base }}/{{ env_name }}" folder
+      file: dest="{{ jenkins_base }}/{{ env_name }}" state=directory mode=0775
+      register: checkout
+      failed_when: checkout.state != "directory"
+    # - debug: vars=checkout msg="{{checkout}}"
+
+    - name: Create "{{ jenkins_base }}/{{ env_name }}/plugins" folder
+      file: dest="{{ jenkins_base }}/{{ env_name }}/plugins" state=directory mode=0775
+      register: checkout
+      failed_when: checkout.state != "directory"
+    # - debug: vars=checkout msg="{{checkout}}"
 
     - file: path="{{ config_base }}{{ image }}/plugins.sh" state=file mode="u=rwx,g=rx,o=rx"
+      register: checkout
+      failed_when: checkout.state != "file"
+    # - debug: vars=checkout msg="{{checkout}}"
 
-    # - shell: echo "{{ config_base }}{{ image }}/plugins.sh"
-    #   register: output
-
-    # - debug: vars=output msg="{{ output.stdout }}"
-
+  tasks:
     - name: Handle plugins
       command: bash -x "{{ config_base }}{{ image }}/plugins.sh" "{{ config_base }}{{ image }}/{{ item }}" "{{ jenkins_base }}/{{ env_name }}/plugins"
       with_items: "{{ jenkins_extra_plugins }}"
       register: output
+    # - debug: vars=output msg="{{ output.msg }}"
 
     #- debug: vars=output msg="{{ item.stdout_lines }}"
     #  with_items: "{{ output.results }}"
 
-    - debug: vars=output msg="{{ output.msg }}"
+    - name: Process template for plugins
+      template: src="{{ item }}" dest="{{jenkins_base}}/{{ env_name }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      #debug: vars="{{ item }}" msg="{{jenkins_base}}/{{ env_name }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      with_fileglob:
+        - "{{ files_base }}{{ image }}/plugins/*.j2"

@@ -1,5 +1,5 @@
 ---
-- name: Create a new '{{ environment }}' environment config based on '.template.json.j2'
+- name: Create a new "{{ environment }}" environment config based on ".template.json.j2"
   hosts: dockerhost
   sudo: False
 
@@ -23,7 +23,21 @@
       register: checkout
 
     - fail: msg="Create failed!"
-      when: checkout.state != 'directory'
+      when: checkout.state != "directory"
+
+    - name: Create "{{ jenkins_base }}/{{ env_name }}" folder
+      file: dest="{{ jenkins_base }}/{{ env_name }}" state=directory mode=0775
+      register: checkout
+
+    - fail: msg="Create failed!"
+      when: checkout.state != "directory"
+
+    - name: Create "{{ jenkins_data_base }}/{{ env_name }}" folder
+      file: dest="{{ jenkins_data_base }}/{{ env_name }}" state=directory mode=0775
+      register: checkout
+
+    - fail: msg="Create failed!"
+      when: checkout.state != "directory"
 
   tasks:
     - name: Process template to new environment
@@ -31,16 +45,3 @@
       with_fileglob:
         - "{{ config_base }}/**/.template.json.j2"
 
-    - name: Create '{{ jenkins_base }}/{{ env_name }}' folder
-      file: dest='{{ jenkins_base }}/{{ env_name }}' state=directory mode=0775
-      register: checkout
-
-    - fail: msg="Create failed!"
-      when: checkout.state != 'directory'
-
-    - name: Create '{{ jenkins_data_base }}/{{ env_name }}' folder
-      file: dest='{{ jenkins_data_base }}/{{ env_name }}' state=directory mode=0775
-      register: checkout
-
-    - fail: msg="Create failed!"
-      when: checkout.state != 'directory'

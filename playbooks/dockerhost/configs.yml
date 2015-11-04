@@ -1,0 +1,62 @@
+---
+- name: Handle configs for an instance
+  hosts: dockerhost
+  sudo: False
+
+  vars_files:
+    - ../../roles/dockerhost/vars/base.yml
+
+  pre_tasks:
+    - include: ../../roles/dockerhost/tasks/check_connection.yml
+
+    # - debug: vars=ansible_env msg="{{ ansible_env }}"
+
+    # - debug: vars=local_base msg="{{ local_base | realpath }}"
+
+    # - debug: vars=config_base msg="{{ config_base }}"
+
+    # - debug: vars=files_base msg="{{ files_base }}"
+
+    # - debug: vars=image msg="{{ image }}"
+
+    # - debug: vars=env_name msg="{{ env_name }}"
+
+    - name: Create "{{ jenkins_base }}/{{ env_name }}" folder
+      file: dest="{{ jenkins_base }}/{{ env_name }}" state=directory mode=0775
+      register: checkout
+      failed_when: checkout.state != "directory"
+    # - debug: vars=checkout msg="{{checkout}}"
+
+    - name: Create folders in "{{jenkins_base}}/{{ env_name }}/users/" for default user configs
+      file: dest="{{jenkins_base}}/{{ env_name }}/users/{{ item | dirname | basename }}/" state=directory mode=0775
+      #debug: vars="{{ item }}" msg="{{jenkins_base}}/{{ env_name }}/users/{{ item | dirname | basename }}/"
+      register: checkout
+      failed_when: checkout.state != "directory"
+      with_fileglob:
+        - "{{ files_base }}{{ image }}/users/**/*.j2"
+
+    - name: Create folders in "{{jenkins_base}}/{{ env_name }}/jobs/" for default job configs
+      file: dest="{{jenkins_base}}/{{ env_name }}/jobs/{{ item | dirname | basename }}/" state=directory mode=0775
+      #debug: vars="{{ item }}" msg="{{jenkins_base}}/{{ env_name }}/jobs/{{ item | dirname | basename }}/"
+      register: checkout
+      failed_when: checkout.state != "directory"
+      with_fileglob:
+        - "{{ files_base }}{{ image }}/jobs/**/*.j2"
+
+  tasks:
+    - name: Process template for configs
+      template: src="{{ item }}" dest="{{jenkins_base}}/{{ env_name }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      with_fileglob:
+        - "{{ files_base }}{{ image }}/*.j2"
+
+    - name: Process templates for default user configs
+      template: src="{{ item }}" dest="{{jenkins_base}}/{{ env_name }}/users/{{ item | dirname | basename }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      # debug: vars="{{ item }}" msg="{{jenkins_base}}/{{ env_name }}/users/{{ item | dirname | basename }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      with_fileglob:
+        - "{{ files_base }}{{ image }}/users/**/*.j2"
+
+    - name: Process templates for default job configs
+      template: src="{{ item }}" dest="{{jenkins_base}}/{{ env_name }}/jobs/{{ item | dirname | basename }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      # debug: vars="{{ item }}" msg="{{jenkins_base}}/{{ env_name }}/jobs/{{ item | dirname | basename }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      with_fileglob:
+        - "{{ files_base }}{{ image }}/jobs/**/*.j2"

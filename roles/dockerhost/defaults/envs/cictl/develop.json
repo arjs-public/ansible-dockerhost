@@ -4,6 +4,9 @@
   "volumes": ["/extra/jenkins/develop:/var/jenkins_home"],
   "links": "cidb_develop:redis",
   "env_name": "develop",
+  "mapped_port": "8082",
+  "db_redis_linkname": "cidb_develop",
+  "db_redis_linkport": "9082",
   "has_custom_command": false,
   "jenkins_extra_plugins": ["plugins.ini"]
 }

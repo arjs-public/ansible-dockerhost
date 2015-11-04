@@ -9,11 +9,13 @@ SHELL := /bin/bash
 
 DOCKERHOST = dockerhost
 ENV = develop
-PLUGINS = plugins.ini
+CONFIG_F = config.xml.j2
+PLUGIN_F = plugins.ini
 BASE_D = .
 PB_D = $(BASE_D)/playbooks/$(DOCKERHOST)
 TAG_D = $(BASE_D)/roles/$(DOCKERHOST)/files
 CNFG_D = $(BASE_D)/roles/$(DOCKERHOST)/defaults
+FILES_D = $(BASE_D)/roles/$(DOCKERHOST)/files
 A_CFG = $(BASE_D)/configs/ansible.cfg
 
 ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),)
@@ -41,9 +43,9 @@ help:
 	@echo
 	@echo "-- Defaults ---------"
 	@echo "* ENV = $(ENV)"
-	@echo "* PLUGINS = $(PLUGINS)"
 	@echo "* TAG_D = $(TAG_D)"
 	@echo "* CNFG_D = $(CNFG_D)"
+	@echo "* FILES_D = $(FILES_D)"
 	@echo "* A_CFG = $(A_CFG)"
 
 # -------- Playbook handling
@@ -55,10 +57,15 @@ verify_playbook:
 execute: verify_playbook
 	@echo
 	@echo "--- Execute playbook '$(PLAYBOOK)'  ------------------------"
-ifeq ($(wildcard $(A_CFG)),)
-	@echo ansible-playbook $(PLAYBOOKPATH) -e "image=$(APP)" $(CONFIGS) $(EXTRAS)
+ifeq ($(origin APP), undefined)
+	$(eval APPIMG=)
 else
-	ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) -e "image=$(APP)" $(CONFIGS) $(EXTRAS)
+	$(eval APPIMG=-e "image=$(APP)")
+endif
+ifeq ($(wildcard $(A_CFG)),)
+	@echo ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS)
+else
+	ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS)
 endif
 	@echo
 
@@ -68,8 +75,14 @@ verify:
 	@test "$(APP)" && test -d $(CNFG_D)/envs/$(APP)/ || (echo "Error: APP not set or APP folder not found! ($(CNFG_D)/envs/$(APP)/" && exit 1)
 	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(ENV).json || (echo "Error: ENV not set or ENV json not found! ($(CNFG_D)/envs/$(APP)/$(ENV).json)" && exit 1)
 
+extras:
+	[[ -f $(FILES_D)/$(APP)/$(CONFIG_F) ]] && make APP=$(APP) ENV=$(ENV) configs
+	[[ -f $(CNFG_D)/envs/$(APP)/$(PLUGIN_F) ]] && make APP=$(APP) ENV=$(ENV) plugins
+	@echo "--- Boot done ------------------------"
+	@echo
+
 boot: PLAYBOOK=start
-boot: verify execute stats status
+boot: verify extras execute stats status
 	@echo "--- Boot done ------------------------"
 	@echo
 
@@ -85,7 +98,7 @@ destroy: verify stats execute status
 
 stats: verify
 	@echo "--- Stats ------------------------"
-	@docker logs --tail="30" $(APP)_$(ENV)
+	@[[ `docker ps | grep $(APP)_$(ENV)` ]] && docker logs --tail="30" $(APP)_$(ENV) || echo No stats available
 	@echo
 
 status:
@@ -95,7 +108,12 @@ status:
 
 plugins: PLAYBOOK=plugins
 plugins: verify execute
-	@echo "--- Plugins ------------------------"
+	@echo "--- Plugins done ------------------------"
+	@echo
+
+configs: PLAYBOOK=configs
+configs: verify execute
+	@echo "--- Configs done ------------------------"
 	@echo
 
 # -------- Environment handling
@@ -167,8 +185,9 @@ startup: verify_infra
 	@echo "--- Startup '$(INFRA)' ------------------------"
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
-		echo Booting $$l; \
-		[[ -f $(CNFG_D)/envs/$$l/$(PLUGINS) ]] && make APP=$$l ENV=$(ENV) plugins; \
+		echo "----- Booting $$l ------------------------"; \
+		[[ -f $(FILES_D)/$$l/$(CONFIG_F) ]] && make APP=$$l ENV=$(ENV) configs; \
+		[[ -f $(CNFG_D)/envs/$$l/$(PLUGIN_F) ]] && make APP=$$l ENV=$(ENV) plugins; \
 		make APP=$$l ENV=$(ENV) boot; \
 		echo; \
 	done
@@ -202,7 +221,7 @@ cleanup: verify_infra
 		make APP=$$l ENV=$(ENV) destroy; \
 		echo; \
 	done
-	@docker ps -a
+	@echo "--- Cleanup '$(INFRA)' done ------------------------"
 
 list:
 	@echo "--- List Infrastructures [$(CNFG_D)/infra/] ------------------------"
