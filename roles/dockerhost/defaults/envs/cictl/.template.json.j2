@@ -2,11 +2,13 @@
   "container_name": "{{ image }}_{{ env_name }}",
   "ports": ["{{ port_pre }}{{ port }}:8080"],
   "volumes": ["{{ jenkins_base }}/{{ env_name }}:/var/jenkins_home"],
-  "links": "cidb_{{ env_name }}:redis",
+  "links": ["cidb_{{ env_name }}:redis"],
   "env_name": "{{ env_name }}",
   "mapped_port": "{{ port_pre }}{{ port }}",
-  "db_redis_linkname": "cidb_{{ env_name }}",
+  "db_redis_linkname": "servix",
   "db_redis_linkport": "{{ port_db_pre }}{{ port }}",
+  "dsl_job_git_url": "git@github.com:arjs-public/jenkins-jobs.git",
+  "dsl_job_git_key": "9aa8ca46-72eb-43f8-a4a7-787127b661d5",
   "has_custom_command": false,
   "jenkins_extra_plugins": ["plugins.ini"]
 }

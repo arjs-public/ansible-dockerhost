@@ -110,7 +110,7 @@
     </hudson.model.AllView>
     <hudson.plugins.view.dashboard.Dashboard plugin="dashboard-view@2.9.6">
      <owner class="hudson" reference="../../.."/>
-      <name>Dashboard</name>
+      <name>{{ env_name | upper }} Dashboard</name>
       <filterExecutors>false</filterExecutors>
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
@@ -146,7 +146,19 @@
           <name>Job statistics</name>
         </hudson.plugins.view.dashboard.stats.StatJobs>
       </rightPortlets>
-      <topPortlets/>
+      <topPortlets>
+        <hudson.plugins.view.dashboard.core.UnstableJobsPortlet>
+          <id>dashboard_portlet_1341</id>
+          <name>Unstable Jobs</name>
+          <showOnlyFailedJobs>false</showOnlyFailedJobs>
+          <recurse>true</recurse>
+        </hudson.plugins.view.dashboard.core.UnstableJobsPortlet>
+        <hudson.plugins.view.dashboard.builds.LatestBuilds>
+          <id>dashboard_portlet_17571</id>
+          <name>Latest builds</name>
+          <numBuilds>25</numBuilds>
+        </hudson.plugins.view.dashboard.builds.LatestBuilds>
+      </topPortlets>
       <bottomPortlets>
         <hudson.plugins.view.dashboard.builds.LatestBuilds>
           <id>dashboard_portlet_23358</id>
@@ -162,7 +174,7 @@
       </bottomPortlets>
     </hudson.plugins.view.dashboard.Dashboard>
   </views>
-  <primaryView>Dashboard</primaryView>
+  <primaryView>{{ env_name | upper }} Dashboard</primaryView>
   <slaveAgentPort>50000</slaveAgentPort>
   <label>master</label>
   <crumbIssuer class="hudson.security.csrf.DefaultCrumbIssuer">

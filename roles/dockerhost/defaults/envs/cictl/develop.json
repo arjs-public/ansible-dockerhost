@@ -2,11 +2,12 @@
   "container_name": "cictl_develop",
   "ports": ["8082:8080"],
   "volumes": ["/extra/jenkins/develop:/var/jenkins_home"],
-  "links": "cidb_develop:redis",
   "env_name": "develop",
   "mapped_port": "8082",
-  "db_redis_linkname": "cidb_develop",
+  "db_redis_linkname": "servix",
   "db_redis_linkport": "9082",
+  "dsl_job_git_url": "git@github.com:arjs-public/jenkins-jobs.git",
+  "dsl_job_git_key": "9aa8ca46-72eb-43f8-a4a7-787127b661d5",
   "has_custom_command": false,
   "jenkins_extra_plugins": ["plugins.ini"]
 }

@@ -2,11 +2,14 @@
 # docker Makefile -- combine some usefull stuff
 #
 
-.PHONY: help boot shutdown destroy stats status destroy plugins images fetch destroyi startup teardown construct cleanup wipeout list create delete
-SHELL := /bin/bash
+.PHONY: help list status create delete
+.PHONY: boot shutdown destroy stats destroy plugins configs
+.PHONY: images fetch destroyi
+.PHONY: startup teardown construct cleanup wipeout
 
 # --------- Defaults
 
+SHELL := /bin/bash
 DOCKERHOST = dockerhost
 ENV = develop
 CONFIG_F = config.xml.j2
@@ -22,6 +25,9 @@ ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),)
 CONFIGS =
 else
 CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"
+endif
+ifneq ($(wildcard configs/.secrets/vpf.txt),)
+CONFIGS += --vault-password-file configs/.secrets/vpf.txt
 endif
 
 # --------- Rules
@@ -76,9 +82,9 @@ verify:
 	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(ENV).json || (echo "Error: ENV not set or ENV json not found! ($(CNFG_D)/envs/$(APP)/$(ENV).json)" && exit 1)
 
 extras:
-	[[ -f $(FILES_D)/$(APP)/$(CONFIG_F) ]] && make APP=$(APP) ENV=$(ENV) configs
-	[[ -f $(CNFG_D)/envs/$(APP)/$(PLUGIN_F) ]] && make APP=$(APP) ENV=$(ENV) plugins
-	@echo "--- Boot done ------------------------"
+	@[[ -f $(FILES_D)/$(APP)/$(CONFIG_F) ]] && make APP=$(APP) ENV=$(ENV) configs || echo "----- No extra files available!"
+	@[[ -f $(CNFG_D)/envs/$(APP)/$(PLUGIN_F) ]] && make APP=$(APP) ENV=$(ENV) plugins || echo "----- No extra plugins configured!"
+	@echo "--- Extras done ------------------------"
 	@echo
 
 boot: PLAYBOOK=start

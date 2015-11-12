@@ -2,6 +2,7 @@
   "container_name": "{{ image }}_{{ env_name }}",
   "ports": ["{{ port_db_pre }}{{ port }}:6379"],
   "volumes": ["{{ jenkins_data_base }}/{{ env_name }}:/data"],
+  "links": [],
   "env_name": "{{ env_name }}",
   "has_custom_command": true,
   "command": "redis-server --appendonly yes"
