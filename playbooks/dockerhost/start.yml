@@ -7,13 +7,13 @@
     - ../../roles/dockerhost/vars/base.yml
 
   tasks:
-    - include: ../../roles/dockerhost/tasks/check_connection.yml
+    - include: '{{ tasks_base }}check_connection.yml'
 
-    - include: ../../roles/dockerhost/tasks/start.yml
+    - include: '{{ tasks_base }}start.yml'
 
-    - include: ../../roles/dockerhost/tasks/get_facts.yml
+    - include: '{{ tasks_base }}get_facts.yml'
 
-    - include: ../../roles/dockerhost/tasks/add_host.yml
+    - include: '{{ tasks_base }}add_host.yml'
 
 #    - name: ping '{{ container_name }}'
 #      shell: ping -c 1 "{{ hostvars[container_name].ansible_ssh_host }}"

@@ -7,7 +7,7 @@
     - ../../roles/dockerhost/vars/base.yml
 
   pre_tasks:
-    - include: ../../roles/dockerhost/tasks/check_connection.yml
+    - include: '{{ tasks_base }}check_connection.yml'
 
     # - debug: vars=ansible_env msg="{{ ansible_env }}"
 
@@ -47,7 +47,7 @@
 
   tasks:
     - name: Handle plugins
-      command: bash -x "{{ config_base }}{{ image }}/plugins.sh" "{{ config_base }}{{ image }}/{{ item }}" "{{ jenkins_base }}/{{ env_name }}/plugins"
+      command: bash -x "{{ files_base }}{{ image }}/plugins.sh" "{{ files_base }}{{ image }}/{{ item }}" "{{ jenkins_base }}/{{ env_name }}/plugins"
       with_items: "{{ jenkins_extra_plugins }}"
       register: output
     # - debug: vars=output msg="{{ output.msg }}"
@@ -56,7 +56,7 @@
     #  with_items: "{{ output.results }}"
 
     - name: Process template for plugins
-      template: src="{{ item }}" dest="{{jenkins_base}}/{{ env_name }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      template: src="{{ item }}" dest="{{ jenkins_base }}/{{ env_name }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
       #debug: vars="{{ item }}" msg="{{jenkins_base}}/{{ env_name }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
       with_fileglob:
-        - "{{ files_base }}{{ image }}/plugins/*.j2"
+        - "{{ files_base }}{{ image }}/jenkins/plugins/*.j2"

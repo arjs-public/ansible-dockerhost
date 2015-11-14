@@ -7,7 +7,7 @@
     - ../../roles/dockerhost/vars/base.yml
 
   tasks:
-    - include: ../../roles/dockerhost/tasks/check_connection.yml
+    - include: '{{ tasks_base }}check_connection.yml'
 
 
     - name: Check directory "{{ image_path }}" and create if not found
@@ -20,7 +20,7 @@
 
     - name: Copy "{{ image }}" docker file to localhost
       synchronize:
-        src: "../../roles/dockerhost/files/{{ image }}/"
+        src: "{{ files_base }}/{{ image }}/"
         dest: "{{ image_path }}{{ image }}/"
         copy_links: yes
 

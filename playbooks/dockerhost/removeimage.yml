@@ -7,6 +7,6 @@
     - ../../roles/dockerhost/vars/base.yml
 
   tasks:
-    - include: ../../roles/dockerhost/tasks/check_connection.yml
+    - include: '{{ tasks_base }}check_connection.yml'
 
-    - include: ../../roles/dockerhost/tasks/removeimage.yml
+    - include: '{{ tasks_base }}removeimage.yml'

@@ -13,5 +13,5 @@ USER root
 COPY etc/timezone /etc/timezone
 RUN dpkg-reconfigure -f noninteractive tzdata
 USER jenkins
-COPY plugins.txt /usr/share/jenkins/plugins.txt
+COPY plugins_standard.txt /usr/share/jenkins/plugins.txt
 RUN /usr/local/bin/plugins.sh /usr/share/jenkins/plugins.txt

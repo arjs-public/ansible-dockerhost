@@ -10,7 +10,7 @@
     - ../../roles/dockerhost/vars/base.yml
 
   pre_tasks:
-    - include: ../../roles/dockerhost/tasks/check_connection.yml
+    - include: '{{ tasks_base }}check_connection.yml'
 
     # - debug: vars=ansible_env msg="{{ ansible_env }}"
     #

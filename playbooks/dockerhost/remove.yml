@@ -7,12 +7,12 @@
     - ../../roles/dockerhost/vars/base.yml
 
   tasks:
-    - include: ../../roles/dockerhost/tasks/check_connection.yml
+    - include: '{{ tasks_base }}check_connection.yml'
 
-    - include: ../../roles/dockerhost/tasks/get_facts.yml
+    - include: '{{ tasks_base }}get_facts.yml'
 
-    - include: ../../roles/dockerhost/tasks/add_host.yml
+    - include: '{{ tasks_base }}add_host.yml'
 
-    - include: ../../roles/dockerhost/tasks/stop.yml
+    - include: '{{ tasks_base }}stop.yml'
 
-    - include: ../../roles/dockerhost/tasks/remove.yml
+    - include: '{{ tasks_base }}remove.yml'

@@ -7,8 +7,10 @@ volumes: []
 image: base
 image_path: ~/docker/
 local_base: '{{ ansible_env.PWD }}/../../'
-config_base: '{{ local_base | realpath }}/roles/dockerhost/defaults/envs/'
-files_base: '{{ local_base | realpath }}/roles/dockerhost/files/'
+roles_base: '{{ local_base | realpath }}/roles/'
+config_base: '{{ roles_base }}/dockerhost/defaults/envs/'
+files_base: '{{ roles_base }}/dockerhost/files/'
+tasks_base: '{{ roles_base }}/dockerhost/tasks/'
 extra_base: /extra
 data_base: '{{ extra_base }}/data'
 jenkins_data_base: '{{ data_base }}/jenkins'
