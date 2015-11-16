@@ -1,5 +1,5 @@
 ---
-- name: Build '{{ image }}' image
+- name: Build {{ image }} image
   hosts: dockerhost
   sudo: False
 

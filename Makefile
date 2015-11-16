@@ -63,11 +63,7 @@ verify_playbook:
 execute: verify_playbook
 	@echo
 	@echo "--- Execute playbook '$(PLAYBOOK)'  ------------------------"
-ifeq ($(origin APP), undefined)
-	$(eval APPIMG=)
-else
-	$(eval APPIMG=-e "image=$(APP)")
-endif
+
 ifeq ($(wildcard $(A_CFG)),)
 	@echo ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS)
 else
@@ -80,6 +76,7 @@ endif
 verify:
 	@test "$(APP)" && test -d $(CNFG_D)/envs/$(APP)/ || (echo "Error: APP not set or APP folder not found! ($(CNFG_D)/envs/$(APP)/" && exit 1)
 	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(ENV).json || (echo "Error: ENV not set or ENV json not found! ($(CNFG_D)/envs/$(APP)/$(ENV).json)" && exit 1)
+	$(eval APPIMG=-e "image=$(APP)")
 
 extras:
 	@[[ -f $(FILES_D)/$(APP)/$(CONFIG_F) ]] && make APP=$(APP) ENV=$(ENV) configs || echo "----- No extra files available!"
@@ -133,7 +130,7 @@ verify_port:
 create: ENV=
 create: PLAYBOOK=create
 create: EXTRAS += -e "env_name=$(ENV)" -e "port=$(PORT)"
-create: verify_env verify_port verify_playbook execute
+create: verify_env verify_port execute
 	@echo "--- Create done ------------------------"
 	@echo
 
@@ -141,19 +138,19 @@ delete: ENV=
 delete: DELETE=False
 delete: PLAYBOOK=delete
 delete: EXTRAS += -e "env_name=$(ENV)" -e "clean_up=$(DELETE)"
-delete: verify_env verify_playbook execute
+delete: verify_env execute
 	@echo "--- Delete done ------------------------"
 	@echo
 
 # -------- Image handling
 
 verify_tag:
-	$(eval CONFIGS=)
 	$(eval APP=$(TAG))
 	@test "$(APP)" && test -d $(TAG_D)/$(TAG)/ || (echo "Error: TAG not set or TAG folder not found! ($(TAG_D)/$(TAG)/)" && exit 1)
+	$(eval APPIMG=-e "image=$(APP)")
 
 build: PLAYBOOK=build
-build: verify_tag verify_playbook execute
+build: verify_tag execute
 	@echo "--- Build done ------------------------"
 	@echo
 
