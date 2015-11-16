@@ -7,8 +7,6 @@
     - ../../roles/dockerhost/vars/base.yml
 
   pre_tasks:
-    - include: '{{ tasks_base }}check_connection.yml'
-
     # - debug: vars=ansible_env msg="{{ ansible_env }}"
 
     # - debug: vars=local_base msg="{{ local_base | realpath }}"
@@ -20,6 +18,8 @@
     # - debug: vars=image msg="{{ image }}"
 
     # - debug: vars=env_name msg="{{ env_name }}"
+
+    - include: '{{ tasks_base }}check_connection.yml'
 
 
     - name: Check directory "{{ config_base }}" and create if not found
@@ -40,7 +40,7 @@
       failed_when: checkout.state != "directory"
     # - debug: vars=checkout msg="{{checkout}}"
 
-    - file: path="{{ config_base }}{{ image }}/plugins.sh" state=file mode="u=rwx,g=rx,o=rx"
+    - file: path="{{ files_base }}{{ image }}/plugins.sh" state=file mode="u=rwx,g=rx,o=rx"
       register: checkout
       failed_when: checkout.state != "file"
     # - debug: vars=checkout msg="{{checkout}}"

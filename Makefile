@@ -12,7 +12,7 @@
 SHELL := /bin/bash
 DOCKERHOST = dockerhost
 ENV = develop
-CONFIG_F = config.xml.j2
+CONFIG_F = jenkins/config.xml.j2
 PLUGIN_F = plugins.ini
 BASE_D = .
 PB_D = $(BASE_D)/playbooks/$(DOCKERHOST)
@@ -27,7 +27,7 @@ else
 CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"
 endif
 ifneq ($(wildcard configs/.secrets/vpf.txt),)
-CONFIGS += --vault-password-file configs/.secrets/vpf.txt
+CONFIGS += --vault-password-file ./configs/.secrets/vpf.txt
 endif
 
 # --------- Rules
@@ -83,7 +83,7 @@ verify:
 
 extras:
 	@[[ -f $(FILES_D)/$(APP)/$(CONFIG_F) ]] && make APP=$(APP) ENV=$(ENV) configs || echo "----- No extra files available!"
-	@[[ -f $(CNFG_D)/envs/$(APP)/$(PLUGIN_F) ]] && make APP=$(APP) ENV=$(ENV) plugins || echo "----- No extra plugins configured!"
+	@[[ -f $(FILES_D)/$(APP)/$(PLUGIN_F) ]] && make APP=$(APP) ENV=$(ENV) plugins || echo "----- No extra plugins configured!"
 	@echo "--- Extras done ------------------------"
 	@echo
 
@@ -109,7 +109,7 @@ stats: verify
 
 status:
 	@echo "--- Status ------------------------"
-	@docker ps -a
+	@docker ps -a -f name=$(APP)_$(ENV)
 	@echo
 
 plugins: PLAYBOOK=plugins
@@ -192,12 +192,11 @@ startup: verify_infra
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo "----- Booting $$l ------------------------"; \
-		[[ -f $(FILES_D)/$$l/$(CONFIG_F) ]] && make APP=$$l ENV=$(ENV) configs; \
-		[[ -f $(CNFG_D)/envs/$$l/$(PLUGIN_F) ]] && make APP=$$l ENV=$(ENV) plugins; \
 		make APP=$$l ENV=$(ENV) boot; \
 		echo; \
 	done
 	@docker ps -a
+	@echo "--- Startup '$(INFRA)' done ------------------------"
 
 teardown: verify_infra
 	@echo "--- Teardown '$(INFRA)' -----------------------"
@@ -208,6 +207,7 @@ teardown: verify_infra
 		echo; \
 	done
 	@docker ps -a
+	@echo "--- Teardown '$(INFRA)' done ------------------------"
 
 construct: verify_infra
 	@echo "--- Construct '$(INFRA)' ------------------------"
@@ -218,6 +218,7 @@ construct: verify_infra
 		echo; \
 	done
 	@docker images
+	@echo "--- Construct '$(INFRA)' done ------------------------"
 
 cleanup: verify_infra
 	@echo "--- Cleanup '$(INFRA)' ------------------------"
@@ -227,6 +228,7 @@ cleanup: verify_infra
 		make APP=$$l ENV=$(ENV) destroy; \
 		echo; \
 	done
+	@docker ps -a
 	@echo "--- Cleanup '$(INFRA)' done ------------------------"
 
 list:

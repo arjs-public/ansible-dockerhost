@@ -1,10 +1,21 @@
 ---
-- name: Stop a running '{{ container_name }}' container based on '{{ image }}'
+- name: Stop a running {{ container_name }} container based on {{ image }}
   hosts: dockerhost
   sudo: False
 
   vars_files:
     - ../../roles/dockerhost/vars/base.yml
+
+  pre_tasks:
+    # - debug: vars=ansible_env msg="{{ ansible_env }}"
+
+    # - debug: vars=local_base msg="{{ local_base }}"
+
+    # - debug: vars=config_base msg="{{ config_base }}"
+
+    # - debug: vars=files_base msg="{{ files_base }}"
+
+    # - debug: vars=tasks_base msg="{{ tasks_base }}"
 
   tasks:
     - include: '{{ tasks_base }}check_connection.yml'

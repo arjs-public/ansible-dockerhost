@@ -3,7 +3,7 @@
     debug: msg="[echo] Use 'standard' entrypoint."
     when: not has_custom_command
 
-  - name: create client container without custom command
+  - name: create client container {{ container_name }} without custom command
     docker:
       docker_api_version: 1.17
       image: "{{ image }}"
@@ -26,7 +26,7 @@
     debug: msg="[echo] Use '{{ command }}' with entrypoint."
     when: has_custom_command
 
-  - name: create client container with custom command
+  - name: create client container {{ container_name }} with custom command
     docker:
       docker_api_version: 1.17
       image: "{{ image }}"

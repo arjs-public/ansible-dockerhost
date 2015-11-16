@@ -10,7 +10,15 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
     </logRotator>
     <keepDependencies>false</keepDependencies>
-    <properties/>
+    <properties>
+      <com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+        <optOut>false</optOut>
+      </com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+      <com.sonyericsson.rebuild.RebuildSettings>
+        <autoRebuild>false</autoRebuild>
+        <rebuildDisabled>true</rebuildDisabled>
+      </com.sonyericsson.rebuild.RebuildSettings>
+    </properties>
     <scm class="hudson.plugins.git.GitSCM">
         <configVersion>2</configVersion>
         <userRemoteConfigs>
