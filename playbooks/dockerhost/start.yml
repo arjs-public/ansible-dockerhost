@@ -7,19 +7,13 @@
     - ../../roles/dockerhost/vars/base.yml
 
   pre_tasks:
-    # - debug: vars=ansible_env msg="{{ ansible_env }}"
+    # - include: '{{ tasks_base }}debug_info.yml'
 
-    # - debug: vars=local_base msg="{{ local_base }}"
-
-    # - debug: vars=config_base msg="{{ config_base }}"
-
-    # - debug: vars=files_base msg="{{ files_base }}"
-
-    # - debug: vars=tasks_base msg="{{ tasks_base }}"
-
-  tasks:
     - include: '{{ tasks_base }}check_connection.yml'
 
+    - include: '{{ tasks_base }}check_folders.yml'
+
+  tasks:
     - include: '{{ tasks_base }}start.yml'
 
     - include: '{{ tasks_base }}get_facts.yml'

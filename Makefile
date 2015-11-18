@@ -34,18 +34,18 @@ endif
 
 help:
 	@echo "-- Help ---------"
-	@echo "* make APP=<app folder> *) [ENV=<environment> *)] ((boot | shutdown | destroy) [EXTRAS=<ansible-playbook params>]) | stats)"
-	@echo "* make INFRA=<infra name from list>  [ENV=<environment> *)] startup | teardown | construct | cleanup"
-	@echo "* make ENV=<Environment name> *) PORT=<Port extension to use> **) create | [DELETE=true ***)] delete"
+	@echo "* make APP=<app folder> *? [ENV=<environment> *)] ([EXTRAS=<ansible-playbook params>] (boot | shutdown | [DELETE=true ***?] destroy)) | stats)"
+	@echo "* make INFRA=<infra name from list>  ([ENV=<environment> *?] startup | teardown | construct | [DELETE=true ***?] cleanup)"
+	@echo "* make ENV=<Environment name> *? (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete)"
 	@echo "* make TAG=<Dockerfile folder> build"
 	@echo "* make IMG=<image from dockerhub> fetch"
-	@echo "* make IMG=<image from images> *) destroyi"
-	@echo "* make status | images | list | wipeout ***)"
+	@echo "* make IMG=<image from images> *? destroyi"
+	@echo "* make status | images | list | wipeout ***?"
 	@echo
-	@echo "*) see 'make list' output for available options; default: ENV = develop"
-	@echo "**) Port extension to use with normal prefix 80 or db prefix 90; e.g. normal (80) + extenison (85) = port (8085)"
-	@echo "***) Very dangerous, since deletes all associated folders on 'dockerhost'"
-	@echo "****) Very dangerous, since it kills all docker containers on 'dockerhost'"
+	@echo "*? see 'make list' output for available options; default: ENV = develop"
+	@echo "**? Port extension to use with normal prefix 80 or db prefix 90; e.g. normal (80) + extenison (85) = port (8085)"
+	@echo "***? Very dangerous, since deletes all associated folders on 'dockerhost'"
+	@echo "****? Very dangerous, since it kills all docker containers on 'dockerhost'"
 	@echo
 	@echo "-- Defaults ---------"
 	@echo "* ENV = $(ENV)"
@@ -94,6 +94,8 @@ shutdown: verify stats execute status
 	@echo "--- Shutdown done ------------------------"
 	@echo
 
+destroy: DELETE=false
+destroy: EXTRAS += -e "clean_up=$(DELETE)"
 destroy: PLAYBOOK=remove
 destroy: verify stats execute status
 	@echo "--- Destroy done ------------------------"
@@ -135,9 +137,10 @@ create: verify_env verify_port execute
 	@echo
 
 delete: ENV=
-delete: DELETE=False
+delete: DELETE=false
 delete: PLAYBOOK=delete
-delete: EXTRAS += -e "env_name=$(ENV)" -e "clean_up=$(DELETE)"
+delete: EXTRAS += -e "env_name=$(ENV)"
+delete: EXTRAS += -e "clean_up=$(DELETE)"
 delete: verify_env execute
 	@echo "--- Delete done ------------------------"
 	@echo
@@ -217,12 +220,13 @@ construct: verify_infra
 	@docker images
 	@echo "--- Construct '$(INFRA)' done ------------------------"
 
+cleanup: DELETE=false
 cleanup: verify_infra
 	@echo "--- Cleanup '$(INFRA)' ------------------------"
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo Removing $$l; \
-		make APP=$$l ENV=$(ENV) destroy; \
+		make APP=$$l ENV=$(ENV) DELETE=$(DELETE) destroy; \
 		echo; \
 	done
 	@docker ps -a

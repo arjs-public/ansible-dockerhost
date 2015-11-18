@@ -1,0 +1,13 @@
+---
+    - name: Check directory "{{ config_base }}"
+      file: dest={{ config_base }} state=directory
+      register: checkout
+      failed_when: checkout.state != "directory"
+    # - debug: vars=checkout msg="{{checkout}}"
+
+    - name: Check "{{ volume_home }}" folder and create if not exists
+      file: dest="{{ volume_home }}" state=directory mode=0775
+      register: checkout
+      failed_when: checkout.state != "directory"
+      when: not volume_home_check_disabled
+    # - debug: vars=checkout msg="{{checkout}}"

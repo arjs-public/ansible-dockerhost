@@ -5,41 +5,26 @@
 
   vars_files:
     - ../../roles/dockerhost/vars/base.yml
+    - "../../vars/group/{{ image }}.vault"
 
   pre_tasks:
-    # - debug: vars=ansible_env msg="{{ ansible_env }}"
-
-    # - debug: vars=local_base msg="{{ local_base }}"
-
-    # - debug: vars=config_base msg="{{ config_base }}"
-
-    # - debug: vars=files_base msg="{{ files_base }}"
-
-    # - debug: vars=tasks_base msg="{{ tasks_base }}"
-
-    # - debug: vars=image msg="{{ image }}"
-
-    # - debug: vars=env_name msg="{{ env_name }}"
-
+    # - include: '{{ tasks_base }}debug_info.yml'
     # - debug: msg="{{ lookup('pipe', 'ls -la ../../configs/.secrets/vpf.txt') }} is the raw result of running this command"
 
     - include: '{{ tasks_base }}check_connection.yml'
 
-    - name: Create "{{ jenkins_base }}/{{ env_name }}" folder
-      file: dest="{{ jenkins_base }}/{{ env_name }}" state=directory mode=0775
-      register: checkout
-      failed_when: checkout.state != "directory"
-    # - debug: vars=checkout msg="{{checkout}}"
+    - include: '{{ tasks_base }}check_folders.yml'
 
-    - name: Create folders in "{{ jenkins_base }}/{{ env_name }}/users/" for default user configs
-      file: dest="{{ jenkins_base }}/{{ env_name }}/users/{{ item | dirname | basename }}/" state=directory mode=0775
-      #debug: vars="{{ item }}" msg="{{jenkins_base}}/{{ env_name }}/users/{{ item | dirname | basename }}/"
+  tasks:
+    - name: Create folders in "{{ volume_home }}/users/" for default user configs
+      file: dest="{{ volume_home }}/users/{{ item | dirname | basename }}/" state=directory mode=0775
+      #debug: vars="{{ item }}" msg="{{ volume_home }}/users/{{ item | dirname | basename }}/"
       register: checkout
       failed_when: checkout.state != "directory"
       with_fileglob:
         - "{{ files_base }}{{ image }}//jenkins/users/**/*.j2"
 
-    - name: Create folders in "{{jenkins_base}}/{{ env_name }}/jobs/" for default job configs
+    - name: Create folders in "{{ volume_home }}/jobs/" for default job configs
       file: dest="{{ item | dirname | replace(files_base + image + "/jenkins", jenkins_base + "/" + env_name) }}/" state=directory mode=0775
       #debug: vars="{{ item }}" msg="{{ item | dirname | replace(files_base + image + "/jenkins", jenkins_base + "/" + env_name) }}/"
       register: checkout
@@ -48,15 +33,14 @@
         - "{{ files_base }}{{ image }}/jenkins/jobs/**/*.j2"
         - "{{ files_base }}{{ image }}/jenkins/jobs/**/jobs/**/*.j2"
 
-  tasks:
     - name: Process template for configs
-      template: src="{{ item }}" dest="{{jenkins_base}}/{{ env_name }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      template: src="{{ item }}" dest="{{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
       with_fileglob:
         - "{{ files_base }}{{ image }}/jenkins/*.j2"
 
     - name: Process templates for default user configs
-      template: src="{{ item }}" dest="{{jenkins_base}}/{{ env_name }}/users/{{ item | dirname | basename }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
-      #debug: vars="{{ item }}" msg="{{jenkins_base}}/{{ env_name }}/users/{{ item | dirname | basename }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      template: src="{{ item }}" dest="{{ volume_home }}/users/{{ item | dirname | basename }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      #debug: vars="{{ item }}" msg="{{ volume_home }}/users/{{ item | dirname | basename }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
       with_fileglob:
         - "{{ files_base }}{{ image }}/jenkins/users/**/*.j2"
 
@@ -68,4 +52,4 @@
         - "{{ files_base }}{{ image }}/jenkins/jobs/**/jobs/**/*.j2"
 
     - name: Copy credentials file
-      copy: content="{{ lookup('pipe', 'ansible-vault view --vault-password-file=../../configs/.secrets/vpf.txt ' + files_base + image + '/jenkins/credentials.xml') }}" dest="{{ jenkins_base }}/{{ env_name }}/credentials.xml"
+      copy: content="{{ lookup('pipe', 'ansible-vault view --vault-password-file=../../configs/.secrets/vpf.txt ' + files_base + image + '/jenkins/credentials.xml') }}" dest="{{ volume_home }}/credentials.xml"

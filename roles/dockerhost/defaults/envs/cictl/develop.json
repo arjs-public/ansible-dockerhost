@@ -1,6 +1,7 @@
 {
   "container_name": "cictl_develop",
   "ports": ["8082:8080"],
+  "volume_home": "/extra/jenkins/develop",
   "volumes": ["/extra/jenkins/develop:/var/jenkins_home"],
   "env_name": "develop",
   "mapped_port": "8082",

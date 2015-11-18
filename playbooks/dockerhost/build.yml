@@ -6,10 +6,12 @@
   vars_files:
     - ../../roles/dockerhost/vars/base.yml
 
-  tasks:
+  pre_tasks:
+    # - include: '{{ tasks_base }}debug_info.yml'
+
     - include: '{{ tasks_base }}check_connection.yml'
 
-
+  tasks:
     - name: Check directory "{{ image_path }}" and create if not found
       file: dest={{ image_path }} state=directory
       register: checkout

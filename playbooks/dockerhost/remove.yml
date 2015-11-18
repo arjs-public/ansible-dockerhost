@@ -1,14 +1,22 @@
 ---
-- name: Stop a running '{{ container_name }}' container based on '{{ image }}' and delete
+- name: Stop a running {{ container_name }} container based on {{ image }} and delete
   hosts: dockerhost
   sudo: False
+
+  vars:
+    clean_up: False
 
   vars_files:
     - ../../roles/dockerhost/vars/base.yml
 
-  tasks:
+  pre_tasks:
+    # - include: '{{ tasks_base }}debug_info.yml'
+
     - include: '{{ tasks_base }}check_connection.yml'
 
+    - include: '{{ tasks_base }}check_folders.yml'
+
+  tasks:
     - include: '{{ tasks_base }}get_facts.yml'
 
     - include: '{{ tasks_base }}add_host.yml'
@@ -16,3 +24,9 @@
     - include: '{{ tasks_base }}stop.yml'
 
     - include: '{{ tasks_base }}remove.yml'
+
+    - name: Delete "{{ volume_home }}" folder
+      file: dest="{{ volume_home }}" state=absent
+      register: checkout
+      failed_when: checkout.state != "absent"
+      when: clean_up

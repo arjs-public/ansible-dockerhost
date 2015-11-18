@@ -1,5 +1,5 @@
 ---
-- name: Delete a {{ environment }} environment config
+- name: Delete a {{ env_name }} environment config
   hosts: dockerhost
   sudo: False
 
@@ -10,23 +10,11 @@
     - ../../roles/dockerhost/vars/base.yml
 
   pre_tasks:
+    # - include: '{{ tasks_base }}debug_info.yml'
+
     - include: '{{ tasks_base }}check_connection.yml'
 
-    # - debug: vars=ansible_env msg="{{ ansible_env }}"
-    #
-    # - debug: vars=local_base msg="{{ local_base | realpath }}"
-    #
-    # - debug: vars=config_base msg="{{ config_base }}"
-    #
-    # - debug: vars=env_name msg="{{ env_name }}"
-
-
-    - name: Check directory {{ config_base }} and create if not found
-      file: dest={{ config_base }} state=directory
-      register: checkout
-
-    - fail: msg="Create failed!"
-      when: checkout.state != 'directory'
+    - include: '{{ tasks_base }}check_folders.yml'
 
   tasks:
     - name: Cleanup environment config files
@@ -34,10 +22,11 @@
       with_fileglob:
         - "{{ config_base }}/**/{{ env_name }}.json"
 
-    - name: Delete {{ jenkins_base }}/{{ env_name }} folder
-      file: dest="{{ jenkins_base }}/{{ env_name }}" state=absent
+    - name: Delete "{{ item }}" folder
+      file: dest="{{ item }}" state=absent
+      register: checkout
+      failed_when: checkout.state != "absent"
       when: clean_up
-
-    - name: Delete {{ jenkins_data_base }}/{{ env_name }} folder
-      file: dest="{{ jenkins_data_base }}/{{ env_name }}" state=absent
-      when: clean_up
+      with_items:
+      - "{{ jenkins_base }}/{{ env_name }}"
+      - "{{ jenkins_data_base }}/{{ env_name }}"

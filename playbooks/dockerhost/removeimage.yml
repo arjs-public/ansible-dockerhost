@@ -6,7 +6,10 @@
   vars_files:
     - ../../roles/dockerhost/vars/base.yml
 
-  tasks:
+  pre_tasks:
+    # - include: '{{ tasks_base }}debug_info.yml'
+
     - include: '{{ tasks_base }}check_connection.yml'
 
+  tasks:
     - include: '{{ tasks_base }}removeimage.yml'

@@ -12,7 +12,8 @@ config_base: '{{ roles_base }}defaults/envs/'
 files_base: '{{ roles_base }}files/'
 tasks_base: '{{ roles_base }}tasks/'
 extra_base: /extra
+jenkins_base: '{{ extra_base }}/jenkins'
 data_base: '{{ extra_base }}/data'
 jenkins_data_base: '{{ data_base }}/jenkins'
-jenkins_base: '{{ extra_base }}/jenkins'
 ansible_python_interpreter: python
+volume_home_check_disabled: false
