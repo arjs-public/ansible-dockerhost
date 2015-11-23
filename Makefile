@@ -36,7 +36,7 @@ help:
 	@echo "-- Help ---------"
 	@echo "* make APP=<app folder> *? [ENV=<environment> *)] ([EXTRAS=<ansible-playbook params>] (boot | shutdown | [DELETE=true ***?] destroy)) | stats)"
 	@echo "* make INFRA=<infra name from list>  ([ENV=<environment> *?] startup | teardown | construct | [DELETE=true ***?] cleanup)"
-	@echo "* make ENV=<Environment name> *? (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete)"
+	@echo "* make ENV=<Environment name> *? [APP=true 5*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete)"
 	@echo "* make TAG=<Dockerfile folder> build"
 	@echo "* make IMG=<image from dockerhub> fetch"
 	@echo "* make IMG=<image from images> *? destroyi"
@@ -46,6 +46,7 @@ help:
 	@echo "**? Port extension to use with normal prefix 80 or db prefix 90; e.g. normal (80) + extenison (85) = port (8085)"
 	@echo "***? Very dangerous, since deletes all associated folders on 'dockerhost'"
 	@echo "****? Very dangerous, since it kills all docker containers on 'dockerhost'"
+	@echo "*****? APP empty means ENV Environment in all Applications; APP set, means ENV Environment for specific Application"
 	@echo
 	@echo "-- Defaults ---------"
 	@echo "* ENV = $(ENV)"
@@ -129,10 +130,13 @@ verify_env:
 verify_port:
 	@test "$(PORT)" || (echo "Error: PORT not set!" && exit 1)
 
+verify_app:
+	$(eval APPIMG=-e "image=$(APP)")
+	
 create: ENV=
 create: PLAYBOOK=create
 create: EXTRAS += -e "env_name=$(ENV)" -e "port=$(PORT)"
-create: verify_env verify_port execute
+create: verify_env verify_port verify_app execute
 	@echo "--- Create done ------------------------"
 	@echo
 
@@ -141,7 +145,7 @@ delete: DELETE=false
 delete: PLAYBOOK=delete
 delete: EXTRAS += -e "env_name=$(ENV)"
 delete: EXTRAS += -e "clean_up=$(DELETE)"
-delete: verify_env execute
+delete: verify_env verify_app execute
 	@echo "--- Delete done ------------------------"
 	@echo
 

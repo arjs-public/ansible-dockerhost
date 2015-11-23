@@ -4,7 +4,8 @@
   sudo: False
 
   vars:
-    clean_up: False
+    - volume_home: ""
+    - clean_up: False
 
   vars_files:
     - ../../roles/dockerhost/vars/base.yml
@@ -14,19 +15,36 @@
 
     - include: '{{ tasks_base }}check_connection.yml'
 
-    - include: '{{ tasks_base }}check_folders.yml'
-
   tasks:
-    - name: Cleanup environment config files
+    - debug: vars=image msg="{{ image }}"
+      when: image is defined and image != ""
+
+    - name: Cleanup environment config files from all images
       file: dest="{{ item }}" state=absent
+      #debug: msg="{{ item }}"
+      register: checkout
+      failed_when: checkout.state != "absent"
       with_fileglob:
         - "{{ config_base }}/**/{{ env_name }}.json"
+      when: image is defined and image == ""
+
+    - name: Cleanup environment config file from specific image
+      file: dest="{{ item }}" state=absent
+      #debug: msg="{{ item }}"
+      register: checkout
+      failed_when: checkout.state != "absent"
+      with_fileglob:
+        - "{{ config_base }}/{{ image }}/{{ env_name }}.json"
+      when: image is defined and image != ""
+
+    - debug: vars=clean_up msg="DELETE? {{ clean_up }}"
+      when: clean_up|bool and image is defined
 
     - name: Delete "{{ item }}" folder
       file: dest="{{ item }}" state=absent
       register: checkout
       failed_when: checkout.state != "absent"
-      when: clean_up
       with_items:
       - "{{ jenkins_base }}/{{ env_name }}"
       - "{{ jenkins_data_base }}/{{ env_name }}"
+      when: clean_up|bool and image is defined and image == ""

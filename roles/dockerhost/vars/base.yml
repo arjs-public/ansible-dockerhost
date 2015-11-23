@@ -3,8 +3,8 @@ container_name: base
 ports: []
 port_pre: 80
 port_db_pre: 90
+port_py_pre: 50
 volumes: []
-image: base
 image_path: ~/docker/
 local_base: '.'
 roles_base: '{{ local_base | realpath }}/roles/dockerhost/'
@@ -16,4 +16,3 @@ jenkins_base: '{{ extra_base }}/jenkins'
 data_base: '{{ extra_base }}/data'
 jenkins_data_base: '{{ data_base }}/jenkins'
 ansible_python_interpreter: python
-volume_home_check_disabled: false

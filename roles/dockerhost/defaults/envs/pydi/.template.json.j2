@@ -1,0 +1,8 @@
+{
+  "container_name": "{{ item | dirname | basename }}_{{ env_name }}",
+  "ports": ["{{ port_py_pre }}{{ port }}:5000"],
+  "links": [],
+  "env_name": "{{ env_name }}",
+  "has_custom_command": false,
+  "command": ""
+}

@@ -5,9 +5,15 @@
       failed_when: checkout.state != "directory"
     # - debug: vars=checkout msg="{{checkout}}"
 
+    # - debug: vars=volume_home msg="conditional {{ volume_home }}"
+    #   when: volume_home != ""
     - name: Check "{{ volume_home }}" folder and create if not exists
       file: dest="{{ volume_home }}" state=directory mode=0775
       register: checkout
       failed_when: checkout.state != "directory"
-      when: not volume_home_check_disabled
+      when: volume_home != ""
     # - debug: vars=checkout msg="{{checkout}}"
+
+    - name: Info about unset "{{ volume_home }}" folder variable
+      debug: msg="[echo] Variable 'volume_home' not set, hence creation was skipped."
+      when: volume_home == ""

@@ -4,7 +4,7 @@
   sudo: False
 
   vars:
-    - volume_home_check_disabled: true
+    - volume_home: ""
 
   vars_files:
     - ../../roles/dockerhost/vars/base.yml
@@ -14,13 +14,23 @@
 
     - include: '{{ tasks_base }}check_connection.yml'
 
-    - include: '{{ tasks_base }}check_folders.yml'
-
   tasks:
-    - name: Process template to new environment
+    - debug: vars=image msg="{{ image }}"
+      when: image is defined and image != ""
+
+    - name: Process template to new environment of all images
       template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"
+      #debug: msg="{{ item | dirname }}/{{ env_name }}.json"
       with_fileglob:
         - "{{ config_base }}/**/.template.json.j2"
+      when: image is defined and image == ""
+
+    - name: Process template to new environment of specific image
+      template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"
+      #debug: msg="{{ item | dirname }}/{{ env_name }}.json"
+      with_fileglob:
+        - "{{ config_base }}/{{ image }}/.template.json.j2"
+      when: image is defined and image != ""
 
     - name: Create "{{ item }}" folder
       file: dest="{{ item }}" state=directory
@@ -29,3 +39,4 @@
       with_items:
       - "{{ jenkins_base }}/{{ env_name }}"
       - "{{ jenkins_data_base }}/{{ env_name }}"
+      when: image is defined and image == ""
