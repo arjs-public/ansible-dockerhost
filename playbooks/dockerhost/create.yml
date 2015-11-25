@@ -32,6 +32,13 @@
         - "{{ config_base }}/{{ image }}/.template.json.j2"
       when: image is defined and image != ""
 
+    - name: Process template to new environment of specific image with extras
+      template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"
+      #debug: msg="{{ item | dirname }}/{{ env_name }}.json"
+      with_fileglob:
+        - "{{ config_base }}/{{ image }}/{{ pyapp }}/.template.json.j2"
+      when: image is defined and image != "" and pyapp is defined and pyapp != ""
+
     - name: Create "{{ item }}" folder
       file: dest="{{ item }}" state=directory
       register: checkout

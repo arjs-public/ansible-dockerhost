@@ -15,9 +15,7 @@
     - name: Check directory "{{ image_path }}" and create if not found
       file: dest={{ image_path }} state=directory
       register: checkout
-
-    - fail: msg="Create failed!"
-      when: checkout.state != 'directory'
+      failed_when: checkout.state != 'directory'
 
 
     - name: Copy "{{ image }}" docker file to localhost
@@ -26,25 +24,52 @@
         dest: "{{ image_path }}{{ image }}/"
         copy_links: yes
 
-    - name: Check "{{ image }}" docker file in localhost
+    - name: Check "{{ image }}" docker image folder
       stat: path="{{ image_path }}{{ image }}/"
       register: checkout
+      failed_when: checkout.stat.exists == False
 
-    - fail: msg="Copy failed!"
-      when: checkout.stat.exists == False
+    - name: Check "{{ image }}/keys" folder
+      file: dest="{{ image_path }}{{ image }}/keys" state=directory
+      register: checkout
+      failed_when: checkout.state != "directory"
+
+    - name: Check "{{ image }}/etc" folder
+      file: dest="{{ image_path }}{{ image }}/etc" state=directory
+      register: checkout
+      failed_when: checkout.state != "directory"
+
 
     - name: ensure private key file is protected
       file:
-        # path: "{{ ansible_env.PWD }}/files/keys/id_rsa"
-        path: "{{ image_path }}{{ image }}/keys/id_rsa"
+        path: "{{ local_base | realpath }}/files/keys/id_rsa"
+        # path: "{{ image_path }}{{ image }}/keys/id_rsa"
+        mode: 0600
+
+    - name: copy private key file to destination
+      copy:
+        src: "{{ local_base | realpath }}/files/keys/id_rsa"
+        dest: "{{ image_path }}{{ image }}/keys/id_rsa"
         mode: 0600
 
     - name: ensure public key file is protected
       file:
-        # path: "{{ ansible_env.PWD }}/files/keys/id_rsa"
-        path: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
-        mode: 0644
+        path: "{{ local_base | realpath }}/files/keys/id_rsa.pub"
+        # path: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
+        mode: 0600
 
+    - name: copy public key file to destination
+      copy:
+        src: "{{ local_base | realpath }}/files/keys/id_rsa.pub"
+        dest: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
+        mode: 0600
+
+
+    - name: copy timezone file to destination
+      copy:
+        src: "{{ local_base | realpath }}/files/etc/timezone"
+        dest: "{{ image_path }}{{ image }}/etc/timezone"
+        mode: 0644
 
     - name: Create "{{ image }}" docker image
       # docker_image:
@@ -53,6 +78,4 @@
       #  state: build
       command: docker build -t {{ image }} "{{ image_path }}{{ image }}"
       register: buildout
-
-#    - fail: msg="Build failed!"
-#      when: buildout.rc != 0
+      failed_when: buildout.rc != 0

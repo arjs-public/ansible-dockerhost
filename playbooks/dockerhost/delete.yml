@@ -37,6 +37,15 @@
         - "{{ config_base }}/{{ image }}/{{ env_name }}.json"
       when: image is defined and image != ""
 
+    - name: Cleanup environment config file from specific image with extras
+      file: dest="{{ item }}" state=absent
+      #debug: msg="{{ item }}"
+      register: checkout
+      failed_when: checkout.state != "absent"
+      with_fileglob:
+        - "{{ config_base }}/{{ image }}/{{ pyapp }}/{{ env_name }}.json"
+      when: image is defined and image != "" and pyapp is defined and pyapp != ""
+
     - debug: vars=clean_up msg="DELETE? {{ clean_up }}"
       when: clean_up|bool and image is defined
 

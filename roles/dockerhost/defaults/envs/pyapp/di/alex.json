@@ -1,0 +1,10 @@
+{
+  "container_name": "pyapp_di_alex",
+  "ports": ["5011:5000"],
+  "volume_home": "/extra/apps/py/{{ image }}/{{ pyapp }}/alex",
+  "volumes": ["/extra/apps/py/{{ image }}/{{ pyapp }}/alex:/usr/src/app"],
+  "links": [],
+  "env_name": "alex",
+  "has_custom_command": false,
+  "command": ""
+}

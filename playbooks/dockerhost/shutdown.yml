@@ -3,6 +3,9 @@
   hosts: dockerhost
   sudo: False
 
+  vars:
+    - volume_home: ""
+
   vars_files:
     - ../../roles/dockerhost/vars/base.yml
 

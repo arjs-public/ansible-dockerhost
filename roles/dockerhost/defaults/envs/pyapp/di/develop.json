@@ -1,0 +1,10 @@
+{
+  "container_name": "pyapp_di_develop",
+  "ports": ["5082:8080"],
+  "volume_home": "/extra/apps/py/pyapp/di/develop",
+  "volumes": ["/extra/apps/py/pyapp/di/develop:/usr/src/app"],
+  "links": [],
+  "env_name": "develop",
+  "has_custom_command": false,
+  "command": ""
+}

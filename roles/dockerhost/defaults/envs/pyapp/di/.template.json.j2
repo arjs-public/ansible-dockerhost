@@ -1,0 +1,10 @@
+{
+  "container_name": "{{ image }}_{{ pyapp }}_{{ env_name }}",
+  "ports": ["{{ port_py_pre }}{{ port }}:8080"],
+  "volume_home": "{{ py_app_base }}/{{ image }}/{{ pyapp }}/{{ env_name }}",
+  "volumes": ["{{ py_app_base }}/{{ image }}/{{ pyapp }}/{{ env_name }}:/usr/src/app"],
+  "links": [],
+  "env_name": "{{ env_name }}",
+  "has_custom_command": false,
+  "command": ""
+}

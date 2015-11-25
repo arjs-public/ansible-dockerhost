@@ -15,4 +15,5 @@ extra_base: /extra
 jenkins_base: '{{ extra_base }}/jenkins'
 data_base: '{{ extra_base }}/data'
 jenkins_data_base: '{{ data_base }}/jenkins'
+py_app_base: '/extra/apps/py'
 ansible_python_interpreter: python

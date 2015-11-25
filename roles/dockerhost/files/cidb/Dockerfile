@@ -1,5 +1,4 @@
 FROM redis:latest
-MAINTAINER alex rj s at aol com
 
 # Set noninteractive mode for apt-get
 ENV DEBIAN_FRONTEND noninteractive

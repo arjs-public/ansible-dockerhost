@@ -1,0 +1,32 @@
+---
+- name: Deploy an app for an instance
+  hosts: dockerhost
+  sudo: False
+
+  vars_files:
+    - ../../../roles/dockerhost/vars/base.yml
+
+  pre_tasks:
+    # - include: '{{ tasks_base }}debug_info.yml'
+
+    - include: '{{ tasks_base }}check_connection.yml'
+
+    - include: '{{ tasks_base }}check_folders.yml'
+
+  tasks:
+    # - name: Create "{{ volume_home }}/plugins" folder
+    #   file: dest="{{ volume_home }}/plugins" state=directory mode=0775
+    #   register: checkout
+    #   failed_when: checkout.state != "directory"
+    # # - debug: vars=checkout msg="{{checkout}}"
+
+    # - name: Check "{{ files_base }}{{ image }}/plugins.sh" 
+    #   file: path="{{ files_base }}{{ image }}/plugins.sh" state=file mode="u=rwx,g=rx,o=rx"
+    #   register: checkout
+    #   failed_when: checkout.state != "file"
+    # # - debug: vars=checkout msg="{{checkout}}"
+
+    - name: Copy files and folders
+      copy:
+        src: "{{ files_base }}/{{ image }}/apps/{{ pyapp }}/"
+        dest: "{{ volume_home }}"

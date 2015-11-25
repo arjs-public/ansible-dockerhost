@@ -1,8 +1,0 @@
-{
-  "container_name": "pydi_alex",
-  "ports": ["5011:5000"],
-  "links": [],
-  "env_name": "alex",
-  "has_custom_command": false,
-  "command": ""
-}
