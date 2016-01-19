@@ -3,8 +3,11 @@
   hosts: dockerhost
   sudo: False
 
+  vars:
+    - base_folder: ../../..
+
   vars_files:
-    - ../../roles/dockerhost/vars/base.yml
+    - "{{ base_folder }}/roles/dockerhost/vars/base.yml"
 
   pre_tasks:
     # - include: '{{ tasks_base }}debug_info.yml'
@@ -20,7 +23,7 @@
       failed_when: checkout.state != "directory"
     # - debug: vars=checkout msg="{{checkout}}"
 
-    - name: Check "{{ files_base }}{{ image }}/plugins.sh" 
+    - name: Check "{{ files_base }}{{ image }}/plugins.sh"
       file: path="{{ files_base }}{{ image }}/plugins.sh" state=file mode="u=rwx,g=rx,o=rx"
       register: checkout
       failed_when: checkout.state != "file"

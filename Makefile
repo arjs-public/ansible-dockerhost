@@ -15,7 +15,7 @@ ENV = develop
 CONFIG_F = jenkins/config.xml.j2
 PLUGIN_F = plugins.ini
 APP_F = app.py
-BASE_D = .
+$(eval BASE_D=$(shell pwd))
 PB_D = $(BASE_D)/playbooks/$(DOCKERHOST)
 TAG_D = $(BASE_D)/roles/$(DOCKERHOST)/files
 CNFG_D = $(BASE_D)/roles/$(DOCKERHOST)/defaults
@@ -56,6 +56,8 @@ help:
 	@echo
 	@echo "-- Defaults ---------"
 	@echo "* ENV = $(ENV)"
+	@echo "* BASE_D = $(BASE_D)"
+	@echo "* PB_D = $(PB_D)"
 	@echo "* TAG_D = $(TAG_D)"
 	@echo "* CNFG_D = $(CNFG_D)"
 	@echo "* FILES_D = $(FILES_D)"
@@ -83,11 +85,11 @@ endif
 
 verify:
 	@test "$(APP)" && test -d $(CNFG_D)/envs/$(APP)/ || (echo "Error: APP not set or APP folder not found! ($(CNFG_D)/envs/$(APP)/" && exit 1)
-	@test "$(PAP)" && test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(PAP)/$(ENV).json || (echo "Error: PAP or ENV not set or PAP/ENV json not found! ($(CNFG_D)/envs/$(APP)/$(PAP)/$(ENV).json)" && exit 1)
 ifndef PAP
 	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(ENV).json || (echo "Error: ENV not set or ENV json not found! ($(CNFG_D)/envs/$(APP)/$(ENV).json)" && exit 1)
 else
-	$(eval PAPEXTRA=-e "pyapp=$(PAP)")  
+	@test "$(PAP)" && test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(PAP)/$(ENV).json || (echo "Error: PAP or ENV not set or PAP/ENV json not found! ($(CNFG_D)/envs/$(APP)/$(PAP)/$(ENV).json)" && exit 1)
+	$(eval PAPEXTRA=-e "pyapp=$(PAP)")
 endif
 	$(eval APPIMG=-e "image=$(APP)")
 
@@ -175,7 +177,7 @@ verify_app:
 
 verify_extra:
 ifdef PAP
-	$(eval PAPEXTRA=-e "pyapp=$(PAP)")  
+	$(eval PAPEXTRA=-e "pyapp=$(PAP)")
 endif
 
 create: ENV=

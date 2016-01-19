@@ -3,9 +3,12 @@
   hosts: dockerhost
   sudo: False
 
+  vars:
+    - base_folder: ../../..
+
   vars_files:
-    - ../../roles/dockerhost/vars/base.yml
-    - "../../vars/group/{{ image }}.vault"
+    - "{{ base_folder }}/roles/dockerhost/vars/base.yml"
+    - "{{ base_folder }}/vars/group/{{ image }}.vault"
 
   pre_tasks:
     # - include: '{{ tasks_base }}debug_info.yml'
@@ -52,4 +55,4 @@
         - "{{ files_base }}{{ image }}/jenkins/jobs/**/jobs/**/*.j2"
 
     - name: Copy credentials file
-      copy: content="{{ lookup('pipe', 'ansible-vault view --vault-password-file=../../configs/.secrets/vpf.txt ' + files_base + image + '/jenkins/credentials.xml') }}" dest="{{ volume_home }}/credentials.xml"
+      copy: content="{{ lookup('pipe', 'ansible-vault view --vault-password-file={{ base_folder }}/configs/.secrets/vpf.txt ' + files_base + image + '/jenkins/credentials.xml') }}" dest="{{ volume_home }}/credentials.xml"
