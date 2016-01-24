@@ -1,11 +1,13 @@
 .DS_Store
 ._.DS_Store
+icon.png
+*.html
 **/._*
+**/.*DS_Store
 **/id_rsa
 **/id_rsa.pub
 **/stmp.conf
 **/smtp.conf
-icon.png
+**/*.swp
 configs/.secrets/**
 out/**
-*.html
