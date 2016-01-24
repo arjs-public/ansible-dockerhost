@@ -55,4 +55,4 @@
         - "{{ files_base }}{{ image }}/jenkins/jobs/**/jobs/**/*.j2"
 
     - name: Copy credentials file
-      copy: content="{{ lookup('pipe', 'ansible-vault view --vault-password-file={{ base_folder }}/configs/.secrets/vpf.txt ' + files_base + image + '/jenkins/credentials.xml') }}" dest="{{ volume_home }}/credentials.xml"
+      copy: content="{{ lookup('pipe', 'ansible-vault view --vault-password-file=' + base_folder + '/configs/.secrets/vpf.txt ' + files_base + image + '/jenkins/credentials.xml') }}" dest="{{ volume_home }}/credentials.xml"

@@ -108,7 +108,7 @@
       <filterQueue>false</filterQueue>
       <properties class="hudson.model.View$PropertyList"/>
     </hudson.model.AllView>
-    <hudson.plugins.view.dashboard.Dashboard plugin="dashboard-view@2.9.6">
+    <hudson.plugins.view.dashboard.Dashboard>
      <owner class="hudson" reference="../../.."/>
       <name>{{ env_name | upper }} Dashboard</name>
       <filterExecutors>false</filterExecutors>
@@ -116,7 +116,6 @@
       <properties class="hudson.model.View$PropertyList"/>
       <jobNames>
         <comparator class="hudson.util.CaseInsensitiveComparator"/>
-        <string>CF_ALL_COMMON</string>
       </jobNames>
       <jobFilters/>
       <columns>
@@ -132,46 +131,49 @@
       <recurse>true</recurse>
       <useCssStyle>false</useCssStyle>
       <includeStdJobList>false</includeStdJobList>
+      <hideJenkinsPanels>false</hideJenkinsPanels>
       <leftPortletWidth>50%</leftPortletWidth>
       <rightPortletWidth>50%</rightPortletWidth>
       <leftPortlets>
         <hudson.plugins.view.dashboard.stats.StatBuilds>
-          <id>dashboard_portlet_4787</id>
+          <id>dashboard_portlet_7306</id>
           <name>Build statistics</name>
         </hudson.plugins.view.dashboard.stats.StatBuilds>
       </leftPortlets>
       <rightPortlets>
         <hudson.plugins.view.dashboard.stats.StatJobs>
-          <id>dashboard_portlet_24956</id>
+          <id>dashboard_portlet_13427</id>
           <name>Job statistics</name>
         </hudson.plugins.view.dashboard.stats.StatJobs>
       </rightPortlets>
       <topPortlets>
         <hudson.plugins.view.dashboard.core.UnstableJobsPortlet>
-          <id>dashboard_portlet_1341</id>
+          <id>dashboard_portlet_17921</id>
           <name>Unstable Jobs</name>
           <showOnlyFailedJobs>false</showOnlyFailedJobs>
           <recurse>true</recurse>
         </hudson.plugins.view.dashboard.core.UnstableJobsPortlet>
         <hudson.plugins.view.dashboard.builds.LatestBuilds>
-          <id>dashboard_portlet_17571</id>
-          <name>Latest builds</name>
-          <numBuilds>25</numBuilds>
-        </hudson.plugins.view.dashboard.builds.LatestBuilds>
-      </topPortlets>
-      <bottomPortlets>
-        <hudson.plugins.view.dashboard.builds.LatestBuilds>
-          <id>dashboard_portlet_23358</id>
+          <id>dashboard_portlet_12242</id>
           <name>Latest builds</name>
           <numBuilds>25</numBuilds>
         </hudson.plugins.view.dashboard.builds.LatestBuilds>
         <hudson.plugins.view.dashboard.core.JobsPortlet>
-          <id>dashboard_portlet_4726</id>
+          <id>dashboard_portlet_20879</id>
           <name>Jobs Grid</name>
           <columnCount>3</columnCount>
           <fillColumnFirst>false</fillColumnFirst>
         </hudson.plugins.view.dashboard.core.JobsPortlet>
-      </bottomPortlets>
+        <hudson.plugins.view.dashboard.test.TestStatisticsPortlet>
+          <id>dashboard_portlet_28250</id>
+          <name>Test Statistics Grid</name>
+          <useBackgroundColors>false</useBackgroundColors>
+          <skippedColor>FDB813</skippedColor>
+          <successColor>71E66D</successColor>
+          <failureColor>E86850</failureColor>
+        </hudson.plugins.view.dashboard.test.TestStatisticsPortlet>
+      </topPortlets>
+      <bottomPortlets/>
     </hudson.plugins.view.dashboard.Dashboard>
   </views>
   <primaryView>{{ env_name | upper }} Dashboard</primaryView>
