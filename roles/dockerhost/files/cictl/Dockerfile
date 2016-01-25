@@ -11,6 +11,10 @@ USER root
 # RUN apt-get update && apt-get install -y ssmtp && apt-get clean
 COPY etc/timezone /etc/timezone
 RUN dpkg-reconfigure -f noninteractive tzdata
+COPY get-pip.py /root/get-pip.py
+RUN python /root/get-pip.py
+RUN pip install virtualenv
+RUN pip list
 USER jenkins
 COPY plugins_standard.txt /usr/share/jenkins/plugins.txt
 RUN /usr/local/bin/plugins.sh /usr/share/jenkins/plugins.txt

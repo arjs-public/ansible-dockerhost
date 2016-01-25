@@ -71,6 +71,14 @@
         dest: "{{ image_path }}{{ image }}/etc/timezone"
         mode: 0644
 
+
+    - name: copy get-pip.py file to destination
+      copy:
+        src: "{{ local_base | realpath }}/files/get-pip.py"
+        dest: "{{ image_path }}{{ image }}/get-pip.py"
+        mode: 0644
+
+
     - name: Create "{{ image }}" docker image
       # docker_image:
       #  name: base
