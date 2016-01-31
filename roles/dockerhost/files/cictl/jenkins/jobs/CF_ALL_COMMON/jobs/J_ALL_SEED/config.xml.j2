@@ -35,9 +35,6 @@
         <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
         <submoduleCfg class="list"/>
         <extensions>
-            <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
-                <relativeTargetDir>data</relativeTargetDir>
-            </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
             <hudson.plugins.git.extensions.impl.SparseCheckoutPaths>
                 <sparseCheckoutPaths>
                     <hudson.plugins.git.extensions.impl.SparseCheckoutPath>
@@ -55,13 +52,13 @@
     <concurrentBuild>false</concurrentBuild>
     <builders>
         <javaposse.jobdsl.plugin.ExecuteDslScripts>
-            <targets>data/dsl/{{ image }}/dsl/**/*.groovy</targets>
+            <targets>dsl/{{ image }}/dsl/**/*.groovy</targets>
             <usingScriptText>false</usingScriptText>
             <ignoreExisting>false</ignoreExisting>
             <removedJobAction>DISABLE</removedJobAction>
             <removedViewAction>DELETE</removedViewAction>
             <lookupStrategy>JENKINS_ROOT</lookupStrategy>
-            <additionalClasspath>data/dsl/{{ image }}/src/main/groovy/</additionalClasspath>
+            <additionalClasspath>dsl/{{ image }}/src/main/groovy/</additionalClasspath>
         </javaposse.jobdsl.plugin.ExecuteDslScripts>
     </builders>
     <publishers>
