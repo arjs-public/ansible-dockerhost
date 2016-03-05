@@ -1,0 +1,25 @@
+---
+- name: WWW | Deploy websites
+  hosts: dockerhost
+  sudo: False
+
+  vars:
+    - base_folder: ../../..
+
+  vars_files:
+    - "{{ base_folder }}/roles/dockerhost/vars/base.yml"
+
+  pre_tasks:
+    # - include: '{{ tasks_base }}debug_info.yml'
+
+    - include: '{{ tasks_base }}check_connection.yml'
+
+    - include: '{{ tasks_base }}check_folders.yml'
+
+  tasks:
+    - name: Create "{{ volume_home }}/site" folder
+      file: dest="{{ volume_home }}/site" state=directory mode=0775
+      register: checkout
+      failed_when: checkout.state != "directory"
+    - debug: vars=checkout msg="{{checkout}}"
+

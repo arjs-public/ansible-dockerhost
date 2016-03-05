@@ -10,4 +10,6 @@ icon.png
 **/smtp.conf
 **/*.swp
 configs/.secrets/**
+bin/**
 out/**
+stash/**

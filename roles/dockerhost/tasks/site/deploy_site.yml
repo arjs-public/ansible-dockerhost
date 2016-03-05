@@ -1,0 +1,41 @@
+---
+- name: CONTENT | Prepare special nginx config
+  copy: src="default" dest="{{ site_default_path }}/default" mode=644
+  register: output
+  failed_when: output.state != "file"
+  tags: CONTENT
+#- debug: msg="{{ output }}"
+
+- name: CONTENT | Cleanup content
+  file: dest="{{ nginx_html_path }}/{{ item }}" state=absent
+  with_items:
+  - index.html
+  - styles
+  - images
+  register: output
+  failed_when: output.state != "absent"
+  tags: CONTENT
+  
+- name: CONTENT | Prepare content
+  file: dest="{{ nginx_html_path }}/{{ item }}" state=directory mode=755
+  with_items:
+  - styles
+  - images
+  register: output
+  failed_when: output.state != "directory"
+  tags: CONTENT
+
+- name: CONTENT | Syncronize files
+  copy: 
+    src:  "{{ files_static }}/{{ item }}" 
+    dest: "{{ nginx_html_path }}/" 
+  with_items:
+  - styles
+  - images
+  tags: CONTENT
+
+- name: CONTENT | Starting NGINX
+  service:
+    name: nginx
+    state: started
+  tags: CONTENT

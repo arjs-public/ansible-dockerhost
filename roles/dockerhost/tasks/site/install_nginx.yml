@@ -1,0 +1,36 @@
+---
+- name: NGINX | Installing NGINX
+  apt:
+    name: nginx
+    state: latest
+    update_cache: no 
+  tags: NGINX
+
+- name: NGINX | Prepare special index.html
+  template: src="index.html" dest="{{ nginx_html_path }}/index.html" mode=644
+  register: output
+  failed_when: output.state != "file"
+  tags: NGINX
+
+- name: NGINX | Starting NGINX
+  service:
+    name: nginx
+    state: started
+  tags: NGINX
+
+- name: NGINX | Wait for NGINX to start
+  wait_for: port=80
+  tags: NGINX
+     
+- name: NGINX | Check
+  local_action: uri url=http://{{ inventory_hostname }}
+  register: output
+  failed_when: output.status != 200
+  tags: NGINX
+# - debug: vars=output msg="{{ output.status }}"
+
+- name: NGINX | Stopping NGINX
+  service:
+    name: nginx
+    state: stopped
+  tags: NGINX

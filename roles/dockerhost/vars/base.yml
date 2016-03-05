@@ -4,6 +4,8 @@ ports: []
 port_pre: 80
 port_db_pre: 90
 port_py_pre: 50
+port_www_pre: 95
+port_wwws_pre: 96
 volumes: []
 image_path: ~/docker/
 local_base: '.'
@@ -15,5 +17,6 @@ extra_base: /extra
 jenkins_base: '{{ extra_base }}/jenkins'
 data_base: '{{ extra_base }}/data'
 jenkins_data_base: '{{ data_base }}/jenkins'
-py_app_base: '/extra/apps/py'
+py_app_base: '{{ extra_base }}/apps'
+www_site_base: '{{ extra_base }}/site'
 ansible_python_interpreter: python

@@ -42,41 +42,47 @@
 
     - name: ensure private key file is protected
       file:
-        path: "{{ local_base | realpath }}/files/keys/id_rsa"
+        path: "{{ files_base | realpath }}/{{ image }}/keys/id_rsa"
         # path: "{{ image_path }}{{ image }}/keys/id_rsa"
         mode: 0600
 
     - name: copy private key file to destination
       copy:
-        src: "{{ local_base | realpath }}/files/keys/id_rsa"
+        src: "{{ files_base | realpath }}/{{ image }}/keys/id_rsa"
         dest: "{{ image_path }}{{ image }}/keys/id_rsa"
         mode: 0600
 
     - name: ensure public key file is protected
       file:
-        path: "{{ local_base | realpath }}/files/keys/id_rsa.pub"
+        path: "{{ files_base | realpath }}/{{ image }}/keys/id_rsa.pub"
         # path: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
         mode: 0600
 
     - name: copy public key file to destination
       copy:
-        src: "{{ local_base | realpath }}/files/keys/id_rsa.pub"
+        src: "{{ files_base | realpath }}/{{ image }}/keys/id_rsa.pub"
         dest: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
         mode: 0600
 
 
     - name: copy timezone file to destination
       copy:
-        src: "{{ local_base | realpath }}/files/etc/timezone"
+        src: "{{ files_base | realpath }}/{{ image }}/etc/timezone"
         dest: "{{ image_path }}{{ image }}/etc/timezone"
         mode: 0644
 
 
+    - name: get file stat of "{{ files_base | realpath }}/{{ image }}/get-pip.py" to be able to perform a copy in the following task
+      local_action: stat path="{{ files_base | realpath }}/{{ image }}/get-pip.py"
+      register: file
+      ignore_errors: True
+
     - name: copy get-pip.py file to destination
       copy:
-        src: "{{ local_base | realpath }}/files/get-pip.py"
+        src: "{{ files_base | realpath }}/{{ image }}/get-pip.py"
         dest: "{{ image_path }}{{ image }}/get-pip.py"
         mode: 0644
+      when: file.stat.exists
 
 
     - name: Create "{{ image }}" docker image

@@ -23,10 +23,10 @@ FILES_D = $(BASE_D)/roles/$(DOCKERHOST)/files
 A_CFG = $(BASE_D)/configs/ansible.cfg
 
 ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),)
- ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(PAP)/$(ENV).json),)
+ ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json),)
  CONFIGS =
  else
- CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(PAP)/$(ENV).json"
+ CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json"
  endif
 else
 CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"
@@ -39,9 +39,9 @@ endif
 
 help:
 	@echo "-- Help ---------"
-	@echo "* make APP=<app folder> *? [ENV=<environment> *)] ([EXTRAS=<ansible-playbook params>] [PAP=<python app> 6*?] (boot | shutdown | [DELETE=true ***?] destroy)) | stats)"
+	@echo "* make APP=<app folder> *? [ENV=<environment> *)] ([EXTRAS=<ansible-playbook params>] [APN=<appname> 6*?] (boot | shutdown | [DELETE=true ***?] destroy)) | stats)"
 	@echo "* make INFRA=<infra name from list>  ([ENV=<environment> *?] startup | teardown | construct | [DELETE=true ***?] cleanup)"
-	@echo "* make ENV=<Environment name> *? [APP=true 5*?] [PAP=<python app> 6*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete)"
+	@echo "* make ENV=<Environment name> *? [APP=<appgroup> 5*?] [APN=<appname> 6*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete)"
 	@echo "* make TAG=<Dockerfile folder> build"
 	@echo "* make IMG=<image from dockerhub> fetch"
 	@echo "* make IMG=<image from images> *? destroyi"
@@ -52,7 +52,7 @@ help:
 	@echo "***? Very dangerous, since deletes all associated folders on 'dockerhost'"
 	@echo "****? Very dangerous, since it kills all docker containers on 'dockerhost'"
 	@echo "*****? APP empty means ENV Environment in all Applications; APP set, means ENV Environment for specific Application"
-	@echo "******? PAP needed for python app image"
+	@echo "******? APN needed for app image"
 	@echo
 	@echo "-- Defaults ---------"
 	@echo "* ENV = $(ENV)"
@@ -77,7 +77,7 @@ execute: verify_playbook
 ifeq ($(wildcard $(A_CFG)),)
 	@echo ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS)
 else
-	ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS) $(PAPEXTRA)
+	ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS) $(APNEXTRA)
 endif
 	@echo
 
@@ -85,11 +85,11 @@ endif
 
 verify:
 	@test "$(APP)" && test -d $(CNFG_D)/envs/$(APP)/ || (echo "Error: APP not set or APP folder not found! ($(CNFG_D)/envs/$(APP)/" && exit 1)
-ifndef PAP
+ifndef APN
 	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(ENV).json || (echo "Error: ENV not set or ENV json not found! ($(CNFG_D)/envs/$(APP)/$(ENV).json)" && exit 1)
 else
-	@test "$(PAP)" && test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(PAP)/$(ENV).json || (echo "Error: PAP or ENV not set or PAP/ENV json not found! ($(CNFG_D)/envs/$(APP)/$(PAP)/$(ENV).json)" && exit 1)
-	$(eval PAPEXTRA=-e "pyapp=$(PAP)")
+	@test "$(APN)" && test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json || (echo "Error: APN or ENV not set or APN/ENV json not found! ($(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json)" && exit 1)
+	$(eval APNEXTRA=-e "appname=$(APN)")
 endif
 	$(eval APPIMG=-e "image=$(APP)")
 
@@ -107,14 +107,14 @@ else
 	@[[ -f $(FILES_D)/$(APP)/$(PLUGIN_F) ]] && make APP=$(APP) ENV=$(ENV) plugins || echo "----- No extra plugins configured!"
 endif
 
-extra_pyapp:
-ifeq ($(wildcard $(FILES_D)/$(APP)/apps/$(PAP)/$(APP_F)),)
+extra_appname:
+ifeq ($(wildcard $(FILES_D)/$(APP)/apps/$(APN)/$(APP_F)),)
 	@echo "---- PyAPP ignorieren"
 else
-	@[[ -f $(FILES_D)/$(APP)/apps/$(PAP)/$(APP_F) ]] && make APP=$(APP) ENV=$(ENV) PAP=$(PAP) pyapp || echo "----- No extra pyapp configured!"
+	@[[ -f $(FILES_D)/$(APP)/apps/$(APN)/$(APP_F) ]] && make APP=$(APP) ENV=$(ENV) APN=$(APN) appname || echo "----- No extra appname configured!"
 endif
 
-extras: extra_config extra_plugins extra_pyapp
+extras: extra_config extra_plugins extra_appname
 	@echo "--- Extras done ------------------------"
 	@echo
 
@@ -138,7 +138,7 @@ destroy: verify stats execute status
 stats: verify
 	@echo "--- Stats ------------------------"
 	@[[ `docker ps | grep $(APP)_$(ENV)` ]] && docker logs --tail="30" $(APP)_$(ENV) || echo No stats available for $(APP)_$(ENV)
-	@[[ `docker ps | grep $(APP)_$(PAP)_$(ENV)` ]] && docker logs --tail="30" $(APP)_$(PAP)_$(ENV) || echo No stats available for $(APP)_$(PAP)_$(ENV)
+	@[[ `docker ps | grep $(APP)_$(APN)_$(ENV)` ]] && docker logs --tail="30" $(APP)_$(APN)_$(ENV) || echo No stats available for $(APP)_$(APN)_$(ENV)
 	@echo
 
 status:
@@ -157,10 +157,10 @@ plugins: verify execute
 	@echo "--- Plugins done ------------------------"
 	@echo
 
-pyapp: PAP=
-pyapp: EXTRAS += -e "pyapp=$(PAP)"
-pyapp: PLAYBOOK=apps/pyapp
-pyapp: verify execute
+appname: APN=
+appname: EXTRAS += -e "appname=$(APN)"
+appname: PLAYBOOK=$(APP)/appname
+appname: verify execute
 	@echo "--- PyAPP done ------------------------"
 	@echo
 
@@ -176,8 +176,8 @@ verify_app:
 	$(eval APPIMG=-e "image=$(APP)")
 
 verify_extra:
-ifdef PAP
-	$(eval PAPEXTRA=-e "pyapp=$(PAP)")
+ifdef APN
+	$(eval APNEXTRA=-e "appname=$(APN)")
 endif
 
 create: ENV=

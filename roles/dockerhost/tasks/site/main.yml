@@ -1,0 +1,8 @@
+---
+- name: WWW | Install NGINX
+  include: ./install_nginx.yml
+  tags: NGINX
+  
+- name: WWW | Deploy SITE content
+  include: ./deploy_site.yml
+  tags: SITE

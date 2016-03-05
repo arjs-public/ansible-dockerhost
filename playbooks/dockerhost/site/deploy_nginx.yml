@@ -1,0 +1,9 @@
+---
+- name: WWW | Install standard ngnix and custom content
+  hosts: WWW
+  
+  vars_files:
+    - ../../roles/www/vars/defaults.yml
+
+  roles:
+    - www
