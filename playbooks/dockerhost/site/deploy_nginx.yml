@@ -1,9 +1,19 @@
 ---
 - name: WWW | Install standard ngnix and custom content
-  hosts: WWW
-  
-  vars_files:
-    - ../../roles/www/vars/defaults.yml
+  hosts: sites
+  sudo: False
 
-  roles:
-    - www
+  vars_files:
+    - ../../../roles/dockerhost/vars/base.yml
+    - ../../../roles/dockerhost/vars/site/defaults.yml
+
+  pre_tasks:
+#    - include: '{{ tasks_base }}debug_info.yml'
+
+    - include: '{{ tasks_base }}check_connection.yml'
+  
+#  roles:
+#    - site
+#
+  tasks:
+    - include: "{{ tasks_base }}site/main.yml"
