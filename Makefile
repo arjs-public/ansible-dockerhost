@@ -109,7 +109,7 @@ endif
 
 extra_appname:
 ifeq ($(wildcard $(FILES_D)/$(APP)/apps/$(APN)/$(APP_F)),)
-	@echo "---- PyAPP ignorieren"
+	@echo "---- APP ignorieren"
 else
 	@[[ -f $(FILES_D)/$(APP)/apps/$(APN)/$(APP_F) ]] && make APP=$(APP) ENV=$(ENV) APN=$(APN) appname || echo "----- No extra appname configured!"
 endif

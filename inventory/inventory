@@ -6,3 +6,6 @@ servix ansible_connection=local
 
 [inventoryhost]
 servix ansible_connection=local
+
+[sites]
+alex.v2.arjs.net ansible_ssh_host=172.17.0.23 ansible_ssh_user=root
