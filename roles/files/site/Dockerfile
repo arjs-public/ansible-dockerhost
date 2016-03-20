@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-ADD keys/ssh_config /root/.ssh/ssh_config
+#ADD keys/ssh_config /root/.ssh/ssh_config
 ADD keys/id_rsa.pub /root/.ssh/authorized_keys
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-server && apt-get clean && /etc/init.d/ssh start && /etc/init.d/ssh stop
 

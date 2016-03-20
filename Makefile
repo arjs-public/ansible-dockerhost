@@ -2,7 +2,7 @@
 # docker Makefile -- combine some usefull stuff
 #
 
-.PHONY: help list status create delete
+.PHONY: help list status create delete ping
 .PHONY: boot shutdown destroy stats destroy plugins configs
 .PHONY: images fetch destroyi
 .PHONY: startup teardown construct cleanup wipeout
@@ -16,11 +16,17 @@ CONFIG_F = jenkins/config.xml.j2
 PLUGIN_F = plugins.ini
 APP_F = app.py
 $(eval BASE_D=$(shell pwd))
-PB_D = $(BASE_D)/playbooks/$(DOCKERHOST)
-TAG_D = $(BASE_D)/roles/$(DOCKERHOST)/files
-CNFG_D = $(BASE_D)/roles/$(DOCKERHOST)/defaults
-FILES_D = $(BASE_D)/roles/$(DOCKERHOST)/files
-A_CFG = $(BASE_D)/configs/ansible.cfg
+#$(info $(BASE_D))
+PB_D = $(BASE_D)/playbooks
+TAG_D = $(BASE_D)/roles/files
+CNFG_D = $(BASE_D)/roles/defaults
+FILES_D = $(BASE_D)/roles/files
+$(eval ANSIBLE_CFG=$(shell netstat -all | grep 6379 > /dev/null && echo redis || echo default))
+#$(info ANSIBLE_CFG: $(ANSIBLE_CFG))
+A_CFG = $(BASE_D)/configs/$(ANSIBLE_CFG).cfg
+VPF_FILE = configs/.secrets/vpf.txt
+#$(info A_CFG: $(A_CFG))
+INVENTORY = $(BASE_D)/inventory/inventory
 
 ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),)
  ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json),)
@@ -31,8 +37,8 @@ ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),)
 else
 CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"
 endif
-ifneq ($(wildcard configs/.secrets/vpf.txt),)
-CONFIGS += --vault-password-file ./configs/.secrets/vpf.txt
+ifneq ($(wildcard $(VPF_FILE)),)
+CONFIGS += --vault-password-file ./$(VPF_FILE)
 endif
 
 # --------- Rules
@@ -45,7 +51,7 @@ help:
 	@echo "* make TAG=<Dockerfile folder> build"
 	@echo "* make IMG=<image from dockerhub> fetch"
 	@echo "* make IMG=<image from images> *? destroyi"
-	@echo "* make status | images | list | wipeout ****?"
+	@echo "* make ping | status | images | list | wipeout ****?"
 	@echo
 	@echo "*? see 'make list' output for available options; default: ENV = develop"
 	@echo "**? Port extension to use with normal prefix 80 or db prefix 90; e.g. normal (80) + extenison (85) = port (8085)"
@@ -68,14 +74,14 @@ help:
 verify_playbook:
 	@echo "---- Verify playbook $(PB_D)/$(PLAYBOOK).yml"
 	$(eval PLAYBOOKPATH=$(PB_D)/$(PLAYBOOK).yml)
-	@test -f $(PLAYBOOKPATH) && echo "----- Playbook $(PB_D)/$(PLAYBOOK).yml found!" && exit 0 || echo "Error: No playbook found!" && exit 1
+	@test -f $(PLAYBOOKPATH) && echo "----- Found playbook $(PB_D)/$(PLAYBOOK).yml" && exit 0 || echo "Error: No playbook found!" && exit 1
 
 execute: verify_playbook
 	@echo
 	@echo "--- Execute playbook '$(PLAYBOOK)'  ------------------------"
 
 ifeq ($(wildcard $(A_CFG)),)
-	@echo ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS)
+	@echo Not executed: ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS)
 else
 	ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS) $(APNEXTRA)
 endif
@@ -205,12 +211,14 @@ verify_tag:
 
 build: PLAYBOOK=build
 build: verify_tag execute
-	@docker images | grep $(TAG)
+	docker images | grep $(TAG)
 	@echo "--- Build done ------------------------"
 	@echo
 
-images:
-	@docker images
+images: PLAYBOOK=images
+images: execute status
+	@echo "--- Images done ------------------------"
+	@echo
 
 verify_img:
 	@test "$(IMG)" || (echo "Error: IMG not set!" && exit 1)
@@ -285,7 +293,7 @@ cleanup: verify_infra
 	@echo "--- Cleanup '$(INFRA)' done ------------------------"
 
 list:
-	@echo "--- List Ifrastructures [$(CNFG_D)/infra/] ------------------------"
+	@echo "--- List Infrastructures [$(CNFG_D)/infra/] ------------------------"
 	@pushd $(CNFG_D)/infra/ > /dev/null; ls -1 *.txt | cut -d _ -f 2 | cut -d . -f 1; popd > /dev/null
 	@echo
 	@echo "--- List Application Stacks [$(CNFG_D)/envs/] ------------------------"
@@ -297,3 +305,10 @@ list:
 	@echo "--- List Custom Docker Images [$(TAG_D)] ------------------------"
 	@pushd $(TAG_D) > /dev/null; ls -1dR */; popd > /dev/null
 	@echo
+
+ansible_cmd_check:
+	@which ansible > /dev/null || (echo "Error: ansible command not found!" && exit 1)
+    
+ping: ansible_cmd_check
+	@echo "--- ping docker host [$(DOCKERHOST)] ------------------------"
+	@ansible -i $(INVENTORY) -m ping $(DOCKERHOST)

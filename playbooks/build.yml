@@ -4,7 +4,7 @@
   sudo: False
 
   vars_files:
-    - ../../roles/dockerhost/vars/base.yml
+    - ../roles/vars/base.yml
 
   pre_tasks:
     # - include: '{{ tasks_base }}debug_info.yml'
@@ -13,73 +13,87 @@
 
   tasks:
     - name: Check directory "{{ image_path }}" and create if not found
-      file: dest={{ image_path }} state=directory
+      file: dest="{{ image_path }}" state=directory
       register: checkout
       failed_when: checkout.state != 'directory'
 
 
     - name: Copy "{{ image }}" docker file to localhost
       synchronize:
-        src: "{{ files_base }}/{{ image }}/"
+        src: "{{ files_base }}{{ image }}/"
         dest: "{{ image_path }}{{ image }}/"
         copy_links: yes
-
+        delete: yes
+        rsync_opts:
+            - "--no-motd"
+            - "--exclude='**/*.DS_Store'"
+      
     - name: Check "{{ image }}" docker image folder
       stat: path="{{ image_path }}{{ image }}/"
       register: checkout
       failed_when: checkout.stat.exists == False
 
-    - name: Check "{{ image }}/keys" folder
+
+    - name: Check "{{ image_path }}{{ image }}/keys" folder
       file: dest="{{ image_path }}{{ image }}/keys" state=directory
       register: checkout
       failed_when: checkout.state != "directory"
+    - stat: path="{{ image }}/keys"
+      register: file_check
+      ignore_errors: True
+    - name: copy "{{ image }}" private key file to destination
+      copy:
+        src: "{{ files_base }}/{{ image }}/keys/id_rsa"
+        dest: "{{ image_path }}{{ image }}/keys/id_rsa"
+        mode: 0600
+      when: file_check.stat.exists == True
+    - name: copy global private key file to destination
+      copy:
+        src: "{{ global_files_base }}/keys/id_rsa"
+        dest: "{{ image_path }}{{ image }}/keys/id_rsa"
+        mode: 0600
+      when: file_check.stat.exists != True
+    - name: copy "{{ image }}" public key file to destination
+      copy:
+        src: "{{ files_base }}/{{ image }}/keys/id_rsa.pub"
+        dest: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
+        mode: 0600
+      when: file_check.stat.exists == True
+    - name: copy global public key file to destination
+      copy:
+        src: "{{ global_files_base }}/keys/id_rsa.pub"
+        dest: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
+        mode: 0600
+      when: file_check.stat.exists != True
 
-    - name: Check "{{ image }}/etc" folder
+
+    - name: Check "{{ image_path }}{{ image }}/etc" folder
       file: dest="{{ image_path }}{{ image }}/etc" state=directory
       register: checkout
       failed_when: checkout.state != "directory"
-
-
-    - name: ensure private key file is protected
-      file:
-        path: "{{ files_base | realpath }}/{{ image }}/keys/id_rsa"
-        # path: "{{ image_path }}{{ image }}/keys/id_rsa"
-        mode: 0600
-
-    - name: copy private key file to destination
+    - stat: path="{{ image }}/etc"
+      register: file_check
+      ignore_errors: True
+    - name: copy "{{ image }}" timezone file to destination
       copy:
-        src: "{{ files_base | realpath }}/{{ image }}/keys/id_rsa"
-        dest: "{{ image_path }}{{ image }}/keys/id_rsa"
-        mode: 0600
-
-    - name: ensure public key file is protected
-      file:
-        path: "{{ files_base | realpath }}/{{ image }}/keys/id_rsa.pub"
-        # path: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
-        mode: 0600
-
-    - name: copy public key file to destination
-      copy:
-        src: "{{ files_base | realpath }}/{{ image }}/keys/id_rsa.pub"
-        dest: "{{ image_path }}{{ image }}/keys/id_rsa.pub"
-        mode: 0600
-
-
-    - name: copy timezone file to destination
-      copy:
-        src: "{{ files_base | realpath }}/{{ image }}/etc/timezone"
+        src: "{{ files_base }}/{{ image }}/etc/timezone"
         dest: "{{ image_path }}{{ image }}/etc/timezone"
         mode: 0644
+      when: file_check.stat.exists == True
+    - name: copy global timezone file to destination
+      copy:
+        src: "{{ global_files_base }}/etc/timezone"
+        dest: "{{ image_path }}{{ image }}/etc/timezone"
+        mode: 0644
+      when: file_check.stat.exists != True
 
 
-    - name: get file stat of "{{ files_base | realpath }}/{{ image }}/get-pip.py" to be able to perform a copy in the following task
-      local_action: stat path="{{ files_base | realpath }}/{{ image }}/get-pip.py"
+    - stat: path="{{ files_base }}/{{ image }}/get-pip.py"
       register: file
       ignore_errors: True
-
     - name: copy get-pip.py file to destination
       copy:
-        src: "{{ files_base | realpath }}/{{ image }}/get-pip.py"
+        src: "{{ files_base }}/{{ image }}/get-pip.py"
         dest: "{{ image_path }}{{ image }}/get-pip.py"
         mode: 0644
       when: file.stat.exists
