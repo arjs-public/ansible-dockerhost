@@ -1,6 +1,0 @@
-root=<name>@<provider>.com
-mailhub=smtp.<name>@<provider>.com:587
-AuthUser=<name>@<provider>.com
-AuthPass=<password>
-UseTLS=YES
-UseSTARTTLS=YES
