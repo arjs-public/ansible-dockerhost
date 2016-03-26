@@ -99,6 +99,10 @@
       when: file.stat.exists
 
 
+    - name: Check if "docker.io" is present
+      shell: dpkg-query --list docker.io    
+    #   register: checkout
+    # - debug: msg="{{ checkout }}"
     - name: Create "{{ image }}" docker image
       # docker_image:
       #  name: base
@@ -107,3 +111,8 @@
       command: docker build -t {{ image }} "{{ image_path }}{{ image }}"
       register: buildout
       failed_when: buildout.rc != 0
+    
+    - name: Execute docker images
+      shell: docker images | grep "{{ image }}"
+    #   register: output
+    # - debug: msg="{{ output }}"

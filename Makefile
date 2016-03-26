@@ -147,11 +147,12 @@ stats: verify
 	@[[ `docker ps | grep $(APP)_$(APN)_$(ENV)` ]] && docker logs --tail="30" $(APP)_$(APN)_$(ENV) || echo No stats available for $(APP)_$(APN)_$(ENV)
 	@echo
 
-status:
-	@echo "--- Status ------------------------"
-	@test "$(APP)" && docker ps -a -f name=$(APP) | tail -n +2 || \
-	test "$(APP)" && test "$(ENV)" && docker ps -a -f name=$(APP)_$(ENV) | tail -n +2 || docker ps -a
+
+status: PLAYBOOK=status
+status: execute
+	@echo "--- Status done ------------------------"
 	@echo
+
 
 configs: PLAYBOOK=jenkins/configs
 configs: verify execute
@@ -211,12 +212,11 @@ verify_tag:
 
 build: PLAYBOOK=build
 build: verify_tag execute
-	docker images | grep $(TAG)
 	@echo "--- Build done ------------------------"
 	@echo
 
 images: PLAYBOOK=images
-images: execute status
+images: execute
 	@echo "--- Images done ------------------------"
 	@echo
 

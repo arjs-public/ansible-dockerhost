@@ -9,7 +9,8 @@ port_wwws_pre: 96
 volumes: []
 image_path: ~/docker/
 local_base: '.'
-roles_base: '{{ local_base | realpath }}/roles/dockerhost/'
+global_files_base: '{{ local_base | realpath }}/files/'
+roles_base: '{{ local_base | realpath }}/roles/'
 config_base: '{{ roles_base }}defaults/envs/'
 files_base: '{{ roles_base }}files/'
 tasks_base: '{{ roles_base }}tasks/'

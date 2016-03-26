@@ -12,7 +12,7 @@
     - ../roles/vars/base.yml
 
   pre_tasks:
-    #- include: '{{ tasks_base }}debug_info.yml'
+    - include: '{{ tasks_base }}debug_info.yml'
 
     - include: '{{ tasks_base }}check_connection.yml'
 
@@ -21,11 +21,6 @@
       shell: dpkg-query --list docker.io    
     #   register: checkout
     # - debug: msg="{{ checkout }}"
-    
-    - name: Execute docker images
-      command: docker images
-    #   register: output
-    # - debug: msg="{{ output }}"
     
     - name: Execute docker status with an name "{{ image }}" 
       command: docker ps -a -f name="{{ image }}" | tail -n +2

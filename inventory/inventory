@@ -1,11 +1,11 @@
 [local]
-servix ansible_connection=local
+servix
 
 [dockerhost]
-servix ansible_connection=local
+servix
 
 [inventoryhost]
-servix ansible_connection=local
+servix
 
 [sites]
 alex.v2.arjs.net ansible_ssh_host=172.17.0.23 ansible_ssh_user=root
