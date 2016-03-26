@@ -1,5 +1,5 @@
 ---
-- name: List container(s) on dockerhost
+- name: Destroys all local running containers from local docker host
   hosts: dockerhost
   sudo: False
 
@@ -25,18 +25,10 @@
     - debug: msg="{{ checkout }}"
       when: do_debug == True
     
-    - name: Execute docker status with an name "{{ image }}" 
-      shell: docker ps -a -f name="{{ image }}" | tail -n +2
-      when: "'{{ image }}' != ''"
-      register: output
-    - debug: msg="{{ output }}"
-      when: do_debug == True
-       
-    - name: Execute docker status with an name "{{ image }}_{{ env_name }}"
-      shell: docker ps -a -f name="{{ image }}_{{ env_name }}" | tail -n +2
-      when: "'{{ image }}' != '' and '{{ env_name }}' != ''"
-      register: output
-    - debug: msg="{{ output }}"
+    - name: Execute docker stop and rm 
+      shell: for j in $(docker ps -a -q); do echo Removing $j; echo docker stop $j; echo docker rm $j; echo; done
+      register: checkout
+    - debug: msg="{{ checkout }}"
       when: do_debug == True
        
     - name: Execute docker status

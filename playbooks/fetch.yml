@@ -1,0 +1,33 @@
+---
+- name: Fetch standard images from docker hub
+  hosts: dockerhost
+  sudo: False
+
+  vars:
+    - volume_home: ""
+    - image: ""
+    - env_name: ""
+    - do_debug: False
+
+  vars_files:
+    - ../roles/vars/base.yml
+
+  pre_tasks:
+    - include: '{{ tasks_base }}debug_info.yml'
+      when: do_debug == True
+
+    - include: '{{ tasks_base }}check_connection.yml'
+
+  tasks:
+    - name: Check if "docker.io" is present
+      shell: dpkg-query --list docker.io    
+      register: checkout
+    - debug: msg="{{ checkout }}"
+      when: do_debug == True
+    
+    - name: Execute docker pull with an name "{{ image }}" 
+      shell: docker pull "{{ image }}" | tail -n +2
+      when: "'{{ image }}' != ''"
+      register: checkout
+    - debug: msg="{{ checkout }}"
+      when: do_debug == True

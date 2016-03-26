@@ -1,0 +1,75 @@
+---
+- name: List containers statistics on dockerhost
+  hosts: dockerhost
+  sudo: False
+
+  vars:
+    - volume_home: ""
+    - image: ""
+    - env_name: ""
+    - do_debug: False
+
+  vars_files:
+    - ../roles/vars/base.yml
+
+  pre_tasks:
+    - include: '{{ tasks_base }}debug_info.yml'
+      when: do_debug == True
+
+    - include: '{{ tasks_base }}check_connection.yml'
+
+  tasks:
+    - name: Check if "docker.io" is present
+      shell: dpkg-query --list docker.io    
+      register: checkout
+    - debug: msg="{{ checkout }}"
+      when: do_debug == True
+    
+    - name: Execute docker logs with an name "{{ image }}_{{ appname }}" 
+      shell: docker logs --tail="30" "{{ image }}_{{ appname }}"
+      when: "'{{ image }}' != '' and '{{ appname }}' != '' and '{{ env_name }}' == ''"
+      register: output
+    - debug: msg="{{ output }}"
+      when: do_debug == True
+    
+    - name: Execute docker logs with an name "{{ image }}_{{ env_name }}" 
+      shell: docker logs --tail="30" "{{ image }}_{{ env_name }}"
+      when: "'{{ image }}' != '' and '{{ appname }}' == '' and '{{ env_name }}' != ''"
+      register: output
+    - debug: msg="{{ output }}"
+      when: do_debug == True
+    
+    - name: Execute docker logs with an name "{{ image }}_{{ appname }}_{{ env_name }}" 
+      shell: docker logs --tail="30" "{{ image }}_{{ appname }}_{{ env_name }}"
+      when: "'{{ image }}' != '' and '{{ appname }}' != '' and '{{ env_name }}' != ''"
+      register: output
+    - debug: msg="{{ output }}"
+      when: do_debug == True
+       
+    - name: Execute docker status with an name "{{ image }}_{{ appname }}_{{ env_name }}"
+      shell: docker ps -a -f name="{{ image }}_{{ appname }}_{{ env_name }}" | tail -n +2
+      when: "'{{ image }}' != '' and '{{ appname }}' != '' and '{{ env_name }}' != ''"
+      register: output
+    - debug: msg="{{ output }}"
+      when: do_debug == True
+       
+    - name: Execute docker status with an name "{{ image }}_{{ appname }}"
+      shell: docker ps -a -f name="{{ image }}_{{ appname }}" | tail -n +2
+      when: "'{{ image }}' != '' and '{{ appname }}' != '' and '{{ env_name }}' == ''"
+      register: output
+    - debug: msg="{{ output }}"
+      when: do_debug == True
+       
+    - name: Execute docker status with an name "{{ image }}_{{ env_name }}"
+      shell: docker ps -a -f name="{{ image }}_{{ env_name }}" | tail -n +2
+      when: "'{{ image }}' != '' and '{{ appname }}' == '' and '{{ env_name }}' != ''"
+      register: output
+    - debug: msg="{{ output }}"
+      when: do_debug == True
+       
+    - name: Execute docker status
+      shell: docker ps -a
+      when: "'{{ image }}' == '' and '{{ env_name }}' == ''"
+      register: output
+    - debug: msg="{{ output }}"
+      when: do_debug == True

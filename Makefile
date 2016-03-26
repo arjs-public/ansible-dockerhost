@@ -1,5 +1,5 @@
 #
-# docker Makefile -- combine some usefull stuff
+# Makefile -- combine some usefull stuff
 #
 
 .PHONY: help list status create delete ping
@@ -141,10 +141,10 @@ destroy: verify stats execute status
 	@echo "--- Destroy done ------------------------"
 	@echo
 
-stats: verify
-	@echo "--- Stats ------------------------"
-	@[[ `docker ps | grep $(APP)_$(ENV)` ]] && docker logs --tail="30" $(APP)_$(ENV) || echo No stats available for $(APP)_$(ENV)
-	@[[ `docker ps | grep $(APP)_$(APN)_$(ENV)` ]] && docker logs --tail="30" $(APP)_$(APN)_$(ENV) || echo No stats available for $(APP)_$(APN)_$(ENV)
+
+stats: PLAYBOOK=stats
+stats: verify execute
+	@echo "--- Stats done ------------------------"
 	@echo
 
 
@@ -168,7 +168,7 @@ appname: APN=
 appname: EXTRAS += -e "appname=$(APN)"
 appname: PLAYBOOK=$(APP)/appname
 appname: verify execute
-	@echo "--- PyAPP done ------------------------"
+	@echo "--- APP done ------------------------"
 	@echo
 
 # -------- Environment handling
@@ -215,39 +215,47 @@ build: verify_tag execute
 	@echo "--- Build done ------------------------"
 	@echo
 
+
+filter_img:
+	$(info IMG=$(IMG))
+	$(eval APPIMG=-e "image=$(IMG)")
+	$(info APPIMG=$(APPIMG))
+
 images: PLAYBOOK=images
-images: execute
+images: filter_img execute
 	@echo "--- Images done ------------------------"
 	@echo
 
+
 verify_img:
 	@test "$(IMG)" || (echo "Error: IMG not set!" && exit 1)
+	$(eval APPIMG=-e "image=$(IMG)")
 
-fetch: verify_img
-	@docker pull ${IMG}
+fetch: PLAYBOOK=fetch
+fetch: verify_img execute
+	@echo "--- Fetch done ------------------------"
+	@echo
 
-destroyi: verify_img
-	@docker rmi ${IMG}
+destroyi: PLAYBOOK=destroyi
+destroyi: verify_img execute
+	@echo "--- Destroy image done ------------------------"
+	@echo
 
 # -------- Wipe.out or debugging
 
-wipeout:
-	@echo "--- Wipeout ------------------------"
-	@for j in $$(docker ps -a -q); \
-	do \
-		echo Removing $$j; \
-		docker stop $$j; \
-		docker rm $$j; \
-		echo; \
-	done
-	@docker ps -a
+wipeout: PLAYBOOK=wipeout
+wipeout: execute
+	@make status
+	@echo "--- Wipeout done ------------------------"
+	@echo
 
 # -------- Infra handling
 
 verify_infra:
 	@test "$(INFRA)" && test -s $(CNFG_D)/infra/$(INFRA).txt || (echo "Error: INFRA not set or INFRA txt not found! ($(CNFG_D)/infra/$(INFRA).txt)" && exit 1)
 
-startup: verify_infra
+
+startup_doing: verify_infra
 	@echo "--- Startup '$(INFRA)' ------------------------"
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
@@ -255,10 +263,14 @@ startup: verify_infra
 		make APP=$$l ENV=$(ENV) boot; \
 		echo; \
 	done
-	@docker ps -a
-	@echo "--- Startup '$(INFRA)' done ------------------------"
 
-teardown: verify_infra
+startup: verify_infra startup_doing
+	@make status
+	@echo "--- Startup '$(INFRA)' done ------------------------"
+	@echo
+
+
+teardown_dowing: verify_infra
 	@echo "--- Teardown '$(INFRA)' -----------------------"
 	@for l in `tac $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
@@ -266,10 +278,14 @@ teardown: verify_infra
 		make APP=$$l ENV=$(ENV) shutdown; \
 		echo; \
 	done
-	@docker ps -a
-	@echo "--- Teardown '$(INFRA)' done ------------------------"
 
-construct: verify_infra
+teardown: verify_infra teardown_dowing
+	@make status
+	@echo "--- Teardown '$(INFRA)' done ------------------------"
+	@echo
+
+
+construct_doing:
 	@echo "--- Construct '$(INFRA)' ------------------------"
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
@@ -277,11 +293,14 @@ construct: verify_infra
 		make TAG=$$l build; \
 		echo; \
 	done
-	@docker images
-	@echo "--- Construct '$(INFRA)' done ------------------------"
 
-cleanup: DELETE=false
-cleanup: verify_infra
+construct: verify_infra construct_doing images
+	@make images
+	@echo "--- Construct '$(INFRA)' done ------------------------"
+	@echo
+
+
+cleanup_doing: 
 	@echo "--- Cleanup '$(INFRA)' ------------------------"
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
@@ -289,8 +308,13 @@ cleanup: verify_infra
 		make APP=$$l ENV=$(ENV) DELETE=$(DELETE) destroy; \
 		echo; \
 	done
-	@docker ps -a
+
+cleanup: DELETE=false
+cleanup: verify_infra cleanup_doing
+	@make status
 	@echo "--- Cleanup '$(INFRA)' done ------------------------"
+	@echo
+
 
 list:
 	@echo "--- List Infrastructures [$(CNFG_D)/infra/] ------------------------"
