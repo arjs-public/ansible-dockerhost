@@ -4,7 +4,7 @@
   sudo: False
 
   vars:
-    - do_debug: True
+    - do_debug: False
 
   vars_files:
     - ../roles/vars/base.yml
