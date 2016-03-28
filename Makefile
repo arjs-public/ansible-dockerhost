@@ -16,16 +16,16 @@ CONFIG_F = jenkins/config.xml.j2
 PLUGIN_F = plugins.ini
 APP_F = app.py
 $(eval BASE_D=$(shell pwd))
-#$(info $(BASE_D))
+$(info [Info] Use BASE_D: $(BASE_D))
 PB_D = $(BASE_D)/playbooks
 TAG_D = $(BASE_D)/roles/files
 CNFG_D = $(BASE_D)/roles/defaults
 FILES_D = $(BASE_D)/roles/files
 $(eval ANSIBLE_CFG=$(shell netstat -all | grep 6379 > /dev/null && echo redis || echo default))
-#$(info ANSIBLE_CFG: $(ANSIBLE_CFG))
+$(info [Info] Use ANSIBLE_CFG: $(ANSIBLE_CFG))
 A_CFG = $(BASE_D)/configs/$(ANSIBLE_CFG).cfg
 VPF_FILE = configs/.secrets/vpf.txt
-#$(info A_CFG: $(A_CFG))
+$(info [Info] Use A_CFG: $(A_CFG))
 INVENTORY = $(BASE_D)/inventory/inventory
 
 ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),)
@@ -81,23 +81,31 @@ execute: verify_playbook
 	@echo "--- Execute playbook '$(PLAYBOOK)'  ------------------------"
 
 ifeq ($(wildcard $(A_CFG)),)
-	@echo Not executed: ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS)
+	@echo Not executed: ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(ENVNAME) $(CONFIGS) $(EXTRAS)
 else
-	ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(CONFIGS) $(EXTRAS) $(APNEXTRA)
+	ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(ENVNAME) $(CONFIGS) $(EXTRAS) $(APNEXTRA)
 endif
 	@echo
 
 # -------- Application handling
 
-verify:
+verify_var_app:
 	@test "$(APP)" && test -d $(CNFG_D)/envs/$(APP)/ || (echo "Error: APP not set or APP folder not found! ($(CNFG_D)/envs/$(APP)/" && exit 1)
+	$(info [Info] Use application: $(APP))
+
+verify_var_apn:
 ifndef APN
 	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(ENV).json || (echo "Error: ENV not set or ENV json not found! ($(CNFG_D)/envs/$(APP)/$(ENV).json)" && exit 1)
 else
+	$(info [Info] Use application name: $(APN))
 	@test "$(APN)" && test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json || (echo "Error: APN or ENV not set or APN/ENV json not found! ($(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json)" && exit 1)
-	$(eval APNEXTRA=-e "appname=$(APN)")
+	$(eval APNEXTRA=-e "app_name=$(APN)")
+	$(info [Info] Use application name extra: $(APNEXTRA))
 endif
-	$(eval APPIMG=-e "image=$(APP)")
+	$(info [Info] Use environment: $(ENV))
+
+verify: verify_var_app verify_var_apn verify_app
+	$(info [Info])
 
 extra_config:
 ifeq ($(wildcard $(FILES_D)/$(APP)/$(CONFIG_F)),)
@@ -125,12 +133,16 @@ extras: extra_config extra_plugins extra_appname
 	@echo
 
 boot: PLAYBOOK=boot
-boot: verify extras execute stats status
+boot: verify extras execute
+	@make APP=$(APP) ENV=$(ENV) APN=$(APN) stats
+	@make APP=$(APP) ENV=$(ENV) APN=$(APN) status
 	@echo "--- Boot done ------------------------"
 	@echo
 
 shutdown: PLAYBOOK=shutdown
-shutdown: verify stats execute status
+shutdown: verify execute
+	@make APP=$(APP) ENV=$(ENV) APN=$(APN) stats
+	@make APP=$(APP) ENV=$(ENV) APN=$(APN) status
 	@echo "--- Shutdown done ------------------------"
 	@echo
 
@@ -149,7 +161,7 @@ stats: verify execute
 
 
 status: PLAYBOOK=status
-status: execute
+status: verify_app verify_env execute
 	@echo "--- Status done ------------------------"
 	@echo
 
@@ -175,12 +187,17 @@ appname: verify execute
 
 verify_env:
 	@test "$(ENV)" || (echo "Error: ENV not set!" && exit 1)
+	$(info [Info] Use environment: $(ENV))
+	$(eval ENVNAME=-e "env_name=$(ENV)")
+	$(info [Info] Use env extra: $(ENVNAME))
 
 verify_port:
 	@test "$(PORT)" || (echo "Error: PORT not set!" && exit 1)
+	$(info [Info] Use port: $(PORT))
 
 verify_app:
 	$(eval APPIMG=-e "image=$(APP)")
+	$(info [Info] Use image: $(APPIMG))
 
 verify_extra:
 ifdef APN

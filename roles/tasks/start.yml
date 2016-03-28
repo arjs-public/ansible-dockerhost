@@ -3,7 +3,7 @@
     debug: msg="[echo] Use 'standard' entrypoint."
     when: not has_custom_command
 
-  - name: create client container {{ container_name }} without custom command
+  - name: create client container {{ container_name }} with standard command
     docker:
       docker_api_version: 1.17
       image: "{{ image }}"
@@ -16,14 +16,18 @@
     register: dockerout
     when: not has_custom_command
 
-  # - debug: vars=dockerout msg="{{ dockerout }}"
-  #   when: not has_custom_command
+  - debug: vars=dockerout msg="{{ dockerout }}"
+    when: do_debug == True and not has_custom_command
+  - debug: vars=dockerout msg="{{ dockerout.changed }}"
+    when: do_debug == True and not has_custom_command
+  - debug: vars=dockerout msg="{{ dockerout.summary.started }}"
+    when: do_debug == True and not has_custom_command
 
-  - fail: msg="[echo] Container '{{ container_name }}' is {{ dockerout.invocation.module_complex_args.state }}"
-    when: not has_custom_command and dockerout.invocation.module_complex_args.state != "running"
+  - fail: msg="[echo] Container '{{ container_name }}' with standard entrypoint is not running"
+    when: not has_custom_command and dockerout.changed == True and dockerout.summary.started == "1"
 
   - name: Output
-    debug: msg="[echo] Use '{{ command }}' with entrypoint."
+    debug: msg="[echo] Use '{{ command }}' with custom entrypoint."
     when: has_custom_command
 
   - name: create client container {{ container_name }} with custom command
@@ -40,8 +44,12 @@
     register: dockerout
     when: has_custom_command
 
-  # - debug: vars=dockerout msg="{{ dockerout }}"
-  #   when: has_custom_command
+  - debug: vars=dockerout msg="{{ dockerout }}"
+    when: do_debug == True and has_custom_command
+  - debug: vars=dockerout msg="{{ dockerout.changed }}"
+    when: do_debug == True and has_custom_command
+  - debug: vars=dockerout msg="{{ dockerout.summary.started }}"
+    when: do_debug == True and has_custom_command
 
-  - fail: msg="[echo] Container '{{ container_name }}' is {{ dockerout.invocation.module_complex_args.state }}"
-    when: has_custom_command and dockerout.invocation.module_complex_args.state != "running"
+  - fail: msg="[echo] Container '{{ container_name }}' with custom entrypoint is not running"
+    when: has_custom_command and dockerout.changed == True and dockerout.summary.started == "1"

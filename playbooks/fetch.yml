@@ -4,9 +4,6 @@
   sudo: False
 
   vars:
-    - volume_home: ""
-    - image: ""
-    - env_name: ""
     - do_debug: False
 
   vars_files:

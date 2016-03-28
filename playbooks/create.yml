@@ -4,19 +4,20 @@
   sudo: False
 
   vars:
-    - volume_home: ""
+    - do_debug: False
 
   vars_files:
-    - ../../roles/dockerhost/vars/base.yml
+    - ../roles/vars/base.yml
 
   pre_tasks:
-    # - include: '{{ tasks_base }}debug_info.yml'
+    - include: '{{ tasks_base }}debug_info.yml'
+      when: do_debug == True
 
     - include: '{{ tasks_base }}check_connection.yml'
 
   tasks:
-#    - debug: vars=image msg="{{ image }}"
-#      when: image is defined and image != ""
+    - debug: vars=image msg="{{ image }}"
+      when: do_debug == True and image is defined and image != ""
 
     - name: Process template to new environment of all images
       template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"

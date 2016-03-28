@@ -4,17 +4,19 @@
   sudo: False
 
   vars:
-    - volume_home: ""
+    - do_debug: False
 
   vars_files:
-    - ../../roles/dockerhost/vars/base.yml
+    - ../roles/vars/base.yml
 
   pre_tasks:
-    # - include: '{{ tasks_base }}debug_info.yml'
+    - include: '{{ tasks_base }}debug_info.yml'
+      when: do_debug == True
 
     - include: '{{ tasks_base }}check_connection.yml'
 
     - include: '{{ tasks_base }}check_folders.yml'
+      when: do_debug == True
 
   tasks:
     - include: '{{ tasks_base }}get_facts.yml'

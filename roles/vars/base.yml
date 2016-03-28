@@ -21,3 +21,7 @@ jenkins_data_base: '{{ data_base }}/jenkins'
 py_app_base: '{{ extra_base }}/apps'
 www_site_base: '{{ extra_base }}/site'
 ansible_python_interpreter: python
+volume_home: ""
+image: ""
+app_name: ""
+env_name: ""
