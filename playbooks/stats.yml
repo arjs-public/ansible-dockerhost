@@ -6,6 +6,7 @@
   vars:
     - volume_home: ""
     - image: ""
+    - app_name: ""
     - env_name: ""
     - do_debug: False
 
@@ -25,51 +26,29 @@
     - debug: msg="{{ checkout }}"
       when: do_debug == True
     
-    - name: Execute docker logs with an name "{{ image }}_{{ appname }}" 
-      shell: docker logs --tail="30" "{{ image }}_{{ appname }}"
-      when: "'{{ image }}' != '' and '{{ appname }}' != '' and '{{ env_name }}' == ''"
+    - debug: msg="{{ image }}_{{ app_name }}"
+      when: do_debug == True and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''
+    - name: Execute docker logs with an name "{{ image }}_{{ app_name }}" 
+      shell: docker logs --tail="30" "{{ image }}_{{ app_name }}"
+      when: "'{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''"
       register: output
     - debug: msg="{{ output }}"
       when: do_debug == True
     
+    - debug: msg="{{ image }}_{{ env_name }}"
+      when: do_debug == True and '{{ image }}' != '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''
     - name: Execute docker logs with an name "{{ image }}_{{ env_name }}" 
       shell: docker logs --tail="30" "{{ image }}_{{ env_name }}"
-      when: "'{{ image }}' != '' and '{{ appname }}' == '' and '{{ env_name }}' != ''"
+      when: "'{{ image }}' != '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''"
       register: output
     - debug: msg="{{ output }}"
       when: do_debug == True
     
-    - name: Execute docker logs with an name "{{ image }}_{{ appname }}_{{ env_name }}" 
-      shell: docker logs --tail="30" "{{ image }}_{{ appname }}_{{ env_name }}"
-      when: "'{{ image }}' != '' and '{{ appname }}' != '' and '{{ env_name }}' != ''"
-      register: output
-    - debug: msg="{{ output }}"
-      when: do_debug == True
-       
-    - name: Execute docker status with an name "{{ image }}_{{ appname }}_{{ env_name }}"
-      shell: docker ps -a -f name="{{ image }}_{{ appname }}_{{ env_name }}" | tail -n +2
-      when: "'{{ image }}' != '' and '{{ appname }}' != '' and '{{ env_name }}' != ''"
-      register: output
-    - debug: msg="{{ output }}"
-      when: do_debug == True
-       
-    - name: Execute docker status with an name "{{ image }}_{{ appname }}"
-      shell: docker ps -a -f name="{{ image }}_{{ appname }}" | tail -n +2
-      when: "'{{ image }}' != '' and '{{ appname }}' != '' and '{{ env_name }}' == ''"
-      register: output
-    - debug: msg="{{ output }}"
-      when: do_debug == True
-       
-    - name: Execute docker status with an name "{{ image }}_{{ env_name }}"
-      shell: docker ps -a -f name="{{ image }}_{{ env_name }}" | tail -n +2
-      when: "'{{ image }}' != '' and '{{ appname }}' == '' and '{{ env_name }}' != ''"
-      register: output
-    - debug: msg="{{ output }}"
-      when: do_debug == True
-       
-    - name: Execute docker status
-      shell: docker ps -a
-      when: "'{{ image }}' == '' and '{{ env_name }}' == ''"
+    - debug: msg="{{ image }}_{{ app_name }}_{{ env_name }}"
+      when: do_debug == True and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''
+    - name: Execute docker logs with an name "{{ image }}_{{ app_name }}_{{ env_name }}" 
+      shell: docker logs --tail="30" "{{ image }}_{{ app_name }}_{{ env_name }}"
+      when: "'{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''"
       register: output
     - debug: msg="{{ output }}"
       when: do_debug == True

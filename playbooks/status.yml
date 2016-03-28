@@ -4,10 +4,7 @@
   sudo: False
 
   vars:
-    - volume_home: ""
-    - image: ""
-    - env_name: ""
-    - do_debug: False
+    - do_debug: True
 
   vars_files:
     - ../roles/vars/base.yml
@@ -24,24 +21,39 @@
       register: checkout
     - debug: msg="{{ checkout }}"
       when: do_debug == True
-    
-    - name: Execute docker status with an name "{{ image }}" 
-      shell: docker ps -a -f name="{{ image }}" | tail -n +2
-      when: "'{{ image }}' != ''"
-      register: output
-    - debug: msg="{{ output }}"
-      when: do_debug == True
        
-    - name: Execute docker status with an name "{{ image }}_{{ env_name }}"
-      shell: docker ps -a -f name="{{ image }}_{{ env_name }}" | tail -n +2
-      when: "'{{ image }}' != '' and '{{ env_name }}' != ''"
-      register: output
-    - debug: msg="{{ output }}"
-      when: do_debug == True
+    - debug: msg="{{ image }}_{{ app_name }}_{{ env_name }}"
+      when: do_debug == True and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''
+    - name: Execute docker ps with an name "{{ image }}_{{ app_name }}_{{ env_name }}"
+      shell: docker ps -a -f name="{{ image }}_{{ app_name }}_{{ env_name }}"
+      when: "'{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''"
        
-    - name: Execute docker status
+    - debug: msg="{{ image }}_{{ app_name }}"
+      when: do_debug == True and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''
+    - name: Execute docker ps with an name "{{ image }}_{{ app_name }}"
+      shell: docker ps -a -f name="{{ image }}_{{ app_name }}"
+      when: "'{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''"
+       
+    - debug: msg="_{{ app_name }}"
+      when: do_debug == True and '{{ image }}' == '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''
+    - name: Execute docker ps with an name "_{{ app_name }}"
+      shell: docker ps -a -f name="_{{ app_name }}"
+      when: "'{{ image }}' == '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''"
+       
+    - debug: msg="{{ image }}_{{ env_name }}"
+      when: do_debug == True and '{{ image }}' != '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''
+    - name: Execute docker ps with an name "{{ image }}_{{ env_name }}"
+      shell: docker ps -a -f name="{{ image }}_{{ env_name }}"
+      when: "'{{ image }}' != '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''"
+       
+    - debug: msg="_{{ env_name }}"
+      when: do_debug == True and '{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''
+    - name: Execute docker ps with an name "_{{ env_name }}"
+      shell: docker ps -a -f name="_{{ env_name }}"
+      when: "'{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''"
+       
+    - debug: msg="Normal docker ps"
+      when: do_debug == True and '{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' == ''
+    - name: Execute docker ps
       shell: docker ps -a
-      when: "'{{ image }}' == '' and '{{ env_name }}' == ''"
-      register: output
-    - debug: msg="{{ output }}"
-      when: do_debug == True
+      when: "'{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' == ''"
