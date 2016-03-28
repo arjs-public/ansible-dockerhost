@@ -105,8 +105,10 @@
 
     - name: Check if "docker.io" is present
       shell: dpkg-query --list docker.io    
-    #   register: checkout
-    # - debug: msg="{{ checkout }}"
+      register: checkout
+    - debug: msg="{{ checkout }}"
+      when: do_debug == True
+    
     - name: Create "{{ image }}" docker image
       # docker_image:
       #  name: base
@@ -118,5 +120,6 @@
     
     - name: Execute docker images
       shell: docker images | grep "{{ image }}"
-    #   register: output
-    # - debug: msg="{{ output }}"
+      register: output
+    - debug: msg="{{ output }}"
+      when: do_debug == True

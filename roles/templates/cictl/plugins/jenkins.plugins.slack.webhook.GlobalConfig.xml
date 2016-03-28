@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jenkins.plugins.slack.webhook.GlobalConfig plugin="slack@2.0.1">
+  <slackOutgoingWebhookToken>{{ slack_team_token }}</slackOutgoingWebhookToken>
+  <slackOutgoingWebhookURL></slackOutgoingWebhookURL>
+</jenkins.plugins.slack.webhook.GlobalConfig>

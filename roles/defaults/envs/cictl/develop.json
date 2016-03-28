@@ -4,6 +4,7 @@
   "volume_home": "/extra/jenkins/develop",
   "volumes": ["/extra/jenkins/develop:/var/jenkins_home"],
   "env_name": "develop",
+  "mapped_server": "servix",
   "mapped_port": "8082",
   "db_redis_linkname": "servix",
   "db_redis_linkport": "9082",

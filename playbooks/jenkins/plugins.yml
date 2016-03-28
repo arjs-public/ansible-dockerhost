@@ -4,39 +4,49 @@
   sudo: False
 
   vars:
-    - base_folder: ../../..
+    - base_folder: ../..
+    - do_debug: False
 
   vars_files:
-    - "{{ base_folder }}/roles/dockerhost/vars/base.yml"
+    - "{{ base_folder }}/roles/vars/base.yml"
+    - "{{ base_folder }}/vars/group/{{ image }}.vault"
 
   pre_tasks:
-    # - include: '{{ tasks_base }}debug_info.yml'
+    - include: '{{ tasks_base }}debug_info.yml'
+      when: do_debug == True
+    - debug: msg="{{ lookup('pipe', 'ls -la ../../configs/.secrets/vpf.txt') }} is the raw result of running this command"
+      when: do_debug == True
 
     - include: '{{ tasks_base }}check_connection.yml'
 
     - include: '{{ tasks_base }}check_folders.yml'
+      when: do_debug == True
 
   tasks:
     - name: Create "{{ volume_home }}/plugins" folder
       file: dest="{{ volume_home }}/plugins" state=directory mode=0775
       register: checkout
       failed_when: checkout.state != "directory"
-    # - debug: vars=checkout msg="{{checkout}}"
+    - debug: vars=checkout msg="{{checkout}}"
+      when: do_debug == True
 
     - name: Check "{{ files_base }}{{ image }}/plugins.sh"
       file: path="{{ files_base }}{{ image }}/plugins.sh" state=file mode="u=rwx,g=rx,o=rx"
       register: checkout
       failed_when: checkout.state != "file"
-    # - debug: vars=checkout msg="{{checkout}}"
+    - debug: vars=checkout msg="{{checkout}}"
+      when: do_debug == True
 
     - name: Handle plugins
       command: bash -x "{{ files_base }}{{ image }}/plugins.sh" "{{ files_base }}{{ image }}/{{ item }}" "{{ volume_home }}/plugins"
       with_items: "{{ jenkins_extra_plugins }}"
       register: output
-    # - debug: vars=output msg="{{ output.msg }}"
+    - debug: vars=output msg="{{ output.msg }}"
+      when: do_debug == True
 
-    #- debug: vars=output msg="{{ item.stdout_lines }}"
-    #  with_items: "{{ output.results }}"
+    - debug: vars=output msg="{{ item.stdout_lines }}"
+      with_items: "{{ output.results }}"
+      when: do_debug == True
 
     - name: Process template for plugins
       template: src="{{ item }}" dest="{{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"

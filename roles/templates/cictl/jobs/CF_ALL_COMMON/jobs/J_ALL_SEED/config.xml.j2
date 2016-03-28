@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<project>
+    <actions/>
+    <description>Seed all standard {{ env_name | upper }} jobs.</description>
+    <displayName>ALL: Seed Jobs to Jenkins [C,1.0,M]</displayName>
+    <logRotator class="hudson.tasks.LogRotator">
+        <daysToKeep>30</daysToKeep>
+        <numToKeep>100</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+    </logRotator>
+    <keepDependencies>false</keepDependencies>
+    <properties>
+      <com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+        <optOut>false</optOut>
+      </com.chikli.hudson.plugin.naginator.NaginatorOptOutProperty>
+      <com.sonyericsson.rebuild.RebuildSettings>
+        <autoRebuild>false</autoRebuild>
+        <rebuildDisabled>true</rebuildDisabled>
+      </com.sonyericsson.rebuild.RebuildSettings>
+    </properties>
+    <scm class="hudson.plugins.git.GitSCM">
+        <configVersion>2</configVersion>
+        <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+                <url>{{ dsl_job_git_url }}</url>
+                <credentialsId>{{ dsl_job_git_key }}</credentialsId>
+            </hudson.plugins.git.UserRemoteConfig>
+        </userRemoteConfigs>
+        <branches>
+            <hudson.plugins.git.BranchSpec>
+                <name>*/master</name>
+            </hudson.plugins.git.BranchSpec>
+        </branches>
+        <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+        <submoduleCfg class="list"/>
+        <extensions>
+            <hudson.plugins.git.extensions.impl.SparseCheckoutPaths>
+                <sparseCheckoutPaths>
+                    <hudson.plugins.git.extensions.impl.SparseCheckoutPath>
+                        <path>dsl/{{ image }}</path>
+                    </hudson.plugins.git.extensions.impl.SparseCheckoutPath>
+                </sparseCheckoutPaths>
+            </hudson.plugins.git.extensions.impl.SparseCheckoutPaths>
+        </extensions>
+    </scm>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers/>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <javaposse.jobdsl.plugin.ExecuteDslScripts>
+            <targets>dsl/{{ image }}/dsl/**/*.groovy</targets>
+            <usingScriptText>false</usingScriptText>
+            <ignoreExisting>false</ignoreExisting>
+            <removedJobAction>DISABLE</removedJobAction>
+            <removedViewAction>DELETE</removedViewAction>
+            <lookupStrategy>JENKINS_ROOT</lookupStrategy>
+            <additionalClasspath>dsl/{{ image }}/src/main/groovy/</additionalClasspath>
+        </javaposse.jobdsl.plugin.ExecuteDslScripts>
+    </builders>
+    <publishers>
+        <jenkins.plugins.logstash.LogstashNotifier>
+            <maxLines>1000</maxLines>
+            <failBuild>false</failBuild>
+        </jenkins.plugins.logstash.LogstashNotifier>
+    </publishers>
+    <buildWrappers>
+        <hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+            <colorMapName>xterm</colorMapName>
+        </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+        <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>
+            <template>${GIT_BRANCH}/${GIT_REVISION, length=8}</template>
+        </org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>
+        <hudson.plugins.timestamper.TimestamperBuildWrapper/>
+    </buildWrappers>
+</project>
