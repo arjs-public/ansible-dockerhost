@@ -6,8 +6,10 @@ icon.png
 **/id_rsa.pub
 **/stmp.conf
 **/smtp.conf
-**/*.swp
 **/*.pyc
+**/*.swp
+**/*.tmp
+**/*.retry
 .vscode
 configs/.secrets/**
 bin/**
