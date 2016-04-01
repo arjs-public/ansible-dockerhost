@@ -10,10 +10,12 @@ volumes: []
 image_path: ~/docker/
 local_base: '.'
 global_files_base: '{{ local_base | realpath }}/files/'
+global_templates_base: '{{ local_base | realpath }}/templates/'
 roles_base: '{{ local_base | realpath }}/roles/'
-config_base: '{{ roles_base }}defaults/envs/'
-files_base: '{{ roles_base }}files/'
-tasks_base: '{{ roles_base }}tasks/'
+config_base: '{{ roles_base | realpath }}/defaults/envs/'
+files_base: '{{ roles_base | realpath }}/files/'
+tasks_base: '{{ roles_base | realpath }}/tasks/'
+templates_base: '{{ roles_base | realpath }}/templates/'
 extra_base: /extra
 jenkins_base: '{{ extra_base }}/jenkins'
 data_base: '{{ extra_base }}/data'
