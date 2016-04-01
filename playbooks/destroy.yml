@@ -28,6 +28,8 @@
 
     - include: '{{ tasks_base }}remove.yml'
 
+    - debug: msg="Delete {{ volume_home }} {{ clean_up }}"
+      when: do_debug == True
     - name: Delete "{{ volume_home }}" folder
       file: dest="{{ volume_home }}" state=absent
       register: checkout
