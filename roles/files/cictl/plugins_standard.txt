@@ -7,7 +7,7 @@ javadoc:latest
 junit:latest
 ldap:latest
 mailer:latest
-matrix-auth:latest
+matrix-auth:1.3
 matrix-project:latest
 maven-plugin:latest
 pam-auth:latest
