@@ -2,6 +2,7 @@
 - name: Create/Delete/Disable plugins for an instance
   hosts: dockerhost
   sudo: False
+  gather_facts: no
 
   vars:
     - base_folder: ../..
@@ -23,33 +24,46 @@
       when: do_debug == True
 
   tasks:
+    - name: Copy "{{ image }}" docker file to localhost
+      synchronize:
+        src: "{{ files_base }}{{ image }}/"
+        dest: "{{ image_path }}{{ image }}/"
+        delete: yes
+        rsync_opts:
+            - "--no-motd"
+            - "--exclude='**/*.DS_Store'"
+
+
     - name: Create "{{ volume_home }}/plugins" folder
       file: dest="{{ volume_home }}/plugins" state=directory mode=0775
       register: checkout
       failed_when: checkout.state != "directory"
-    - debug: vars=checkout msg="{{checkout}}"
+    - debug: msg="{{checkout}}"
       when: do_debug == True
 
-    - name: Check "{{ files_base }}{{ image }}/plugins.sh"
-      file: path="{{ files_base }}{{ image }}/plugins.sh" state=file mode="u=rwx,g=rx,o=rx"
+    - name: Check "{{ image_path }}{{ image }}/plugins.sh"
+      file: path="{{ image_path }}{{ image }}/plugins.sh" state=file mode="0755"
       register: checkout
       failed_when: checkout.state != "file"
-    - debug: vars=checkout msg="{{checkout}}"
+    - debug: msg="{{checkout}}"
       when: do_debug == True
 
     - name: Handle plugins
-      command: bash -x "{{ files_base }}{{ image }}/plugins.sh" "{{ files_base }}{{ image }}/{{ item }}" "{{ volume_home }}/plugins"
+      shell: "{{ image_path }}{{ image }}/plugins.sh {{ image_path }}{{ image }}/{{ item }} {{ volume_home }}/plugins"
       with_items: "{{ jenkins_extra_plugins }}"
       register: output
-    - debug: vars=output msg="{{ output.msg }}"
+    - debug: msg="{{ output.msg }}"
       when: do_debug == True
 
-    - debug: vars=output msg="{{ item.stdout_lines }}"
-      with_items: "{{ output.results }}"
+    - name: Check "{{ image_path }}{{ image }}"
+      file: path="{{ image_path }}{{ image }}" state=directory
+      register: checkout
+      failed_when: checkout.state != "directory"
+    - debug: msg="{{checkout}}"
       when: do_debug == True
 
     - name: Process template for plugins
       template: src="{{ item }}" dest="{{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
-      #debug: vars="{{ item }}" msg="{{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+      #debug: msg="{{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
       with_fileglob:
-        - "{{ files_base }}{{ image }}/jenkins/plugins/*.j2"
+        - "{{ templates_base }}{{ image }}/plugins/*.j2"

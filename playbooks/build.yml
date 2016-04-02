@@ -16,6 +16,12 @@
     - include: '{{ tasks_base }}check_connection.yml'
 
   tasks:
+    - name: Check directory "{{ image_path }}" and delete if found
+      file: path="{{ image_path }}" state=absent
+      register: checkout
+      failed_when: checkout.state != 'absent'
+    - debug: msg="{{ checkout }}"
+      when: do_debug == True
     - name: Check directory "{{ image_path }}" and create if not found
       file: dest="{{ image_path }}" state=directory
       register: checkout
@@ -26,7 +32,6 @@
       synchronize:
         src: "{{ files_base }}{{ image }}/"
         dest: "{{ image_path }}{{ image }}/"
-        copy_links: yes
         delete: yes
         rsync_opts:
             - "--no-motd"
