@@ -205,7 +205,7 @@ appname: starting verify execute ending
 
 verify_env:
 ifndef ENV
-	$(eval ENV=develop")
+	$(eval ENV=develop)
 endif
 	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
 	$(info [Info] Use environment: $(ENV))
@@ -286,11 +286,13 @@ startup_doing: verify_infra
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo "[Info]  Booting $$l ..."; \
+		make APP=$$l ENV=$(ENV) setup; \
 		make APP=$$l ENV=$(ENV) boot; \
 		echo; \
 	done
 
-startup: starting verify_infra startup_doing do_status ending
+startup: PLAYBOOK=startup
+startup: starting verify_infra verify_env startup_doing do_status ending
 
 
 teardown_dowing: verify_infra
@@ -302,7 +304,7 @@ teardown_dowing: verify_infra
 		echo; \
 	done
 
-teardown: starting verify_infra teardown_dowing do_status ending
+teardown: starting verify_env verify_infra teardown_dowing do_status ending
 
 
 construct_doing:
@@ -327,7 +329,7 @@ cleanup_doing:
 	done
 
 cleanup: DELETE=false
-cleanup: starting verify_infra cleanup_doing do_status ending
+cleanup: starting verify_env verify_infra cleanup_doing do_status ending
 
 
 list:
