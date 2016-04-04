@@ -38,14 +38,14 @@
       file: dest="{{ volume_home }}/plugins" state=directory mode=0775
       register: checkout
       failed_when: checkout.state != "directory"
-    - debug: msg="{{checkout}}"
+    - debug: msg="{{ checkout }}"
       when: do_debug == True
 
     - name: Check "{{ image_path }}{{ image }}/plugins.sh"
       file: path="{{ image_path }}{{ image }}/plugins.sh" state=file mode="0755"
       register: checkout
       failed_when: checkout.state != "file"
-    - debug: msg="{{checkout}}"
+    - debug: msg="{{ checkout }}"
       when: do_debug == True
 
     - name: Handle plugins
@@ -59,9 +59,13 @@
       file: path="{{ image_path }}{{ image }}" state=directory
       register: checkout
       failed_when: checkout.state != "directory"
-    - debug: msg="{{checkout}}"
+    - debug: msg="{{ checkout }}"
       when: do_debug == True
 
+    - debug: msg="{{ item }}"
+      when: do_debug == True
+      with_fileglob:
+        - "{{ templates_base }}{{ image }}/plugins/*.j2"
     - name: Process template for plugins
       template: src="{{ item }}" dest="{{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
       #debug: msg="{{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
