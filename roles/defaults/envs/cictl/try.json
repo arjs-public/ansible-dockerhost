@@ -1,9 +1,15 @@
 {
-  "container_name": "ci_try",
+  "container_name": "cictl_try",
   "ports": ["8085:8080"],
+  "volume_home": "/extra/jenkins/try",
   "volumes": ["/extra/jenkins/try:/var/jenkins_home"],
   "links": "cidb_try:redis",
   "env_name": "try",
+  "mapped_server": "servix",
+  "mapped_port": "8085",
+  "db_redis_linkname": "servix",
+  "db_redis_linkport": "9085",
+  "dsl_job_git_url": "git@github.com:arjs-public/jenkins-jobs.git",
   "has_custom_command": false,
   "jenkins_extra_plugins": ["plugins.ini"]
 }
