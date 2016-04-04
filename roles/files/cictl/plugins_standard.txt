@@ -1,5 +1,5 @@
-antisamy-markup-formatter:latest
 ant:latest
+antisamy-markup-formatter:latest
 credentials:latest
 cvs:latest
 external-monitor-job:latest
