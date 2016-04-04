@@ -1,21 +1,21 @@
 ---
 - name: Check directory "{{ config_base }}"
-	file: dest={{ config_base }} state=directory
-	register: checkout
-	failed_when: checkout.state != "directory"
+  file: dest={{ config_base }} state=directory
+  register: checkout
+  failed_when: checkout.state != "directory"
 - debug: msg="{{checkout}}"
-	when: do_debug == True
+  when: do_debug == True
 
 - debug: msg="conditional {{ volume_home }}"
-	when: do_debug == True and volume_home != ""
+  when: do_debug == True and volume_home != ""
 - name: Check "{{ volume_home }}" folder and create if not exists
-	file: dest="{{ volume_home }}" state=directory mode=0775
-	register: checkout
-	failed_when: checkout.state != "directory"
-	when: volume_home != ""
+  file: dest="{{ volume_home }}" state=directory mode=0775
+  register: checkout
+  failed_when: checkout.state != "directory"
+  when: volume_home != ""
 - debug: msg="{{checkout}}"
-	when: do_debug == True
+  when: do_debug == True
 
 - name: Info about unset "{{ volume_home }}" folder variable
-	debug: msg="[echo] Variable 'volume_home' not set, hence creation was skipped."
-	when: do_debug == True and volume_home == ""
+  debug: msg="[echo] Variable 'volume_home' not set, hence creation was skipped."
+  when: do_debug == True and volume_home == ""
