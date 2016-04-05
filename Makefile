@@ -22,7 +22,7 @@ TAG_D = $(BASE_D)/roles/files
 CNFG_D = $(BASE_D)/roles/defaults
 FILES_D = $(BASE_D)/roles/files
 TEMPLATES_D = $(BASE_D)/roles/templates
-$(eval ANSIBLE_CFG=$(shell netstat -all | grep 6379 > /dev/null && echo redis || echo default))
+$(eval ANSIBLE_CFG=$(shell netstat -all | grep ' 6379 ' > /dev/null && echo redis || echo default))
 # $(info [Info] Use ANSIBLE_CFG: $(ANSIBLE_CFG))
 A_CFG = $(BASE_D)/configs/$(ANSIBLE_CFG).cfg
 VPF_FILE = configs/.secrets/vpf.txt
@@ -36,10 +36,10 @@ ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),)
  CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json"
  endif
 else
-CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"
+ CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"
 endif
 ifneq ($(wildcard $(VPF_FILE)),)
-CONFIGS += --vault-password-file ./$(VPF_FILE)
+ CONFIGS += --vault-password-file ./$(VPF_FILE)
 endif
 
 # --------- Rules
