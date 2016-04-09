@@ -1,0 +1,11 @@
+{
+  "container_name": "{{ image }}_{{ appname }}_{{ env_name }}",
+  "ports": ["{{ port_www_pre }}{{ port }}:80", "{{ port_wwws_pre }}{{ port }}:443"],
+  "volume_home": "{{ www_site_base }}/{{ appname }}/{{ env_name }}",
+  "volumes": ["{{ www_site_base }}/{{ appname }}/{{ env_name }}:/var/www/html"],
+  "links": [],
+  "app_name": "{{ appname }}",
+  "env_name": "{{ env_name }}",
+  "has_custom_command": false,
+  "command": ""
+}

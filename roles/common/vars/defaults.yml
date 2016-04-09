@@ -1,0 +1,22 @@
+---
+container_name: base
+ports: []
+volumes: []
+image: ""
+app_name: ""
+env_name: ""
+volume_home: ""
+local_base: '.'
+extra_base: /extra
+image_path: ~/docker/
+ansible_python_interpreter: python
+global_folder: '{{ local_base | realpath }}/'
+global_vars_base: '{{ global_folder }}vars/'
+global_files_base: '{{ global_folder }}files/'
+global_templates_base: '{{ global_folder }}templates/'
+global_roles_base: '{{ global_folder }}roles/'
+common_folder: '{{ global_roles_base }}common/'
+common_config_base: '{{ common_folder }}defaults/'
+common_files_base: '{{ common_folder }}files/'
+common_tasks_base: '{{ common_folder }}tasks/'
+common_templates_base: '{{ common_folder }}templates/'

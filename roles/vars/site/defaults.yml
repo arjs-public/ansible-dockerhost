@@ -1,4 +1,0 @@
----
-site_default_path: /etc/nginx/sites-available
-files_static: ../files/app/static
-nginx_html_path: /var/www/html
