@@ -1,0 +1,29 @@
+---
+- name: WWW | Deploy websites
+  hosts: "{{ host }}"
+  gather_facts: no
+  sudo: no
+
+  vars:
+    - do_debug: False
+    - do_check_folders: False
+    - do_check_connection: False
+    - base_folder: ../..
+
+  vars_files:
+    - "{{ base_folder }}/roles/common/vars/defaults.yml"
+    - "{{ base_folder }}/roles/site/vars/defaults.yml"
+
+  pre_tasks:
+    - include: '{{ common_tasks_base }}/debug.yml'
+      when: do_debug|bool
+
+    - include: '{{ common_tasks_base }}check_connection.yml'
+      when: do_check_connection|bool
+
+    - include: '{{ common_tasks_base }}check_folders.yml'
+      when: do_check_folders|bool
+
+  tasks:
+    - debug: msg="{{ checkout }}"
+      when: do_debug|bool and checkout is defined

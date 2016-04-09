@@ -11,6 +11,7 @@ extra_base: /extra
 image_path: ~/docker/
 ansible_python_interpreter: python
 global_folder: '{{ local_base | realpath }}/'
+global_inventory: '{{ local_base | realpath }}/inventory/inventory'
 global_vars_base: '{{ global_folder }}vars/'
 global_files_base: '{{ global_folder }}files/'
 global_templates_base: '{{ global_folder }}templates/'

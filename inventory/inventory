@@ -8,4 +8,4 @@ servix
 servix
 
 [sites]
-alex.v2.arjs.net ansible_ssh_host=172.17.0.23 ansible_ssh_user=root
+try.v2.arjs.net ansible_ssh_host=ip

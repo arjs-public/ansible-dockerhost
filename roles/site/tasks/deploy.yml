@@ -1,49 +1,34 @@
 ---
 - name: CONTENT | Prepare special nginx config
-  copy: src="{{ files_base }}/{{ image }}/default" dest="{{ site_default_path }}/default" mode=644
-  register: output
-  failed_when: output.state != "file"
+  copy: src="{{ files_base }}/default" dest="{{ site_default_path }}/default" mode=644
+  register: checkout
+  failed_when: checkout.state != "file"
   tags: CONTENT
-- debug: msg="{{ output }}"
+- debug: msg="{{ checkout }}"
+  when: do_debug|bool and checkout is defined
 
 - name: CONTENT | Cleanup content
   file: dest="{{ nginx_html_path }}/{{ item }}" state=absent
   with_items:
   - index.html
   - offline.html
-#  - styles
-#  - images
-  register: output
-  failed_when: output.state != "absent"
+  register: checkout
+  failed_when: checkout.state != "absent"
   tags: CONTENT
-  
-#- name: CONTENT | Prepare content
-#  file: dest="{{ nginx_html_path }}/{{ item }}" state=directory mode=755
-#  with_items:
-#  - styles
-#  - images
-#  register: output
-#  failed_when: output.state != "directory"
-#  tags: CONTENT
-
-#- name: CONTENT | Syncronize files
-#  copy: 
-#    src:  "{{ files_static }}/{{ item }}" 
-#    dest: "{{ nginx_html_path }}/" 
-#  with_items:
-#  - styles
-#  - images
-#  tags: CONTENT
+- debug: msg="{{ checkout }}"
+  when: do_debug|bool and checkout is defined
 
 - name: CONTENT | Prepare default "{{ item }}"
-  template: src="{{ roles_base }}templates/{{ image }}/{{ item }}" dest="{{ nginx_html_path }}/{{ item }}" mode=644
+  template: src="{{ templates_base }}/{{ item }}" dest="{{ nginx_html_path }}/{{ item }}" mode=644
   #debug: msg="{{ item }}"
-  register: output
+  register: checkout
   with_items:
-    - index.html
-    - offline.html
-  failed_when: output.state != "file"
+  - index.html
+  - offline.html
+  failed_when: checkout.state != "file"
   tags: CONTENT
+- debug: msg="{{ checkout }}"
+  when: do_debug|bool and checkout is defined
 
 - name: CONTENT | Starting NGINX
   service:
@@ -53,15 +38,17 @@
 
 - name: CONTENT | Check
   local_action: uri url=http://{{ ansible_eth0["ipv4"]["address"] }}
-  register: output
-  failed_when: output.status != 200
+  register: checkout
+  failed_when: checkout.status != 200
   tags: CONTENT
-#- debug: vars=output msg="{{ output.status }}"
+- debug: msg="{{ checkout }}"
+  when: do_debug|bool and checkout is defined
 
 - name: CONTENT | Check offline.html
   local_action: uri url=http://{{ ansible_eth0["ipv4"]["address"] }}/offline.html
-  register: output
-  failed_when: output.status != 200
+  register: checkout
+  failed_when: checkout.status != 200
   tags: CONTENT
-#- debug: vars=output msg="{{ output.status }}"
+- debug: msg="{{ checkout }}"
+  when: do_debug|bool and checkout is defined
 
