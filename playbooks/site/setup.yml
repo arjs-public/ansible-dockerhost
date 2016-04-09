@@ -42,4 +42,8 @@
       - "{{ volume_home }}/{{ image }}/{{ env_name }}"
       - "{{ volume_home }}/{{ image }}/{{ env_name }}/{{ site_name }}"
     - debug: msg="{{ checkout }}"
-      when: checkout is defined
+      when: do_debug|bool and checkout is defined
+
+    - name: SITE | Install standard ngnix and custom content
+      include: "{{ tasks_base }}main.yml"
+      become: yes
