@@ -1,7 +1,0 @@
----
-    - name: Check connection
-      shell: echo "Ok!"
-      register: echout
-
-    - fail: msg="[echo] {{ echout.stdout }}"
-      when: echout.stdout != "Ok!"
