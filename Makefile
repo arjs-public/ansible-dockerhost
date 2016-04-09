@@ -18,8 +18,8 @@ PLUGIN_F = plugins.ini
 APP_F = app.py
 $(eval BASE_D=$(shell pwd))
 # $(info [Info] Use BASE_D: $(BASE_D))
-PB_D = $(BASE_D)/playbooks
-PB_D = $(if $(IMG),$(BASE_D)/playbooks/$(IMG),$(BASE_D)/playbooks)
+PB_D_B = $(BASE_D)/playbooks
+PB_D = $(if $(IMG),$(PB_D_B)/$(IMG),$(PB_D_B))
 CNFG_D = $(if $(IMG),$(BASE_D)/roles/$(IMG)/defaults,$(BASE_D)/roles/defaults)
 TAG_D = $(BASE_D)/roles/files
 FILES_D = $(BASE_D)/roles/files
@@ -59,7 +59,7 @@ help:
 	$(info [Info] * make INFRA=<infra name from list> construct)
 	$(info [Info] * make INFRA=<infra name from list> [DELETE=true|*false ***?] cleanup)
 	$(info [Info] * make ENV=<Environment name> *? [IMG=<appgroup> 5*?] [NAME=<appname> 6*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete))
-	$(info [Info] * make TAG=<Dockerfile folder> build)
+	$(info [Info] * make IMG=<image to use> build)
 	$(info [Info] * make IMG=<image from dockerhub> fetch)
 	$(info [Info] * make IMG=<image from images> *? destroyi)
 	$(info [Info] * make ping | status | images | list | wipeout ****?)
@@ -99,6 +99,7 @@ verify_var_img:
 	@test "$(IMG)" && test -d "$(CNFG_D)/envs/" || (echo "[Error] IMG not set or IMG folder not found! ($(CNFG_D)/envs/)" && exit 1)
 	$(eval APPIMG=-e "image=$(IMG)")
 	$(info [Info] Use image extra: $(APPIMG))
+	$(info [Info])
 
 verify_var_name:
 ifndef NAME
@@ -109,39 +110,37 @@ else
 	$(eval APNEXTRA=-e "app_name=$(NAME)")
 	$(info [Info] Use application name extra: $(APNEXTRA))
 endif
+	$(info [Info])
 
-verify_env:
+verify_var_env:
 	$(if $(ENV),,$(call try))
 	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
 	$(info [Info] Use environment: $(ENV))
 	$(info [Info] Use environment extra: $(ENVNAME))
+	$(info [Info])
 
 verify_port:
 	@test "$(PORT)" || (echo "[Error] PORT not set!" && exit 1)
 	$(info [Info] Use port: $(PORT))
+	$(info [Info])
 
-verify_extra:
+verify_extra1:
 ifdef NAME
 	$(eval APNEXTRA=-e "app_name=$(NAME)")
 endif
 
-verify: verify_var_img verify_var_name verify_extra
-	$(info [Info])
+verify: verify_var_img verify_var_name verify_var_name
 
 # -------- Playbook handling
 
-define set_playbook
-	$(eval PLAYBOOK=unkown)
-endef
-
 set_playbook:
 	$(if $(PLAYBOOK),,$(eval PLAYBOOK=main))
-	$(info [Info] Using Playbook: $(PB_D)/$(PLAYBOOK).yml ...)	
+	$(eval PLAYBOOKPATH = $(if $(wildcard $(PB_D)/$(PLAYBOOK).yml),$(PB_D)/$(PLAYBOOK).yml,$(PB_D_B)/$(PLAYBOOK).yml))
+	$(info [Info] Using Playbook: $(PLAYBOOKPATH) ...)	
 
 verify_playbook:
-	$(info [Info] Verify playbook $(PB_D)/$(PLAYBOOK).yml ...)
-	$(eval PLAYBOOKPATH=$(PB_D)/$(PLAYBOOK).yml)
-	@test -f $(PLAYBOOKPATH) && echo "[Info] Found playbook $(PB_D)/$(PLAYBOOK).yml ..." || (echo "[Error] No playbook found!" && exit 1)
+	$(info [Info] Verify playbook $(PLAYBOOKPATH) ...)
+	@test -f $(PLAYBOOKPATH) && echo "[Info] Found playbook $(PLAYBOOKPATH) ..." || (echo "[Error] No playbook found!" && exit 1)
 
 execute_playbook: 
 	$(info [Info])
@@ -206,6 +205,7 @@ develop:
 
 # -------- Instance handling
 
+setup: PLAYBOOK=setup
 setup: verify extras execute ending 
 
 boot: PLAYBOOK=boot
@@ -232,7 +232,7 @@ do_status:
 	@make IMG=$(IMG) ENV=$(ENV) NAME=$(NAME) status
 
 status: PLAYBOOK=status
-status: starting verify_img verify_env execute ending
+status: starting verify_img verify_var_env execute ending
 
 # -------- Jenkins handling
 
@@ -253,24 +253,19 @@ appname: starting verify execute ending
 create: ENV=
 create: PLAYBOOK=create
 create: EXTRAS += -e "env_name=$(ENV)" -e "port=$(PORT)"
-create: starting verify_env verify_port verify_img verify_extra execute ending
+create: starting verify_var_env verify_port verify_img verify_extra execute ending
 
 delete: ENV=
 delete: DELETE=false
 delete: PLAYBOOK=delete
 delete: EXTRAS += -e "env_name=$(ENV)"
 delete: EXTRAS += -e "clean_up=$(DELETE)"
-delete: starting verify_env verify_img verify_extra execute ending
+delete: starting verify_var_env verify_img verify_extra execute ending
 
 # -------- Image handling
 
-verify_tag:
-	$(eval IMG=$(TAG))
-	@test "$(IMG)" && test -d $(TAG_D)/$(TAG)/ || (echo "[Error] TAG not set or TAG folder not found! ($(TAG_D)/$(TAG)/)" && exit 1)
-	$(eval APPIMG=-e "image=$(IMG)")
-
 build: PLAYBOOK=build
-build: starting verify_tag execute ending
+build: verify_var_img execute ending
 
 
 filter_img:
@@ -312,7 +307,7 @@ startup_doing: verify_infra
 	done
 
 startup: PLAYBOOK=startup
-startup: starting verify_infra verify_env startup_doing do_status ending
+startup: starting verify_infra verify_var_env startup_doing do_status ending
 
 
 teardown_dowing: verify_infra
@@ -324,7 +319,7 @@ teardown_dowing: verify_infra
 		echo; \
 	done
 
-teardown: starting verify_env verify_infra teardown_dowing do_status ending
+teardown: starting verify_var_env verify_infra teardown_dowing do_status ending
 
 
 construct_doing:
@@ -349,7 +344,7 @@ cleanup_doing:
 	done
 
 cleanup: DELETE=false
-cleanup: starting verify_env verify_infra cleanup_doing do_status ending
+cleanup: starting verify_var_env verify_infra cleanup_doing do_status ending
 
 
 list:

@@ -5,7 +5,7 @@
   sudo: no
 
   vars:
-    - do_debug: True
+    - do_debug: False
     - do_check_folders: False
     - do_check_connection: False
     - base_folder: ../..
