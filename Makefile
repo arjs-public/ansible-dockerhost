@@ -3,6 +3,7 @@
 #
 
 .PHONY: help list status create delete ping
+.PHONY: try develop test stage production
 .PHONY: boot shutdown destroy stats destroy plugins configs setup
 .PHONY: images fetch destroyi
 .PHONY: startup teardown construct cleanup wipeout
@@ -18,8 +19,9 @@ APP_F = app.py
 $(eval BASE_D=$(shell pwd))
 # $(info [Info] Use BASE_D: $(BASE_D))
 PB_D = $(BASE_D)/playbooks
+PB_D = $(if $(IMG),$(BASE_D)/playbooks/$(IMG),$(BASE_D)/playbooks)
+CNFG_D = $(if $(IMG),$(BASE_D)/roles/$(IMG)/defaults,$(BASE_D)/roles/defaults)
 TAG_D = $(BASE_D)/roles/files
-CNFG_D = $(BASE_D)/roles/defaults
 FILES_D = $(BASE_D)/roles/files
 TEMPLATES_D = $(BASE_D)/roles/templates
 $(eval ANSIBLE_CFG=$(shell netstat -all | grep ' 6379 ' > /dev/null && echo redis || echo default))
@@ -29,14 +31,14 @@ VPF_FILE = configs/.secrets/vpf.txt
 # $(info [Info] Use A_CFG: $(A_CFG))
 INVENTORY = $(BASE_D)/inventory/inventory
 
-ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),)
- ifeq ($(wildcard $(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json),)
+ifeq ($(wildcard $(CNFG_D)/envs/$(IMG)/$(ENV).json),)
+ ifeq ($(wildcard $(CNFG_D)/envs/$(IMG)/$(NAME)/$(ENV).json),)
  CONFIGS =
  else
- CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json"
+ CONFIGS = -e "@$(CNFG_D)/envs/$(IMG)/$(NAME)/$(ENV).json"
  endif
 else
- CONFIGS = -e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"
+ CONFIGS = -e "@$(CNFG_D)/envs/$(IMG)/$(ENV).json"
 endif
 ifneq ($(wildcard $(VPF_FILE)),)
  CONFIGS += --vault-password-file ./$(VPF_FILE)
@@ -47,16 +49,16 @@ endif
 help:
 	$(info [Info] -- Help ---------)
 	$(info [Info] )
-	$(info [Info] * make APP=<app folder> *? [ENV=<environment> *?] [APN=<appname> 6*?] [EXTRAS=<ansible-playbook params>] setup)
-	$(info [Info] * make APP=<app folder> *? [ENV=<environment> *?] [APN=<appname> 6*?] [EXTRAS=<ansible-playbook params>] boot)
-	$(info [Info] * make APP=<app folder> *? [ENV=<environment> *?] [APN=<appname> 6*?] shutdown)
-	$(info [Info] * make APP=<app folder> *? [ENV=<environment> *?] [APN=<appname> 6*?] [DELETE=true|*false ***?] destroy)
-	$(info [Info] * make APP=<app folder> *? [ENV=<environment> *?] [APN=<appname> 6*?] stats)
+	$(info [Info] * make IMG=<image to use> *? [ENV=<environment> *?] [NAME=<appname> 6*?] [EXTRAS=<ansible-playbook params>] setup)
+	$(info [Info] * make IMG=<image to use> *? [ENV=<environment> *?] [NAME=<appname> 6*?] [EXTRAS=<ansible-playbook params>] boot)
+	$(info [Info] * make IMG=<image to use> *? [ENV=<environment> *?] [NAME=<appname> 6*?] shutdown)
+	$(info [Info] * make IMG=<image to use> *? [ENV=<environment> *?] [NAME=<appname> 6*?] [DELETE=true|*false ***?] destroy)
+	$(info [Info] * make IMG=<image to use> *? [ENV=<environment> *?] [NAME=<appname> 6*?] stats)
 	$(info [Info] * make INFRA=<infra name from list> [ENV=<environment> *?] startup)
 	$(info [Info] * make INFRA=<infra name from list> teardown)
 	$(info [Info] * make INFRA=<infra name from list> construct)
 	$(info [Info] * make INFRA=<infra name from list> [DELETE=true|*false ***?] cleanup)
-	$(info [Info] * make ENV=<Environment name> *? [APP=<appgroup> 5*?] [APN=<appname> 6*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete))
+	$(info [Info] * make ENV=<Environment name> *? [IMG=<appgroup> 5*?] [NAME=<appname> 6*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete))
 	$(info [Info] * make TAG=<Dockerfile folder> build)
 	$(info [Info] * make IMG=<image from dockerhub> fetch)
 	$(info [Info] * make IMG=<image from images> *? destroyi)
@@ -66,8 +68,8 @@ help:
 	$(info [Info] **? Port extension to use with normal prefix 80 or db prefix 90; e.g. normal (80) + extenison (85) = port (8085))
 	$(info [Info] ***? Very dangerous, since deletes all associated folders on 'dockerhost')
 	$(info [Info] ****? Very dangerous, since it kills all docker containers on 'dockerhost')
-	$(info [Info] *****? APP empty means ENV Environment in all Applications; APP set, means ENV Environment for specific Application)
-	$(info [Info] ******? APN needed for app image)
+	$(info [Info] *****? IMG empty means ENV Environment in all Applications; IMG set, means ENV Environment for specific Application)
+	$(info [Info] ******? NAME needed for special image)
 	$(info [Info] )
 	$(info [Info] -- Defaults ---------)
 	$(info [Info] * ENV = $(ENV))
@@ -89,76 +91,122 @@ ending:
 	$(info [Info] Finsihed $(PLAYBOOK))
 	$(info [Info])
 
+# -------- Verify handling
+
+verify_var_img:
+	@test "$(IMG)" || (echo "[Error] IMG not set!" && exit 1)
+	$(info [Info] Use image: $(IMG))
+	@test "$(IMG)" && test -d "$(CNFG_D)/envs/" || (echo "[Error] IMG not set or IMG folder not found! ($(CNFG_D)/envs/)" && exit 1)
+	$(eval APPIMG=-e "image=$(IMG)")
+	$(info [Info] Use image extra: $(APPIMG))
+
+verify_var_name:
+ifndef NAME
+	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(IMG)/$(ENV).json || (echo "[Error] ENV not set or ENV json not found! ($(CNFG_D)/envs/$(IMG)/$(ENV).json))" && exit 1)
+else
+	$(info [Info] Use application name: $(NAME))
+	@test "$(NAME)" && test "$(ENV)" && test -s $(CNFG_D)/envs/$(NAME)/$(ENV).json || (echo "[Error] NAME or ENV not set or IMG/ENV json not found! ($(CNFG_D)/envs/$(IMG)/$(NAME)/$(ENV).json))" && exit 1)
+	$(eval APNEXTRA=-e "app_name=$(NAME)")
+	$(info [Info] Use application name extra: $(APNEXTRA))
+endif
+
+verify_env:
+	$(if $(ENV),,$(call try))
+	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
+	$(info [Info] Use environment: $(ENV))
+	$(info [Info] Use environment extra: $(ENVNAME))
+
+verify_port:
+	@test "$(PORT)" || (echo "[Error] PORT not set!" && exit 1)
+	$(info [Info] Use port: $(PORT))
+
+verify_extra:
+ifdef NAME
+	$(eval APNEXTRA=-e "app_name=$(NAME)")
+endif
+
+verify: verify_var_img verify_var_name verify_extra
+	$(info [Info])
+
 # -------- Playbook handling
+
+define set_playbook
+	$(eval PLAYBOOK=unkown)
+endef
+
+set_playbook:
+	$(if $(PLAYBOOK),,$(eval PLAYBOOK=main))
+	$(info [Info] Using Playbook: $(PB_D)/$(PLAYBOOK).yml ...)	
 
 verify_playbook:
 	$(info [Info] Verify playbook $(PB_D)/$(PLAYBOOK).yml ...)
 	$(eval PLAYBOOKPATH=$(PB_D)/$(PLAYBOOK).yml)
 	@test -f $(PLAYBOOKPATH) && echo "[Info] Found playbook $(PB_D)/$(PLAYBOOK).yml ..." || (echo "[Error] No playbook found!" && exit 1)
 
-execute: verify_playbook
+execute_playbook: 
 	$(info [Info])
 	$(info [Info] Execute playbook '$(PLAYBOOK)' ...)
 
+execute: set_playbook verify_playbook execute_playbook
+	$(info [Info])
+
 ifeq ($(wildcard $(A_CFG)),)
-	@echo "[Info] Not executed: ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(ENVNAME) $(CONFIGS) $(EXTRAS)
+	@echo "[Info] Not executed: ansible-playbook $(PLAYBOOKPATH) $(CONFIGS) $(APPIMG) $(ENVNAME) $(EXTRAS) $(APNEXTRA)
 	exit 1
 else
-	@ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(APPIMG) $(ENVNAME) $(CONFIGS) $(EXTRAS) $(APNEXTRA)
+	@ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(CONFIGS) $(APPIMG) $(ENVNAME) $(EXTRAS) $(APNEXTRA)
 endif
-	$(info [Info])
-
-# -------- Verify handling
-
-verify_var_app:
-	$(info [Info])
-	$(info [Info] Use application: $(APP))
-	@test "$(APP)" && test -d "$(CNFG_D)/envs/$(APP)/" || (echo "[Error] APP not set or APP folder not found! ($(CNFG_D)/envs/$(APP)/)" && exit 1)
-
-verify_var_apn:
-ifndef APN
-	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(ENV).json || (echo "[Error] ENV not set or ENV json not found! ($(CNFG_D)/envs/$(APP)/$(ENV).json))" && exit 1)
-else
-	$(info [Info] Use application name: $(APN))
-	@test "$(APN)" && test "$(ENV)" && test -s $(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json || (echo "[Error] APN or ENV not set or APN/ENV json not found! ($(CNFG_D)/envs/$(APP)/$(APN)/$(ENV).json))" && exit 1)
-	$(eval APNEXTRA=-e "app_name=$(APN)")
-	$(info [Info] Use application name extra: $(APNEXTRA))
-endif
-	$(info [Info] Use environment: $(ENV))
-
-verify: verify_var_app verify_var_apn verify_app
 	$(info [Info])
 
 # -------- Extras handling
 
 extra_config:
-ifeq ($(wildcard $(TEMPLATES_D)/$(APP)/$(CONFIG_F)),)
+ifeq ($(wildcard $(TEMPLATES_D)/$(IMG)/$(CONFIG_F)),)
 	$(info [Info] Config ignorieren)
 else
-	@[[ -f $(TEMPLATES_D)/$(APP)/$(CONFIG_F) ]] && make APP=$(APP) ENV=$(ENV) configs || (echo "[Info] No extra files available!")
+	@[[ -f $(TEMPLATES_D)/$(IMG)/$(CONFIG_F) ]] && make IMG=$(IMG) ENV=$(ENV) configs || (echo "[Info] No extra files available!")
 endif
 
 extra_plugins:
-ifeq ($(wildcard $(FILES_D)/$(APP)/$(PLUGIN_F)),)
+ifeq ($(wildcard $(FILES_D)/$(IMG)/$(PLUGIN_F)),)
 	$(info [Info] Plugins ignorieren)
 else
-	@[[ -f $(FILES_D)/$(APP)/$(PLUGIN_F) ]] && make APP=$(APP) ENV=$(ENV) plugins || (echo "[Info] No extra plugins configured!")
+	@[[ -f $(FILES_D)/$(IMG)/$(PLUGIN_F) ]] && make IMG=$(IMG) ENV=$(ENV) plugins || (echo "[Info] No extra plugins configured!")
 endif
 
 extra_appname:
-ifeq ($(wildcard $(FILES_D)/$(APP)/apps/$(APN)/$(APP_F)),)
-	$(info [Info] APP ignorieren)
+ifeq ($(wildcard $(FILES_D)/$(IMG)/apps/$(NAME)/$(APP_F)),)
+	$(info [Info] IMG ignorieren)
 else
-	@[[ -f $(FILES_D)/$(APP)/apps/$(APN)/$(APP_F) ]] && make APP=$(APP) ENV=$(ENV) APN=$(APN) appname || (echo "[Info] No extra appname configured!")
+	@[[ -f $(FILES_D)/$(IMG)/apps/$(NAME)/$(APP_F) ]] && make IMG=$(IMG) ENV=$(ENV) NAME=$(NAME) appname || (echo "[Info] No extra appname configured!")
 endif
 
 extras: extra_config extra_plugins extra_appname
 	$(info [Info])
 
+# -------- Environment handling
+
+define try =
+	$(eval ENV=try)
+	$(info [Info] Use environment: $(ENV))
+	$(eval ENVNAME=-e "env_name=$(ENV)")
+	$(info [Info] Use environment extra: $(ENVNAME))
+	@true
+endef
+
+try:
+	$(call try)
+
+develop:
+	$(eval ENV=develop)
+	$(info [Info] Use environment: $(ENV))
+	$(eval ENVNAME=-e "env_name=$(ENV)")
+	$(info [Info] Use environment extra: $(ENVNAME))
+	@true
+
 # -------- Instance handling
 
-setup: PLAYBOOK=setup
-setup: starting verify extras execute ending 
+setup: verify extras execute ending 
 
 boot: PLAYBOOK=boot
 boot: starting verify execute do_stats do_status ending
@@ -175,16 +223,16 @@ destroy: PLAYBOOK=destroy
 destroy: starting verify do_stats destroy_do do_status ending
 
 do_stats:
-	@make APP=$(APP) ENV=$(ENV) APN=$(APN) stats
+	@make IMG=$(IMG) ENV=$(ENV) NAME=$(NAME) stats
 
 stats: PLAYBOOK=stats
 stats: starting verify execute ending
 
 do_status:
-	@make APP=$(APP) ENV=$(ENV) APN=$(APN) status
+	@make IMG=$(IMG) ENV=$(ENV) NAME=$(NAME) status
 
 status: PLAYBOOK=status
-status: starting verify_app verify_env execute ending
+status: starting verify_img verify_env execute ending
 
 # -------- Jenkins handling
 
@@ -194,55 +242,32 @@ configs: starting verify execute ending
 plugins: PLAYBOOK=jenkins/plugins
 plugins: starting verify execute ending
 
-# -------- App handling
+# -------- IMG handling
 
-appname: APN=
-appname: EXTRAS += -e "appname=$(APN)"
-appname: PLAYBOOK=$(APP)/appname
+appname: NAME=
+appname: EXTRAS += -e "app_name=$(NAME)"
+appname: PLAYBOOK=$(IMG)/appname
 appname: starting verify execute ending
-
 # -------- Environment handling
-
-verify_env:
-ifndef ENV
-	$(eval ENV=develop)
-endif
-	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
-	$(info [Info] Use environment: $(ENV))
-	$(eval ENVNAME=-e "env_name=$(ENV)")
-	$(info [Info] Use env extra: $(ENVNAME))
-
-verify_port:
-	@test "$(PORT)" || (echo "[Error] PORT not set!" && exit 1)
-	$(info [Info] Use port: $(PORT))
-
-verify_app:
-	$(eval APPIMG=-e "image=$(APP)")
-	$(info [Info] Use image: $(APPIMG))
-
-verify_extra:
-ifdef APN
-	$(eval APNEXTRA=-e "appname=$(APN)")
-endif
 
 create: ENV=
 create: PLAYBOOK=create
 create: EXTRAS += -e "env_name=$(ENV)" -e "port=$(PORT)"
-create: starting verify_env verify_port verify_app verify_extra execute ending
+create: starting verify_env verify_port verify_img verify_extra execute ending
 
 delete: ENV=
 delete: DELETE=false
 delete: PLAYBOOK=delete
 delete: EXTRAS += -e "env_name=$(ENV)"
 delete: EXTRAS += -e "clean_up=$(DELETE)"
-delete: starting verify_env verify_app verify_extra execute ending
+delete: starting verify_env verify_img verify_extra execute ending
 
 # -------- Image handling
 
 verify_tag:
-	$(eval APP=$(TAG))
-	@test "$(APP)" && test -d $(TAG_D)/$(TAG)/ || (echo "[Error] TAG not set or TAG folder not found! ($(TAG_D)/$(TAG)/)" && exit 1)
-	$(eval APPIMG=-e "image=$(APP)")
+	$(eval IMG=$(TAG))
+	@test "$(IMG)" && test -d $(TAG_D)/$(TAG)/ || (echo "[Error] TAG not set or TAG folder not found! ($(TAG_D)/$(TAG)/)" && exit 1)
+	$(eval APPIMG=-e "image=$(IMG)")
 
 build: PLAYBOOK=build
 build: starting verify_tag execute ending
@@ -258,11 +283,6 @@ do_images:
 
 images: PLAYBOOK=images
 images: starting filter_img execute ending
-
-
-verify_img:
-	@test "$(IMG)" || (echo "[Error] IMG not set!" && exit 1)
-	$(eval APPIMG=-e "image=$(IMG)")
 
 fetch: PLAYBOOK=fetch
 fetch: starting verify_img execute ending
@@ -286,8 +306,8 @@ startup_doing: verify_infra
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo "[Info]  Booting $$l ..."; \
-		make APP=$$l ENV=$(ENV) setup; \
-		make APP=$$l ENV=$(ENV) boot; \
+		make IMG=$$l ENV=$(ENV) setup; \
+		make IMG=$$l ENV=$(ENV) boot; \
 		echo; \
 	done
 
@@ -300,7 +320,7 @@ teardown_dowing: verify_infra
 	@for l in `tac $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo "[Info] Shuting down $$l"; \
-		make APP=$$l ENV=$(ENV) shutdown; \
+		make IMG=$$l ENV=$(ENV) shutdown; \
 		echo; \
 	done
 
@@ -324,7 +344,7 @@ cleanup_doing:
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo "[Info] Removing $$l"; \
-		make APP=$$l ENV=$(ENV) DELETE=$(DELETE) destroy; \
+		make IMG=$$l ENV=$(ENV) DELETE=$(DELETE) destroy; \
 		echo; \
 	done
 

@@ -1,0 +1,21 @@
+---
+- name: COMMON | Check directory "{{ config_base }}"
+  file: dest={{ config_base }} state=directory
+  register: checkout
+  failed_when: checkout.state != "directory"
+- debug: msg="[debug] {{ checkout }}"
+  when: do_debug|bool
+
+- debug: msg="[debug] Conditional {{ volume_home }}"
+  when: do_debug|bool and volume_home != ""
+- name: COMMON | Check "{{ volume_home }}" folder and create if not exists
+  file: dest="{{ volume_home }}" state=directory mode=0775
+  register: checkout
+  failed_when: checkout.state != "directory"
+  when: volume_home != ""
+- debug: msg="[debug] {{ checkout }}"
+  when: do_debug|bool
+
+- name: COMMON | Info about unset "{{ volume_home }}" folder variable
+  debug: msg="[debug] Variable 'volume_home' not set, hence creation was skipped."
+  when: do_debug|bool and volume_home == ""

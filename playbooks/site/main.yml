@@ -1,0 +1,45 @@
+---
+- name: SITE | Prepares and deploys a working websites
+  hosts: dockerhost
+  gather_facts: no
+  sudo: no
+
+  vars:
+    - do_debug: True
+    - do_check_folders: False
+    - do_check_connection: False
+    - base_folder: ../..
+
+  vars_files:
+    - "{{ base_folder }}/roles/common/vars/defaults.yml"
+    - "{{ base_folder }}/roles/site/vars/defaults.yml"
+
+  pre_tasks:
+    - include: '{{ common_tasks_base }}/debug.yml'
+      when: do_debug|bool
+
+    - include: '{{ common_tasks_base }}check_connection.yml'
+      when: do_check_connection|bool
+
+    - include: '{{ common_tasks_base }}check_folders.yml'
+      when: do_check_folders|bool
+
+  tasks:
+    - name: SITE | Check variables
+      fail: msg="[error] {{ item }} is not defined"
+      when: "{{ item }} is not defined"
+      with_items:
+      - image
+      - env_name
+      - site_name
+      
+    - name: SITE | Create "{{ volume_home }}/{{ image }}/{{ env_name }}/{{ site_name }}" folder if not exists
+      file: dest="{{ item }}" state=directory mode=0775
+      register: checkout
+      failed_when: checkout.state != "directory"
+      with_items:
+      - "{{ volume_home }}/{{ image }}"
+      - "{{ volume_home }}/{{ image }}/{{ env_name }}"
+      - "{{ volume_home }}/{{ image }}/{{ env_name }}/{{ site_name }}"
+    - debug: msg="{{ checkout }}"
+      when: checkout is defined

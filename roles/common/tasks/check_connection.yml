@@ -1,0 +1,9 @@
+---
+- name: COMMON | Check connection
+  shell: echo "Ok!"
+  register: echout
+  changed_when: echout.rc != 0
+
+- name: COMMON | Fail when not Ok is returned!
+  fail: msg="[info] {{ echout.stdout }}"
+  when: echout.stdout != "Ok!"
