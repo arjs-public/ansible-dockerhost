@@ -1,5 +1,4 @@
 ---
-- debug: msg="[Debug] {{ has_custom_command }}"
 - debug: msg="[Debug] Use 'standard' entrypoint."
   when: do_debug|bool and not has_custom_command
 

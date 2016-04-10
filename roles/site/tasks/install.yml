@@ -1,56 +1,65 @@
 ---
+- name: CHECK | Check if "hostname"
+  shell: hostname -f    
+  register: checkout
+  remote_user: root
+  delegate_to: "{{ container_name }}"
+  when: do_debug|bool
+- debug: msg="{{ checkout }}"
+  when: do_debug|bool
+
 - name: SITE | Installing nginx
   apt:
     name: nginx
     state: latest
     update_cache: no 
+  remote_user: root
+  delegate_to: "{{ container_name }}"
   tags: nginx
-
-- name: SITE | Prepare special "{{ item }}"
-  template: src="{{ roles_base }}templates/{{ image }}/{{ item }}" dest="{{ nginx_html_path }}/{{ item }}" mode=644
-  #debug: msg="{{ item }}"
-  register: checkout
-  with_items:
-    - index.html
-    - offline.html
-  failed_when: checkout.state != "file"
-  tags: nginx
-- debug: msg="{{ checkout }}"
-  when: do_debug|bool and checkout is defined
 
 - name: SITE | Starting NGINX
   service:
     name: nginx
     state: started
+  remote_user: root
+  delegate_to: "{{ container_name }}"
   tags: nginx
 
 - name: SITE | Wait for NGINX to start
   wait_for: port=80
+  remote_user: root
+  delegate_to: "{{ container_name }}"
   tags: nginx
      
-- debug: msg="{{ inventory_hostname }}"
+- debug: msg="[Debug] {{ inventory_hostname }}"
   when: do_debug|bool and inventory_hostname is defined
-- debug: msg="{{ ansible_eth0["ipv4"]["address"] }}"
+- debug: msg="[Debug] {{ ansible_eth0["ipv4"]["address"] }}"
   when: do_debug|bool and ansible_eth0["ipv4"]["address"] is defined
 - name: SITE | Check
   #local_action: uri url=http://{{ inventory_hostname }}
   local_action: uri url=http://{{ ansible_eth0["ipv4"]["address"] }}
   register: checkout
   failed_when: checkout.status != 200
+  remote_user: root
+  delegate_to: "{{ container_name }}"
   tags: nginx
-- debug: msg="{{ checkout.status }}"
+- debug: msg="[Debug] {{ checkout.status }}"
   when: do_debug|bool and checkout is defined
 
 - name: SITE | Check offline.html
   local_action: uri url=http://{{ ansible_eth0["ipv4"]["address"] }}/offline.html
   register: checkout
   failed_when: checkout.status != 200
+  remote_user: root
+  delegate_to: "{{ container_name }}"
   tags: nginx
-- debug: msg="{{ checkout.status }}"
+- debug: msg="[Debug] {{ checkout.status }}"
   when: do_debug|bool and checkout is defined
 
 - name: SITE | Stopping NGINX
   service:
     name: nginx
     state: stopped
+  remote_user: root
+  delegate_to: "{{ container_name }}"
   tags: nginx

@@ -28,6 +28,7 @@
     - name: CHECK | Check if "docker.io" is present
       shell: dpkg-query --list docker.io    
       register: checkout
+      failed_when: checkout.rc != 0
     - debug: msg="{{ checkout }}"
       when: do_debug|bool
        

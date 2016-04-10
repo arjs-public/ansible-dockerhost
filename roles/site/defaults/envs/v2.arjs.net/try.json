@@ -1,11 +1,11 @@
 {
-  "container_name": "site_v2.arjs.net_alex",
+  "container_name": "site_v2.arjs.net_try",
   "ports": ["9595:80", "9695:443"],
-  "volume_home": "/extra/site/v2.arjs.net/alex",
-  "volumes": ["/extra/site/v2.arjs.net/alex:/var/www/html"],
+  "volume_home": "/extra/site/v2.arjs.net/try",
+  "volumes": ["/extra/site/v2.arjs.net/try:/var/www/html"],
   "links": [],
   "app_name": "v2.arjs.net",
-  "env_name": "alex",
+  "env_name": "try",
   "has_custom_command": false,
   "command": ""
 }

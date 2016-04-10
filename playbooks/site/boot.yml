@@ -5,7 +5,7 @@
   sudo: no
 
   vars:
-    - do_debug: True
+    - do_debug: False
     - do_check_folders: False
     - do_check_connection: False
     - base_folder: ../..
@@ -25,8 +25,15 @@
       when: do_check_folders|bool
 
   tasks:
-    - debug: msg="[Debug] {{ host }}"
-      when: do_debug|bool and host is defined
+    - name: CHECK | Check if "docker.io" is present
+      shell: dpkg-query --list docker.io    
+      register: checkout
+      failed_when: checkout.rc != 0
+    - debug: msg="{{ checkout }}"
+      when: do_debug|bool
+
+    - debug: msg="[Debug] {{ container_name }}"
+      when: do_debug|bool and container_name is defined
 
     - name: BOOT | Start docker container
       include: '{{ common_tasks_base }}start.yml'
@@ -36,3 +43,6 @@
 
     - name: BOOT | Add docker container to inventory
       include: '{{ common_tasks_base }}add_host.yml'
+
+    - name: BOOT | Install nginx
+      include: '{{ tasks_base }}install.yml'

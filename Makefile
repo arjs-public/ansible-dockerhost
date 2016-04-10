@@ -224,8 +224,6 @@ setup: PLAYBOOK=setup
 setup: verify extras execute ending 
 
 boot: PLAYBOOK=boot
-boot: HOSTNAME=$(ENV).$(NAME)
-boot: EXTRAS += -e "host=$(HOSTNAME)"
 boot: verify execute do_stats do_status ending
 
 shutdown: PLAYBOOK=shutdown

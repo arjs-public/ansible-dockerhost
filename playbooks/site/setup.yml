@@ -33,15 +33,13 @@
       - env_name
       - site_name
       
-    - name: SITE | Create "{{ volume_home }}/{{ image }}/{{ env_name }}/{{ site_name }}" folder if not exists
-      file: dest="{{ item }}" state=directory mode=0775
+    - debug: msg="[Debug] {{ volume_home }}"
+      when: do_debug|bool and volume_home is defined
+    - name: SITE | Create "{{ volume_home }}" folder if not exists
+      file: dest="{{ volume_home }}" state=directory mode=0775
       register: checkout
-      failed_when: checkout.state != "directory"
-      with_items:
-      - "{{ volume_home }}/{{ image }}"
-      - "{{ volume_home }}/{{ image }}/{{ env_name }}"
-      - "{{ volume_home }}/{{ image }}/{{ env_name }}/{{ site_name }}"
-    - debug: msg="{{ checkout }}"
+      #failed_when: checkout.state != "directory"
+    - debug: msg="[Debug] {{ checkout }}"
       when: do_debug|bool and checkout is defined
 
     - name: SITE | Create "{{ env_name }}.{{ site_name }}" entry in inventory
@@ -51,3 +49,19 @@
           regexp="^{{ env_name }}.{{ site_name }} ansible_ssh_host="
           insertafter="EOF"
           state=present
+
+    - debug: msg="[Debug] {{ templates_base }}{{ item }} {{ volume_home }}/{{ item }}"
+      with_items:
+        - index.html
+        - offline.html
+      when: do_debug|bool
+    - name: SITE | Prepare special "{{ item }}"
+      template: src="{{ templates_base }}{{ item }}" dest="{{ volume_home }}/{{ item }}" mode=644
+      register: checkout
+      with_items:
+        - index.html
+        - offline.html
+      failed_when: checkout.state != "file"
+      tags: nginx
+    - debug: msg="[Debug] {{ checkout }}"
+      when: do_debug|bool and checkout is defined
