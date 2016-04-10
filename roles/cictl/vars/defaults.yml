@@ -1,0 +1,29 @@
+---
+container_name: base
+ports: []
+port_pre: 80
+port_db_pre: 90
+port_py_pre: 50
+port_www_pre: 95
+port_wwws_pre: 96
+volumes: []
+image_path: ~/docker/
+local_base: '.'
+global_files_base: '{{ local_base | realpath }}/files/'
+global_templates_base: '{{ local_base | realpath }}/templates/'
+roles_base: '{{ local_base | realpath }}/roles/'
+config_base: '{{ roles_base | realpath }}/defaults/envs/'
+files_base: '{{ roles_base | realpath }}/files/'
+tasks_base: '{{ roles_base | realpath }}/tasks/'
+templates_base: '{{ roles_base | realpath }}/templates/'
+extra_base: /extra
+jenkins_base: '{{ extra_base }}/jenkins'
+data_base: '{{ extra_base }}/data'
+jenkins_data_base: '{{ data_base }}/jenkins'
+py_app_base: '{{ extra_base }}/apps'
+www_site_base: '{{ extra_base }}/site'
+ansible_python_interpreter: python
+volume_home: ""
+image: ""
+app_name: ""
+env_name: ""

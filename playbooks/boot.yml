@@ -1,28 +1,39 @@
 ---
-- name: Create and start a running {{ container_name }} container based on {{ image }}
+- name: BOOT | Create and start a running {{ container_name }} container based on {{ image }}
   hosts: dockerhost
-  sudo: False
+  hosts: "{{ host }}"
+  gather_facts: no
+  sudo: no
 
   vars:
     - do_debug: False
+    - do_check_folders: False
+    - do_check_connection: False
+    - base_folder: ..
 
   vars_files:
-    - ../roles/vars/base.yml
+    - "{{ base_folder }}/roles/common/vars/defaults.yml"
+    - "{{ base_folder }}/roles/site/vars/defaults.yml"
 
   pre_tasks:
-    - include: '{{ tasks_base }}debug_info.yml'
-      when: do_debug == True
+    - include: '{{ common_tasks_base }}/debug.yml'
+      when: do_debug|bool
 
-    - include: '{{ tasks_base }}check_connection.yml'
+    - include: '{{ common_tasks_base }}check_connection.yml'
+      when: do_check_connection|bool
 
-    - include: '{{ tasks_base }}check_folders.yml'
+    - include: '{{ common_tasks_base }}check_folders.yml'
+      when: do_check_folders|bool
 
   tasks:
-    - include: '{{ tasks_base }}start.yml'
+    - name: BOOT | Start docker container
+      include: '{{ tasks_base }}start.yml'
 
-    - include: '{{ tasks_base }}get_facts.yml'
+    - name: BOOT | Get docker container information
+      include: '{{ tasks_base }}get_facts.yml'
 
-    - include: '{{ tasks_base }}add_host.yml'
+    - name: BOOT | Add docker container to inventory
+      include: '{{ tasks_base }}add_host.yml'
 
 #    - name: ping '{{ container_name }}'
 #      shell: ping -c 1 "{{ hostvars[container_name].ansible_ssh_host }}"

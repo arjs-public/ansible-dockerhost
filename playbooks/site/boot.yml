@@ -1,5 +1,5 @@
 ---
-- name: WWW | Deploy websites
+- name: SITE | Boot website
   hosts: "{{ host }}"
   gather_facts: no
   sudo: no
@@ -25,5 +25,17 @@
       when: do_check_folders|bool
 
   tasks:
+    - debug: msg="{{ host }}"
+      when: do_debug|bool and host is defined
     - debug: msg="{{ checkout }}"
       when: do_debug|bool and checkout is defined
+
+    - name: BOOT | Start docker container
+      include: '{{ tasks_base }}start.yml'
+
+    - name: BOOT | Get docker container information
+      include: '{{ tasks_base }}get_facts.yml'
+
+    - name: BOOT | Add docker container to inventory
+      include: '{{ tasks_base }}add_host.yml'
+
