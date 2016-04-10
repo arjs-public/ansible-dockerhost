@@ -1,5 +1,5 @@
 ---
-    - name: Get facts about containers
-      docker_facts:
-        docker_api_version: 1.17
-        name: "{{ container_name }}"
+- name: DOCKER | Get facts about containers
+  docker_facts:
+    docker_api_version: 1.17
+    name: "{{ container_name }}"

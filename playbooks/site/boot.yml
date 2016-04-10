@@ -1,11 +1,11 @@
 ---
 - name: SITE | Boot website
-  hosts: "{{ host }}"
+  hosts: dockerhost
   gather_facts: no
   sudo: no
 
   vars:
-    - do_debug: False
+    - do_debug: True
     - do_check_folders: False
     - do_check_connection: False
     - base_folder: ../..
@@ -25,17 +25,14 @@
       when: do_check_folders|bool
 
   tasks:
-    - debug: msg="{{ host }}"
+    - debug: msg="[Debug] {{ host }}"
       when: do_debug|bool and host is defined
-    - debug: msg="{{ checkout }}"
-      when: do_debug|bool and checkout is defined
 
     - name: BOOT | Start docker container
-      include: '{{ tasks_base }}start.yml'
+      include: '{{ common_tasks_base }}start.yml'
 
     - name: BOOT | Get docker container information
-      include: '{{ tasks_base }}get_facts.yml'
+      include: '{{ common_tasks_base }}get_facts.yml'
 
     - name: BOOT | Add docker container to inventory
-      include: '{{ tasks_base }}add_host.yml'
-
+      include: '{{ common_tasks_base }}add_host.yml'

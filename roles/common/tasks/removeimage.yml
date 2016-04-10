@@ -1,6 +1,6 @@
 ---
-  - name: remove image
-    docker_image:
-      docker_api_version: 1.17
-      name: "{{ image }}"
-      state: absent
+- name: DOCKER | Remove image
+  docker_image:
+    docker_api_version: 1.17
+    name: "{{ image }}"
+    state: absent

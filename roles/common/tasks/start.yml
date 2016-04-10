@@ -1,55 +1,54 @@
 ---
-  - name: Output
-    debug: msg="[echo] Use 'standard' entrypoint."
-    when: not has_custom_command
+- debug: msg="[Debug] {{ has_custom_command }}"
+- debug: msg="[Debug] Use 'standard' entrypoint."
+  when: do_debug|bool and not has_custom_command
 
-  - name: create client container {{ container_name }} with standard command
-    docker:
-      docker_api_version: 1.17
-      image: "{{ image }}"
-      name: "{{ container_name }}"
-      detach: False
-      expose: "{{ ports }}"
-      ports: "{{ ports }}"
-      volumes: "{{ volumes }}"
-      state: running
-    register: dockerout
-    when: not has_custom_command
+- name: DOCKER | Create client container "{{ container_name }}" with standard command
+  docker:
+    docker_api_version: 1.17
+    image: "{{ image }}"
+    name: "{{ container_name }}"
+    detach: False
+    expose: "{{ ports }}"
+    ports: "{{ ports }}"
+    volumes: "{{ volumes }}"
+    state: running
+  register: checkout
+  when: not has_custom_command
 
-  - debug: vars=dockerout msg="{{ dockerout }}"
-    when: do_debug == True and not has_custom_command
-  - debug: vars=dockerout msg="{{ dockerout.changed }}"
-    when: do_debug == True and not has_custom_command
-  - debug: vars=dockerout msg="{{ dockerout.summary.started }}"
-    when: do_debug == True and not has_custom_command
+- debug: msg="[Debug] {{ checkout }}"
+  when: do_debug|bool and not has_custom_command
+- debug: msg="[Debug] {{ checkout.changed }}"
+  when: do_debug|bool and not has_custom_command
+- debug: msg="[Debug] {{ checkout.summary.started }}"
+  when: do_debug|bool and not has_custom_command
 
-  - fail: msg="[echo] Container '{{ container_name }}' with standard entrypoint is not running"
-    when: not has_custom_command and dockerout.changed == True and dockerout.summary.started == "1"
+- fail: msg="[Error] Container '{{ container_name }}' with standard entrypoint is not running"
+  when: not has_custom_command and checkout.changed|bool and checkout.summary.started == "1"
 
-  - name: Output
-    debug: msg="[echo] Use '{{ command }}' with custom entrypoint."
-    when: has_custom_command
+- debug: msg="[Debug] Use '{{ command }}' with custom entrypoint."
+  when: do_debug|bool and has_custom_command
 
-  - name: create client container {{ container_name }} with custom command
-    docker:
-      docker_api_version: 1.17
-      image: "{{ image }}"
-      name: "{{ container_name }}"
-      detach: False
-      expose: "{{ ports }}"
-      ports: "{{ ports }}"
-      volumes: "{{ volumes }}"
-      command: "{{ command }}"
-      state: running
-    register: dockerout
-    when: has_custom_command
+- name: DOCKER | Create client container "{{ container_name }}" with custom command
+  docker:
+    docker_api_version: 1.17
+    image: "{{ image }}"
+    name: "{{ container_name }}"
+    detach: False
+    expose: "{{ ports }}"
+    ports: "{{ ports }}"
+    volumes: "{{ volumes }}"
+    command: "{{ command }}"
+    state: running
+  register: checkout
+  when: has_custom_command
 
-  - debug: vars=dockerout msg="{{ dockerout }}"
-    when: do_debug == True and has_custom_command
-  - debug: vars=dockerout msg="{{ dockerout.changed }}"
-    when: do_debug == True and has_custom_command
-  - debug: vars=dockerout msg="{{ dockerout.summary.started }}"
-    when: do_debug == True and has_custom_command
+- debug: msg="[Debug] {{ checkout }}"
+  when: do_debug|bool and has_custom_command
+- debug: msg="[Debug] {{ checkout.changed }}"
+  when: do_debug|bool and has_custom_command
+- debug: msg="[Debug] {{ checkout.summary.started }}"
+  when: do_debug|bool and has_custom_command
 
-  - fail: msg="[echo] Container '{{ container_name }}' with custom entrypoint is not running"
-    when: has_custom_command and dockerout.changed == True and dockerout.summary.started == "1"
+- fail: msg="[Error] Container '{{ container_name }}' with custom entrypoint is not running"
+  when: has_custom_command and checkout.changed|bool and checkout.summary.started == "1"

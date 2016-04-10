@@ -19,8 +19,11 @@ APP_F = app.py
 $(eval BASE_D=$(shell pwd))
 # $(info [Info] Use BASE_D: $(BASE_D))
 PB_D_B = $(BASE_D)/playbooks
+# $(info [Info] Use PB_D_B: $(PB_D_B))
 PB_D = $(if $(IMG),$(PB_D_B)/$(IMG),$(PB_D_B))
+# $(info [Info] Use PB_D: $(PB_D))
 CNFG_D = $(if $(IMG),$(BASE_D)/roles/$(IMG)/defaults,$(BASE_D)/roles/defaults)
+# $(info [Info] Use CNFG_D: $(CNFG_D))
 TAG_D = $(BASE_D)/roles/files
 FILES_D = $(BASE_D)/roles/files
 TEMPLATES_D = $(BASE_D)/roles/templates
@@ -31,15 +34,22 @@ VPF_FILE = configs/.secrets/vpf.txt
 # $(info [Info] Use A_CFG: $(A_CFG))
 INVENTORY = $(BASE_D)/inventory/inventory
 
-ifeq ($(wildcard $(CNFG_D)/envs/$(IMG)/$(ENV).json),)
- ifeq ($(wildcard $(CNFG_D)/envs/$(IMG)/$(NAME)/$(ENV).json),)
- CONFIGS =
+# --------- Extra config variables
+ifeq ($(wildcard $(CNFG_D)/envs/$(ENV).json),)
+ # $(info [Info] Check for $(CNFG_D)/envs/$(NAME)/$(ENV).json)
+ ifeq ($(wildcard $(CNFG_D)/envs/$(NAME)/$(ENV).json),)
+  # $(info [Info] No Environment found)
+  CONFIGS =
  else
- CONFIGS = -e "@$(CNFG_D)/envs/$(IMG)/$(NAME)/$(ENV).json"
+  # $(info [Info] Environment with $(NAME))
+  CONFIGS = -e "@$(CNFG_D)/envs/$(NAME)/$(ENV).json"
  endif
 else
- CONFIGS = -e "@$(CNFG_D)/envs/$(IMG)/$(ENV).json"
+ # $(info [Info] Environment without $(NAME))
+ CONFIGS = -e "@$(CNFG_D)/envs/$(ENV).json"
 endif
+
+# --------- Passwort vault
 ifneq ($(wildcard $(VPF_FILE)),)
  CONFIGS += --vault-password-file ./$(VPF_FILE)
 endif
@@ -83,9 +93,9 @@ help:
 
 # -------- Helpers handling
 
-starting:
-	$(info [Info])
-	$(info [Info] Starting $(PLAYBOOK))
+# starting:
+# 	$(info [Info])
+# 	$(info [Info] Starting $(PLAYBOOK))
 	
 ending:
 	$(info [Info] Finsihed $(PLAYBOOK))
@@ -104,11 +114,15 @@ verify_var_img:
 verify_var_name:
 ifndef NAME
 	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(IMG)/$(ENV).json || (echo "[Error] ENV not set or ENV json not found! ($(CNFG_D)/envs/$(IMG)/$(ENV).json))" && exit 1)
+	$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(ENV).json")
+	$(info [Info] Use application environment: $(CONFIGS))
 else
 	$(info [Info] Use application name: $(NAME))
 	@test "$(NAME)" && test "$(ENV)" && test -s $(CNFG_D)/envs/$(NAME)/$(ENV).json || (echo "[Error] NAME or ENV not set or IMG/ENV json not found! ($(CNFG_D)/envs/$(IMG)/$(NAME)/$(ENV).json))" && exit 1)
 	$(eval APNEXTRA=-e "app_name=$(NAME)")
 	$(info [Info] Use application name extra: $(APNEXTRA))
+	$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(NAME)/$(ENV).json")
+	$(info [Info] Use application environment: $(CONFIGS))
 endif
 	$(info [Info])
 
@@ -124,10 +138,10 @@ verify_port:
 	$(info [Info] Use port: $(PORT))
 	$(info [Info])
 
-verify_extra1:
-ifdef NAME
-	$(eval APNEXTRA=-e "app_name=$(NAME)")
-endif
+# verify_extra_old:
+# ifdef NAME
+# 	$(eval APNEXTRA=-e "app_name=$(NAME)")
+# endif
 
 verify: verify_var_img verify_var_name verify_var_name
 
@@ -235,7 +249,7 @@ do_status:
 	@make IMG=$(IMG) ENV=$(ENV) NAME=$(NAME) status
 
 status: PLAYBOOK=status
-status: verify_img verify_var_env execute ending
+status: verify_var_img verify_var_env execute ending
 
 # -------- Jenkins handling
 
