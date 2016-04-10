@@ -190,6 +190,7 @@ define try =
 	$(info [Info] Use environment: $(ENV))
 	$(eval ENVNAME=-e "env_name=$(ENV)")
 	$(info [Info] Use environment extra: $(ENVNAME))
+	$(info [Info])
 	@true
 endef
 
@@ -209,10 +210,12 @@ setup: PLAYBOOK=setup
 setup: verify extras execute ending 
 
 boot: PLAYBOOK=boot
-boot: starting verify execute do_stats do_status ending
+boot: HOSTNAME=$(ENV).$(NAME)
+boot: EXTRAS += -e "host=$(HOSTNAME)"
+boot: verify execute do_stats do_status ending
 
 shutdown: PLAYBOOK=shutdown
-shutdown: starting verify execute do_stats do_status ending
+shutdown: verify execute do_stats do_status ending
 
 destroy_do: execute
 	$(info [Info] Do Destroy ...)
@@ -220,47 +223,47 @@ destroy_do: execute
 destroy: DELETE=false
 destroy: EXTRAS += -e "clean_up=$(DELETE)"
 destroy: PLAYBOOK=destroy
-destroy: starting verify do_stats destroy_do do_status ending
+destroy: verify do_stats destroy_do do_status ending
 
 do_stats:
 	@make IMG=$(IMG) ENV=$(ENV) NAME=$(NAME) stats
 
 stats: PLAYBOOK=stats
-stats: starting verify execute ending
+stats: verify execute ending
 
 do_status:
 	@make IMG=$(IMG) ENV=$(ENV) NAME=$(NAME) status
 
 status: PLAYBOOK=status
-status: starting verify_img verify_var_env execute ending
+status: verify_img verify_var_env execute ending
 
 # -------- Jenkins handling
 
 configs: PLAYBOOK=jenkins/configs
-configs: starting verify execute ending
+configs: verify execute ending
 
 plugins: PLAYBOOK=jenkins/plugins
-plugins: starting verify execute ending
+plugins: verify execute ending
 
 # -------- IMG handling
 
 appname: NAME=
 appname: EXTRAS += -e "app_name=$(NAME)"
 appname: PLAYBOOK=$(IMG)/appname
-appname: starting verify execute ending
+appname: verify execute ending
 # -------- Environment handling
 
 create: ENV=
 create: PLAYBOOK=create
 create: EXTRAS += -e "env_name=$(ENV)" -e "port=$(PORT)"
-create: starting verify_var_env verify_port verify_img verify_extra execute ending
+create: verify_var_env verify_port verify_img verify_extra execute ending
 
 delete: ENV=
 delete: DELETE=false
 delete: PLAYBOOK=delete
 delete: EXTRAS += -e "env_name=$(ENV)"
 delete: EXTRAS += -e "clean_up=$(DELETE)"
-delete: starting verify_var_env verify_img verify_extra execute ending
+delete: verify_var_env verify_img verify_extra execute ending
 
 # -------- Image handling
 
@@ -277,18 +280,18 @@ do_images:
 	@make images
 
 images: PLAYBOOK=images
-images: starting filter_img execute ending
+images: filter_img execute ending
 
 fetch: PLAYBOOK=fetch
-fetch: starting verify_img execute ending
+fetch: verify_img execute ending
 
 destroyi: PLAYBOOK=destroyi
-destroyi: starting verify_img execute ending
+destroyi: verify_img execute ending
 
 # -------- Wipe.out or debugging
 
 wipeout: PLAYBOOK=wipeout
-wipeout: starting execute do_status ending
+wipeout: execute do_status ending
 
 # -------- Infra handling
 
@@ -307,7 +310,7 @@ startup_doing: verify_infra
 	done
 
 startup: PLAYBOOK=startup
-startup: starting verify_infra verify_var_env startup_doing do_status ending
+startup: verify_infra verify_var_env startup_doing do_status ending
 
 
 teardown_dowing: verify_infra
@@ -319,7 +322,7 @@ teardown_dowing: verify_infra
 		echo; \
 	done
 
-teardown: starting verify_var_env verify_infra teardown_dowing do_status ending
+teardown: verify_var_env verify_infra teardown_dowing do_status ending
 
 
 construct_doing:
@@ -331,7 +334,7 @@ construct_doing:
 		echo; \
 	done
 
-construct: starting verify_infra construct_doing do_images ending
+construct: verify_infra construct_doing do_images ending
 
 
 cleanup_doing: 
@@ -344,7 +347,7 @@ cleanup_doing:
 	done
 
 cleanup: DELETE=false
-cleanup: starting verify_var_env verify_infra cleanup_doing do_status ending
+cleanup: verify_var_env verify_infra cleanup_doing do_status ending
 
 
 list:
