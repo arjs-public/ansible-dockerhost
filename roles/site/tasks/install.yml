@@ -1,14 +1,14 @@
 ---
-- name: CHECK | Check if "hostname"
+- name: INSTALL | Check if "hostname"
   shell: hostname -f    
   register: checkout
   remote_user: root
   delegate_to: "{{ container_name }}"
   when: do_debug|bool
-- debug: msg="{{ checkout }}"
+- debug: msg="[Debug] INSTALL | {{ checkout }}"
   when: do_debug|bool
 
-- name: SITE | Installing nginx
+- name: INSTALL | Installing nginx
   apt:
     name: nginx
     state: latest
@@ -17,7 +17,43 @@
   delegate_to: "{{ container_name }}"
   tags: nginx
 
-- name: SITE | Starting NGINX
+- name: INSTALL | Stopping NGINX
+  service:
+    name: nginx
+    state: stopped
+  remote_user: root
+  delegate_to: "{{ container_name }}"
+  tags: nginx
+
+- debug: msg="[Debug] INSTALL | Copy {{ files_base }}default {{ site_default_path }}/default"
+  when: do_debug|bool
+- name: INSTALL | Prepare special nginx config
+  copy: src="{{ files_base }}default" dest="{{ site_default_path }}/default" mode=644
+  remote_user: root
+  delegate_to: "{{ container_name }}"
+  register: checkout
+  failed_when: checkout.state != "file"
+  tags: nginx
+- debug: msg="[Debug] INSTALL | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
+
+- debug: msg="[Debug] INSTALL | {{ templates_base }}{{ item }} {{ volume_home }}/{{ item }}"
+  with_items:
+    - index.html
+    - offline.html
+  when: do_debug|bool
+- name: INSTALL | Prepare special "{{ item }}"
+  template: src="{{ templates_base }}{{ item }}" dest="{{ volume_home }}/{{ item }}" mode=644
+  register: checkout
+  with_items:
+    - index.html
+    - offline.html
+  failed_when: checkout.state != "file"
+  tags: nginx
+- debug: msg="[Debug] INSTALL | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
+
+- name: INSTALL | Starting NGINX
   service:
     name: nginx
     state: started
@@ -25,41 +61,41 @@
   delegate_to: "{{ container_name }}"
   tags: nginx
 
-- name: SITE | Wait for NGINX to start
+- name: INSTALL | Wait for NGINX to start
   wait_for: port=80
   remote_user: root
   delegate_to: "{{ container_name }}"
   tags: nginx
      
-- debug: msg="[Debug] {{ inventory_hostname }}"
+- debug: msg="[Debug] INSTALL | {{ inventory_hostname }}"
   when: do_debug|bool and inventory_hostname is defined
-- debug: msg="[Debug] {{ ansible_eth0["ipv4"]["address"] }}"
-  when: do_debug|bool and ansible_eth0["ipv4"]["address"] is defined
-- name: SITE | Check
+- debug: msg="[Debug] INSTALL | {{ container_ip }}"
+  when: do_debug|bool and container_ip is defined
+- name: INSTALL | Check
   #local_action: uri url=http://{{ inventory_hostname }}
-  local_action: uri url=http://{{ ansible_eth0["ipv4"]["address"] }}
+  local_action: uri url=http://{{ container_ip }}
   register: checkout
   failed_when: checkout.status != 200
   remote_user: root
   delegate_to: "{{ container_name }}"
   tags: nginx
-- debug: msg="[Debug] {{ checkout.status }}"
+- debug: msg="[Debug] INSTALL | {{ checkout.status }}"
   when: do_debug|bool and checkout is defined
 
-- name: SITE | Check offline.html
-  local_action: uri url=http://{{ ansible_eth0["ipv4"]["address"] }}/offline.html
+- name: INSTALL | Check offline.html
+  local_action: uri url=http://{{ container_ip }}/offline.html
   register: checkout
   failed_when: checkout.status != 200
   remote_user: root
   delegate_to: "{{ container_name }}"
   tags: nginx
-- debug: msg="[Debug] {{ checkout.status }}"
+- debug: msg="[Debug] INSTALL | {{ checkout.status }}"
   when: do_debug|bool and checkout is defined
 
-- name: SITE | Stopping NGINX
-  service:
-    name: nginx
-    state: stopped
-  remote_user: root
-  delegate_to: "{{ container_name }}"
-  tags: nginx
+# - name: INSTALL | Stopping NGINX
+#   service:
+#     name: nginx
+#     state: stopped
+#   remote_user: root
+#   delegate_to: "{{ container_name }}"
+#   tags: nginx
