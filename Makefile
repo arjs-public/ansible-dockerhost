@@ -111,9 +111,22 @@ verify_var_img:
 	$(info [Info] Use image extra: $(APPIMG))
 	$(info [Info])
 
+verify_var_env:
+	$(if $(ENV),,$(call try))
+	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
+	$(info [Info] Use environment: $(ENV))
+	$(eval ENVNAME=-e "env_name=$(ENV)")
+	$(info [Info] Use environment extra: $(ENVNAME))
+	$(info [Info])
+
 verify_var_name:
+	$(info [Info] Use environment: $(ENV))
 ifndef NAME
-	@test "$(ENV)" && test -s $(CNFG_D)/envs/$(IMG)/$(ENV).json || (echo "[Error] ENV not set or ENV json not found! ($(CNFG_D)/envs/$(IMG)/$(ENV).json))" && exit 1)
+	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
+	@test -s $(CNFG_D)/envs/$(IMG)/$(ENV).json || (echo "[Error] ENV json not found! ($(CNFG_D)/envs/$(IMG)/$(ENV).json))" && exit 1)
+	$(info [Info] Use application name: )
+	$(eval APNEXTRA=-e "app_name=")
+	$(info [Info] Use application name extra: $(APNEXTRA))
 	$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(ENV).json")
 	$(info [Info] Use application environment: $(CONFIGS))
 else
@@ -126,24 +139,12 @@ else
 endif
 	$(info [Info])
 
-verify_var_env:
-	$(if $(ENV),,$(call try))
-	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
-	$(info [Info] Use environment: $(ENV))
-	$(info [Info] Use environment extra: $(ENVNAME))
-	$(info [Info])
-
 verify_port:
 	@test "$(PORT)" || (echo "[Error] PORT not set!" && exit 1)
 	$(info [Info] Use port: $(PORT))
 	$(info [Info])
 
-# verify_extra_old:
-# ifdef NAME
-# 	$(eval APNEXTRA=-e "app_name=$(NAME)")
-# endif
-
-verify: verify_var_img verify_var_name verify_var_name
+verify: verify_var_img verify_var_env verify_var_name
 
 # -------- Playbook handling
 
@@ -224,10 +225,10 @@ setup: PLAYBOOK=setup
 setup: verify extras execute ending 
 
 boot: PLAYBOOK=boot
-boot: verify execute do_stats do_status ending
+boot: verify execute ending
 
 shutdown: PLAYBOOK=shutdown
-shutdown: verify execute do_stats do_status ending
+shutdown: verify execute ending
 
 destroy_do: execute
 	$(info [Info] Do Destroy ...)
@@ -235,19 +236,13 @@ destroy_do: execute
 destroy: DELETE=false
 destroy: EXTRAS += -e "clean_up=$(DELETE)"
 destroy: PLAYBOOK=destroy
-destroy: verify do_stats destroy_do do_status ending
-
-do_stats:
-	@make IMG=$(IMG) ENV=$(ENV) NAME=$(NAME) stats
+destroy: verify destroy_do ending
 
 stats: PLAYBOOK=stats
 stats: verify execute ending
 
-do_status:
-	@make IMG=$(IMG) ENV=$(ENV) NAME=$(NAME) status
-
 status: PLAYBOOK=status
-status: verify_var_img verify_var_env execute ending
+status: execute ending
 
 # -------- Jenkins handling
 
@@ -303,7 +298,7 @@ destroyi: verify_img execute ending
 # -------- Wipe.out or debugging
 
 wipeout: PLAYBOOK=wipeout
-wipeout: execute do_status ending
+wipeout: execute ending
 
 # -------- Infra handling
 
@@ -322,7 +317,7 @@ startup_doing: verify_infra
 	done
 
 startup: PLAYBOOK=startup
-startup: verify_infra verify_var_env startup_doing do_status ending
+startup: verify_infra verify_var_env startup_doing ending
 
 
 teardown_dowing: verify_infra
@@ -334,7 +329,7 @@ teardown_dowing: verify_infra
 		echo; \
 	done
 
-teardown: verify_var_env verify_infra teardown_dowing do_status ending
+teardown: verify_var_env verify_infra teardown_dowing ending
 
 
 construct_doing:
@@ -359,7 +354,7 @@ cleanup_doing:
 	done
 
 cleanup: DELETE=false
-cleanup: verify_var_env verify_infra cleanup_doing do_status ending
+cleanup: verify_var_env verify_infra cleanup_doing ending
 
 
 list:

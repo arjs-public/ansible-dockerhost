@@ -1,5 +1,5 @@
 ---
-- name: INFO | List container(s) on dockerhost
+- name: STATUS | List status of container(s) on dockerhost
   hosts: dockerhost
   gather_facts: no
   sudo: no
@@ -25,63 +25,5 @@
       when: do_check_folders|bool
 
   tasks:
-    - name: CHECK | Check if "docker.io" is present
-      shell: dpkg-query --list docker.io    
-      register: checkout
-      failed_when: checkout.rc != 0
-    - debug: msg="{{ checkout }}"
-      when: do_debug|bool
-       
-    - debug: msg="{{ image }}_{{ app_name }}_{{ env_name }}"
-      when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''
-    - name: INFO | Execute docker ps with an name "{{ image }}_{{ app_name }}_{{ env_name }}"
-      shell: docker ps -a -f name="{{ image }}_{{ app_name }}_{{ env_name }}"
-      when: "'{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''"
-      register: checkout
-    - debug: msg="{{ checkout }}"
-      when: do_debug|bool
-       
-    - debug: msg="{{ image }}_{{ app_name }}"
-      when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''
-    - name: INFO | Execute docker ps with an name "{{ image }}_{{ app_name }}"
-      shell: docker ps -a -f name="{{ image }}_{{ app_name }}"
-      when: "'{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''"
-      register: checkout
-    - debug: msg="{{ checkout }}"
-      when: do_debug|bool
-       
-    - debug: msg="_{{ app_name }}"
-      when: do_debug|bool and '{{ image }}' == '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''
-    - name: INFO | Execute docker ps with an name "_{{ app_name }}"
-      shell: docker ps -a -f name="_{{ app_name }}"
-      when: "'{{ image }}' == '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''"
-      register: checkout
-    - debug: msg="{{ checkout }}"
-      when: do_debug|bool
-       
-    - debug: msg="{{ image }}_{{ env_name }}"
-      when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''
-    - name: INFO | Execute docker ps with an name "{{ image }}_{{ env_name }}"
-      shell: docker ps -a -f name="{{ image }}_{{ env_name }}"
-      when: "'{{ image }}' != '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''"
-      register: checkout
-    - debug: msg="{{ checkout }}"
-      when: do_debug|bool
-       
-    - debug: msg="_{{ env_name }}"
-      when: do_debug|bool and '{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''
-    - name: INFO | Execute docker ps with an name "_{{ env_name }}"
-      shell: docker ps -a -f name="_{{ env_name }}"
-      when: "'{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''"
-      register: checkout
-    - debug: msg="{{ checkout }}"
-      when: do_debug|bool
-       
-    - debug: msg="Normal docker ps"
-      when: do_debug|bool and '{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' == ''
-    - name: INFO | Execute docker ps
-      shell: docker ps -a
-      when: "'{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' == ''"
-      register: checkout
-    - debug: msg="{{ checkout }}"
-      when: do_debug|bool
+    - name: STATUS | Execute status task
+      include: "{{ common_tasks_base}}status.yml"
