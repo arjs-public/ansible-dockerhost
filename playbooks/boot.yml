@@ -1,7 +1,6 @@
 ---
 - name: BOOT | Create and start a running {{ container_name }} container based on {{ image }}
   hosts: dockerhost
-  hosts: "{{ host }}"
   gather_facts: no
   sudo: no
 
@@ -26,6 +25,16 @@
       when: do_check_folders|bool
 
   tasks:
+    - name: BOOT | Check if "docker.io" is present
+      shell: dpkg-query --list docker.io    
+      register: checkout
+      failed_when: checkout.rc != 0
+    - debug: msg="[Debug] BOOT | {{ checkout }}"
+      when: do_debug|bool and checkout is defined
+
+    - debug: msg="[Debug] BOOT | {{ container_name }}"
+      when: do_debug|bool and container_name is defined
+
     - name: BOOT | Start docker container
       include: '{{ tasks_base }}start.yml'
 
@@ -35,16 +44,13 @@
     - name: BOOT | Add docker container to inventory
       include: '{{ tasks_base }}add_host.yml'
 
-#    - name: ping '{{ container_name }}'
-#      shell: ping -c 1 "{{ hostvars[container_name].ansible_ssh_host }}"
-      # ping:
-      # shell: ping -c 1 "{{ item.value.docker_networksettings.IPAddress }}"
-      # when: item.value.docker_state.Running == True
-      # with_dict: docker_containers
-#      register: output
+    - name: BOOT | Execute status task
+      include: "{{ common_tasks_base}}status.yml"
+
+    - name: BOOT | Execute stats task
+      include: "{{ common_tasks_base}}stats.yml"
 
 #    - name: Output
 #      debug: msg="[echo] {{ output.rc }}"
-#      # debug: msg="[echo] {{ output.results[0].rc }}"
 #    - name: Output
 #      debug: msg="[echo] {{ hostvars[container_name].ansible_ssh_host }}"
