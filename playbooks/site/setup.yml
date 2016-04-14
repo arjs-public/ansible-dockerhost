@@ -1,5 +1,5 @@
 ---
-- name: SITE | Prepares and deploys a working websites
+- name: SETUP | Prepares and deploys a working websites
   hosts: dockerhost
   gather_facts: no
   sudo: no
@@ -25,43 +25,11 @@
       when: do_check_folders|bool
 
   tasks:
-    - name: SITE | Check variables
-      fail: msg="[error] {{ item }} is not defined"
-      when: "{{ item }} is not defined"
-      with_items:
-      - image
-      - env_name
-      - site_name
+    - name: SETUP | Check variables
+	  include: '{{ tasks_base }}check_vars.yml'
       
-    - debug: msg="[Debug] SITE | {{ volume_home }}"
-      when: do_debug|bool and volume_home is defined
-    - name: SITE | Create "{{ volume_home }}" folder if not exists
-      file: dest="{{ volume_home }}" state=directory mode=0775
-      register: checkout
-      #failed_when: checkout.state != "directory"
-    - debug: msg="[Debug] SITE | {{ checkout }}"
-      when: do_debug|bool and checkout is defined
+    - name: SETUP | Create "{{ volume_home }}" folder if not exists
+	  include: '{{ tasks_base }}check_folders.yml'
 
-    # - name: SITE | Create "{{ env_name }}.{{ site_name }}" entry in inventory
-    #   local_action: lineinfile
-    #       dest="{{ global_inventory }}"
-    #       line="{{ env_name }}.{{ site_name }} ansible_ssh_host=ip"
-    #       regexp="^{{ env_name }}.{{ site_name }} ansible_ssh_host="
-    #       insertafter="EOF"
-    #       state=present
-
-    - debug: msg="[Debug] SITE | {{ templates_base }}{{ item }} {{ volume_home }}/{{ item }}"
-      with_items:
-        - index.html
-        - offline.html
-      when: do_debug|bool
-    - name: SITE | Prepare special "{{ item }}"
-      template: src="{{ templates_base }}{{ item }}" dest="{{ volume_home }}/{{ item }}" mode=644
-      register: checkout
-      with_items:
-        - index.html
-        - offline.html
-      failed_when: checkout.state != "file"
-      tags: nginx
-    - debug: msg="[Debug] SITE | {{ checkout }}"
-      when: do_debug|bool and checkout is defined
+    - name: SETUP | Copy initial files
+	  include: '{{ tasks_base }}setup.yml'
