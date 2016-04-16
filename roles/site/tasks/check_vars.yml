@@ -7,11 +7,10 @@
     - env_name
     - site_name
 
-
-    # - name: SETUP | Create "{{ env_name }}.{{ site_name }}" entry in inventory
-    #   local_action: lineinfile
-    #       dest="{{ global_inventory }}"
-    #       line="{{ env_name }}.{{ site_name }} ansible_ssh_host=ip"
-    #       regexp="^{{ env_name }}.{{ site_name }} ansible_ssh_host="
-    #       insertafter="EOF"
-    #       state=present
+# - name: SETUP | Create "{{ env_name }}.{{ site_name }}" entry in inventory
+#   local_action: lineinfile
+#       dest="{{ global_inventory }}"
+#       line="{{ env_name }}.{{ site_name }} ansible_ssh_host=ip"
+#       regexp="^{{ env_name }}.{{ site_name }} ansible_ssh_host="
+#       insertafter="EOF"
+#       state=present

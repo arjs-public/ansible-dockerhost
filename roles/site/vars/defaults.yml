@@ -13,3 +13,4 @@ templates_base: "{{ site_folder }}templates/"
 site_default_path: /etc/nginx/sites-available
 files_static: ../files/app/static
 nginx_html_path: /var/www/html
+artifactory_base_url: http://servix:9091/artifactory

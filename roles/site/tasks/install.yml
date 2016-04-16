@@ -72,7 +72,6 @@
 - debug: msg="[Debug] INSTALL | {{ container_ip }}"
   when: do_debug|bool and container_ip is defined
 - name: INSTALL | Check
-  #local_action: uri url=http://{{ inventory_hostname }}
   local_action: uri url=http://{{ container_ip }}
   register: checkout
   failed_when: checkout.status != 200

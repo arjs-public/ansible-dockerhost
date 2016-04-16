@@ -3,8 +3,8 @@
 #
 
 .PHONY: help list status create delete ping
-.PHONY: try develop test stage production
-.PHONY: boot shutdown destroy stats destroy plugins configs setup
+.PHONY: test stage production
+.PHONY: boot shutdown destroy stats destroy plugins configs setup deploy
 .PHONY: images fetch destroyi
 .PHONY: startup teardown construct cleanup wipeout
 
@@ -53,6 +53,13 @@ endif
 ifneq ($(wildcard $(VPF_FILE)),)
  CONFIGS += --vault-password-file ./$(VPF_FILE)
 endif
+
+# --------- Include
+
+include configs/makefiles/images.mk
+include configs/makefiles/environments.mk
+include configs/makefiles/sites.mk
+include configs/makefiles/apps.mk
 
 # --------- Rules
 
@@ -105,39 +112,12 @@ ending:
 
 verify_var_img:
 	@test "$(IMG)" || (echo "[Error] IMG not set!" && exit 1)
-	$(info [Info] Use image: $(IMG))
-	@test "$(IMG)" && test -d "$(CNFG_D)/envs/" || (echo "[Error] IMG not set or IMG folder not found! ($(CNFG_D)/envs/)" && exit 1)
-	$(eval APPIMG=-e "image=$(IMG)")
-	$(info [Info] Use image extra: $(APPIMG))
-	$(info [Info])
 
 verify_var_env:
-	$(if $(ENV),,$(call try))
 	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
-	$(info [Info] Use environment: $(ENV))
-	$(eval ENVNAME=-e "env_name=$(ENV)")
-	$(info [Info] Use environment extra: $(ENVNAME))
-	$(info [Info])
 
 verify_var_name:
-	$(info [Info] Use environment: $(ENV))
-ifndef NAME
-	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
-	@test -s $(CNFG_D)/envs/$(IMG)/$(ENV).json || (echo "[Error] ENV json not found! ($(CNFG_D)/envs/$(IMG)/$(ENV).json))" && exit 1)
-	$(info [Info] Use application name: )
-	$(eval APNEXTRA=-e "app_name=")
-	$(info [Info] Use application name extra: $(APNEXTRA))
-	$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(ENV).json")
-	$(info [Info] Use application environment: $(CONFIGS))
-else
-	$(info [Info] Use application name: $(NAME))
-	@test "$(NAME)" && test "$(ENV)" && test -s $(CNFG_D)/envs/$(NAME)/$(ENV).json || (echo "[Error] NAME or ENV not set or IMG/ENV json not found! ($(CNFG_D)/envs/$(IMG)/$(NAME)/$(ENV).json))" && exit 1)
-	$(eval APNEXTRA=-e "app_name=$(NAME)")
-	$(info [Info] Use application name extra: $(APNEXTRA))
-	$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(NAME)/$(ENV).json")
-	$(info [Info] Use application environment: $(CONFIGS))
-endif
-	$(info [Info])
+	@test "$(NAME)" || (echo "[Error] NAME not set!" && exit 1)
 
 verify_port:
 	@test "$(PORT)" || (echo "[Error] PORT not set!" && exit 1)
@@ -145,6 +125,7 @@ verify_port:
 	$(info [Info])
 
 verify: verify_var_img verify_var_env verify_var_name
+	$(if $(NAME),,$(call SITE_RULE_STD))
 
 # -------- Playbook handling
 
@@ -198,27 +179,6 @@ endif
 extras: extra_config extra_plugins extra_appname
 	$(info [Info])
 
-# -------- Environment handling
-
-define try =
-	$(eval ENV=try)
-	$(info [Info] Use environment: $(ENV))
-	$(eval ENVNAME=-e "env_name=$(ENV)")
-	$(info [Info] Use environment extra: $(ENVNAME))
-	$(info [Info])
-	@true
-endef
-
-try:
-	$(call try)
-
-develop:
-	$(eval ENV=develop)
-	$(info [Info] Use environment: $(ENV))
-	$(eval ENVNAME=-e "env_name=$(ENV)")
-	$(info [Info] Use environment extra: $(ENVNAME))
-	@true
-
 # -------- Instance handling
 
 setup: PLAYBOOK=setup
@@ -227,16 +187,16 @@ setup: verify extras execute ending
 boot: PLAYBOOK=boot
 boot: verify execute ending
 
+deploy: PLAYBOOK=deploy
+deploy: verify_var_img verify_var_name execute ending 
+
 shutdown: PLAYBOOK=shutdown
 shutdown: verify execute ending
-
-destroy_do: execute
-	$(info [Info] Do Destroy ...)
 
 destroy: DELETE=false
 destroy: EXTRAS += -e "clean_up=$(DELETE)"
 destroy: PLAYBOOK=destroy
-destroy: verify destroy_do ending
+destroy: verify execute ending
 
 stats: PLAYBOOK=stats
 stats: verify execute ending
@@ -252,31 +212,31 @@ configs: verify execute ending
 plugins: PLAYBOOK=jenkins/plugins
 plugins: verify execute ending
 
-# -------- IMG handling
+# -------- APP handling
 
 appname: NAME=
 appname: EXTRAS += -e "app_name=$(NAME)"
-appname: PLAYBOOK=$(IMG)/appname
+appname: PLAYBOOK=$(IMG)/$(NAME)
 appname: verify execute ending
+
 # -------- Environment handling
 
 create: ENV=
 create: PLAYBOOK=create
 create: EXTRAS += -e "env_name=$(ENV)" -e "port=$(PORT)"
-create: verify_var_env verify_port verify_img verify_extra execute ending
+create: verify_var_env verify_port verify_var_img verify_extra execute ending
 
 delete: ENV=
 delete: DELETE=false
 delete: PLAYBOOK=delete
 delete: EXTRAS += -e "env_name=$(ENV)"
 delete: EXTRAS += -e "clean_up=$(DELETE)"
-delete: verify_var_env verify_img verify_extra execute ending
+delete: verify_var_env verify_var_img verify_extra execute ending
 
 # -------- Image handling
 
 build: PLAYBOOK=build
 build: verify_var_img execute ending
-
 
 filter_img:
 	$(info IMG=$(IMG))
@@ -290,10 +250,10 @@ images: PLAYBOOK=images
 images: filter_img execute ending
 
 fetch: PLAYBOOK=fetch
-fetch: verify_img execute ending
+fetch: verify_var_img execute ending
 
 destroyi: PLAYBOOK=destroyi
-destroyi: verify_img execute ending
+destroyi: verify_var_img execute ending
 
 # -------- Wipe.out or debugging
 
