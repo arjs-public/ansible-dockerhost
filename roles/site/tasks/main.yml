@@ -1,8 +1,0 @@
----
-- name: SITE | Install nginx
-  include: ./install.yml
-  tags: nginx
-  
-- name: SITE | Deploy site content
-  include: ./deploy.yml
-  tags: content
