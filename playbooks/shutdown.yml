@@ -1,26 +1,51 @@
 ---
 - name: Stop a running {{ container_name }} container based on {{ image }}
   hosts: dockerhost
-  sudo: False
+  gather_facts: no
+  sudo: no
 
   vars:
     - do_debug: False
+    - do_check_folders: False
+    - do_check_connection: False
+    - base_folder: ..
 
   vars_files:
-    - ../roles/vars/base.yml
+    - "{{ base_folder }}/roles/common/vars/defaults.yml"
+    - "{{ base_folder }}/roles/site/vars/defaults.yml"
 
   pre_tasks:
-    - include: '{{ tasks_base }}debug_info.yml'
-      when: do_debug == True
+    - include: '{{ common_tasks_base }}/debug.yml'
+      when: do_debug|bool
 
-    - include: '{{ tasks_base }}check_connection.yml'
+    - include: '{{ common_tasks_base }}check_connection.yml'
+      when: do_check_connection|bool
 
-    - include: '{{ tasks_base }}check_folders.yml'
-      when: do_debug == True
+    - include: '{{ common_tasks_base }}check_folders.yml'
+      when: do_check_folders|bool
 
   tasks:
-    - include: '{{ tasks_base }}get_facts.yml'
+    - name: SHUTDOWN | Check if "docker.io" is present
+      shell: dpkg-query --list docker.io    
+      register: checkout
+      failed_when: checkout.rc != 0
+    - debug: msg="[Debug] SHUTDOWN | {{ checkout }}"
+      when: do_debug|bool and checkout is defined
 
-    - include: '{{ tasks_base }}add_host.yml'
+    - debug: msg="[Debug] SHUTDOWN | {{ container_name }}"
+      when: do_debug|bool and container_name is defined
 
-    - include: '{{ tasks_base }}stop.yml'
+    - name: SHUTDOWN | Execute stats task
+      include: "{{ common_tasks_base }}stats.yml"
+
+    - name: SHUTDOWN | Get docker container information
+      include: '{{ common_tasks_base }}get_facts.yml'
+
+    - name: SHUTDOWN | Add docker container to inventory
+      include: '{{ common_tasks_base }}add_host.yml'
+
+    - name: SHUTDOWN | Stop docker container
+      include: '{{ common_tasks_base }}stop.yml'
+
+    - name: SHUTDOWN | Execute status task
+      include: "{{ common_tasks_base }}status.yml"

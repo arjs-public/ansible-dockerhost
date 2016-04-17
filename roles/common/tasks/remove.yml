@@ -1,5 +1,5 @@
 ---
-- name: DOCKER | Remove obsolete container
+- name: REMOVE | Remove obsolete container
   docker:
     docker_api_version: 1.17
     name: "{{ container_name }}"

@@ -1,4 +1,6 @@
 ---
+- debug: msg="[Debug] ADD HOST | {{ container_facts['docker_state'].Running }}"
+  when: do_debug|bool and container_facts is defined
 - name: ADD HOST | Add container '{{ container_name }}' to the hosts inventory
   add_host:
     hostname: "{{ container_name }}"
@@ -6,11 +8,10 @@
     ansible_ssh_host: "{{ item.value.docker_networksettings.IPAddress }}"
     ansible_ssh_port: 22
   with_dict: docker_containers
-  when: item.value.docker_state.Running|bool and item.key == container_name
+  when: container_facts['docker_state'].Running|bool
 
 - debug: msg="[Debug] ADD HOST | {{ hostvars[container_name] }}"
-  with_dict: docker_containers
-  when: do_debug|bool and item.value.docker_state.Running|bool and item.key == container_name
+  when: container_facts['docker_state'].Running|bool
 
 - name: ADD HOST | Extract IP for '{{ container_ip }}'
   set_fact: container_ip="{{ item.value.docker_networksettings.IPAddress }}"
@@ -20,10 +21,4 @@
 
 - name: ADD HOST | ping '{{ container_name }}'
   shell: echo ping -c 1 "{{ container_ip }}"
-  with_dict: docker_containers
-  when: item.value.docker_state.Running|bool and item.key == container_name and container_ip is defined
-
-# - name: ADD HOST | ping '{{ container_name }}'
-#   shell: echo ping -c 1 "{{ item.value.docker_networksettings.IPAddress }}"
-#   with_dict: docker_containers
-#   when: item.value.docker_state.Running|bool and item.key == container_name
+  when: container_facts['docker_state'].Running|bool and container_ip is defined

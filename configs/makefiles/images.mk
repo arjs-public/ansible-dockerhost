@@ -12,7 +12,7 @@ set_img:
 	$(call SET_APPIMG)
 	
 define SET_APPIMG_ENV
-	$(info [Info] Use config folder: $(CNFG_D))
+	@test "$(CNFG_D)" || (echo "[Error] CNFG_D not set!" && exit 1)
 	@test -d "$(CNFG_D)/envs/" || (echo "[Error] IMG/ENV folder not found! ($(CNFG_D)/envs/)" && exit 1)
 	$(call SET_APPIMG)
 endef

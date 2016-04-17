@@ -1,8 +1,8 @@
 ---
-- debug: msg="[Debug] Use 'standard' entrypoint."
+- debug: msg="[Debug] START | Use 'standard' entrypoint."
   when: do_debug|bool and not has_custom_command
 
-- name: DOCKER | Create client container "{{ container_name }}" with standard command
+- name: START | Create client container "{{ container_name }}" with standard command
   docker:
     docker_api_version: 1.17
     image: "{{ image }}"
@@ -15,20 +15,20 @@
   register: checkout
   when: not has_custom_command
 
-- debug: msg="[Debug] {{ checkout }}"
+- debug: msg="[Debug] START | {{ checkout }}"
   when: do_debug|bool and not has_custom_command
-- debug: msg="[Debug] {{ checkout.changed }}"
+- debug: msg="[Debug] START | {{ checkout.changed }}"
   when: do_debug|bool and not has_custom_command
-- debug: msg="[Debug] {{ checkout.summary.started }}"
+- debug: msg="[Debug] START | {{ checkout.summary.started }}"
   when: do_debug|bool and not has_custom_command
 
-- fail: msg="[Error] Container '{{ container_name }}' with standard entrypoint is not running"
+- fail: msg="[Error] START | Container '{{ container_name }}' with standard entrypoint is not running"
   when: not has_custom_command and checkout.changed|bool and checkout.summary.started == "1"
 
-- debug: msg="[Debug] Use '{{ command }}' with custom entrypoint."
+- debug: msg="[Debug] START | Use '{{ command }}' with custom entrypoint."
   when: do_debug|bool and has_custom_command
 
-- name: DOCKER | Create client container "{{ container_name }}" with custom command
+- name: START | Create client container "{{ container_name }}" with custom command
   docker:
     docker_api_version: 1.17
     image: "{{ image }}"
@@ -42,12 +42,12 @@
   register: checkout
   when: has_custom_command
 
-- debug: msg="[Debug] {{ checkout }}"
+- debug: msg="[Debug] START | {{ checkout }}"
   when: do_debug|bool and has_custom_command
-- debug: msg="[Debug] {{ checkout.changed }}"
+- debug: msg="[Debug] START | {{ checkout.changed }}"
   when: do_debug|bool and has_custom_command
-- debug: msg="[Debug] {{ checkout.summary.started }}"
+- debug: msg="[Debug] START | {{ checkout.summary.started }}"
   when: do_debug|bool and has_custom_command
 
-- fail: msg="[Error] Container '{{ container_name }}' with custom entrypoint is not running"
+- fail: msg="[Error] START | Container '{{ container_name }}' with custom entrypoint is not running"
   when: has_custom_command and checkout.changed|bool and checkout.summary.started == "1"

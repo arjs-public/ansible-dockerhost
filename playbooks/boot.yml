@@ -45,10 +45,10 @@
       include: '{{ tasks_base }}add_host.yml'
 
     - name: BOOT | Execute status task
-      include: "{{ common_tasks_base}}status.yml"
+      include: "{{ common_tasks_base }}status.yml"
 
     - name: BOOT | Execute stats task
-      include: "{{ common_tasks_base}}stats.yml"
+      include: "{{ common_tasks_base }}stats.yml"
 
 #    - name: Output
 #      debug: msg="[echo] {{ output.rc }}"

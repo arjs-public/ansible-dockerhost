@@ -1,37 +1,63 @@
 ---
 - name: Stop a running {{ container_name }} container based on {{ image }} and delete
   hosts: dockerhost
-  sudo: False
+  gather_facts: no
+  sudo: no
 
   vars:
     - clean_up: False
     - do_debug: False
+    - do_check_folders: False
+    - do_check_connection: False
+    - base_folder: ..
 
   vars_files:
-    - ../roles/vars/base.yml
+    - "{{ base_folder }}/roles/common/vars/defaults.yml"
+    - "{{ base_folder }}/roles/site/vars/defaults.yml"
 
   pre_tasks:
-    - include: '{{ tasks_base }}debug_info.yml'
-      when: do_debug == True
+    - include: '{{ common_tasks_base }}/debug.yml'
+      when: do_debug|bool
 
-    - include: '{{ tasks_base }}check_connection.yml'
+    - include: '{{ common_tasks_base }}check_connection.yml'
+      when: do_check_connection|bool
 
-    - include: '{{ tasks_base }}check_folders.yml'
-      when: do_debug == True and clean_up == False
+    - include: '{{ common_tasks_base }}check_folders.yml'
+      when: do_check_folders|bool
 
   tasks:
-    - include: '{{ tasks_base }}get_facts.yml'
+    - name: DESTROY | Check if "docker.io" is present
+      shell: dpkg-query --list docker.io    
+      register: checkout
+      failed_when: checkout.rc != 0
+    - debug: msg="[Debug] DESTROY | {{ checkout }}"
+      when: do_debug|bool and checkout is defined
 
-    - include: '{{ tasks_base }}add_host.yml'
+    - debug: msg="[Debug] DESTROY | {{ container_name }}"
+      when: do_debug|bool and container_name is defined
 
-    - include: '{{ tasks_base }}stop.yml'
+    - name: DESTROY | Execute stats task
+      include: "{{ common_tasks_base }}stats.yml"
 
-    - include: '{{ tasks_base }}remove.yml'
+    - name: DESTROY | Get docker container information
+      include: '{{ common_tasks_base }}get_facts.yml'
 
-    - debug: msg="Delete {{ volume_home }} {{ clean_up }}"
-      when: do_debug == True
+    - name: DESTROY | Add docker container to inventory
+      include: '{{ common_tasks_base }}add_host.yml'
+
+    - name: DESTROY | Stop docker container
+      include: '{{ common_tasks_base }}stop.yml'
+
+    - name: DESTROY | Execute remove task
+      include: '{{ common_tasks_base }}remove.yml'
+
+    - debug: msg="[Debug] DESTROY | Delete {{ volume_home }} {{ clean_up }}"
+      when: do_debug|bool
     - name: Delete "{{ volume_home }}" folder
       file: dest="{{ volume_home }}" state=absent
       register: checkout
       failed_when: checkout.state != "absent"
       when: clean_up|bool
+
+    - name: DESTROY | Execute status task
+      include: "{{ common_tasks_base }}status.yml"

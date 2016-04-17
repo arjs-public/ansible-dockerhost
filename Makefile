@@ -66,17 +66,18 @@ include configs/makefiles/apps.mk
 help:
 	$(info [Info] -- Help ---------)
 	$(info [Info] )
-	$(info [Info] * make IMG=<image to use> *? [ENV=<environment> *?] [NAME=<appname> 6*?] [EXTRAS=<ansible-playbook params>] setup)
-	$(info [Info] * make IMG=<image to use> *? [ENV=<environment> *?] [NAME=<appname> 6*?] [EXTRAS=<ansible-playbook params>] boot)
-	$(info [Info] * make IMG=<image to use> *? [ENV=<environment> *?] [NAME=<appname> 6*?] shutdown)
-	$(info [Info] * make IMG=<image to use> *? [ENV=<environment> *?] [NAME=<appname> 6*?] [DELETE=true|*false ***?] destroy)
-	$(info [Info] * make IMG=<image to use> *? [ENV=<environment> *?] [NAME=<appname> 6*?] stats)
+	$(info [Info] * make <environment> <image> <appname> setup [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <environment> <image> <appname> deploy [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <environment> <image> <appname> boot [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <environment> <image> <appname> shutdown [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <environment> <image> <appname> stats [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <environment> <image> <appname> destroy [DELETE=true|*false ***?])
 	$(info [Info] * make INFRA=<infra name from list> [ENV=<environment> *?] startup)
 	$(info [Info] * make INFRA=<infra name from list> teardown)
 	$(info [Info] * make INFRA=<infra name from list> construct)
 	$(info [Info] * make INFRA=<infra name from list> [DELETE=true|*false ***?] cleanup)
 	$(info [Info] * make ENV=<Environment name> *? [IMG=<appgroup> 5*?] [NAME=<appname> 6*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete))
-	$(info [Info] * make IMG=<image to use> build)
+	$(info [Info] * make IMG=<image to build> build)
 	$(info [Info] * make IMG=<image from dockerhub> fetch)
 	$(info [Info] * make IMG=<image from images> *? destroyi)
 	$(info [Info] * make ping | status | images | list | wipeout ****?)
@@ -188,7 +189,7 @@ boot: PLAYBOOK=boot
 boot: verify execute ending
 
 deploy: PLAYBOOK=deploy
-deploy: verify_var_img verify_var_name execute ending 
+deploy: verify execute ending 
 
 shutdown: PLAYBOOK=shutdown
 shutdown: verify execute ending
