@@ -1,30 +1,37 @@
 ---
 - name: Fetch standard images from docker hub
   hosts: dockerhost
+  gather_facts: no
   sudo: False
 
   vars:
     - do_debug: False
+    - do_check_connection: False
+    - base_folder: ..
 
   vars_files:
-    - ../roles/vars/base.yml
+    - "{{ base_folder }}/roles/common/vars/defaults.yml"
 
   pre_tasks:
-    - include: '{{ tasks_base }}debug_info.yml'
-      when: do_debug == True
+    - include: '{{ common_tasks_base }}/debug.yml'
+      when: do_debug|bool
 
-    - include: '{{ tasks_base }}check_connection.yml'
+    - include: '{{ common_tasks_base }}check_connection.yml'
+      when: do_check_connection|bool
 
   tasks:
-    - name: Check if "docker.io" is present
+    - debug: msg="[Debug] FETCH | {{ image }}"
+      when: do_debug|bool and image is defined
+    - name: FETCH | Check if "docker.io" is present
       shell: dpkg-query --list docker.io    
       register: checkout
-    - debug: msg="{{ checkout }}"
-      when: do_debug == True
+      failed_when: checkout.rc != 0
+    - debug: msg="[Debug] FETCH | {{ checkout }}"
+      when: do_debug|bool and checkout is defined
     
-    - name: Execute docker pull with an name "{{ image }}" 
+    - name: FETCH | Execute docker pull with an name "{{ image }}" 
       shell: docker pull "{{ image }}" | tail -n +2
       when: "'{{ image }}' != ''"
       register: checkout
-    - debug: msg="{{ checkout }}"
-      when: do_debug == True
+    - debug: msg="[Debug] FETCH | {{ checkout }}"
+      when: do_debug|bool and checkout is defined

@@ -239,18 +239,15 @@ build: PLAYBOOK=build
 build: verify_var_img execute ending
 
 filter_img:
-	$(info IMG=$(IMG))
-	$(eval APPIMG=-e "image=$(IMG)")
-	$(info APPIMG=$(APPIMG))
-
-do_images: 
-	@make images
+	$(if $(IMG),$(info Using image: $(IMG)),)
+	$(if $(IMG),$(eval APPIMG=-e "image=$(IMG)"),)
+	$(if $(IMG),$(info APPIMG=$(APPIMG)),)
 
 images: PLAYBOOK=images
 images: filter_img execute ending
 
 fetch: PLAYBOOK=fetch
-fetch: verify_var_img execute ending
+fetch: set_img execute ending
 
 destroyi: PLAYBOOK=destroyi
 destroyi: verify_var_img execute ending
