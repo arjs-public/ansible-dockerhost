@@ -1,18 +1,19 @@
 ---
-- name: BOOT | Create and start a running {{ container_name }} container based on {{ image }}
+- name: BOOT | Create and start a running '{{ container_name }}' container based on '{{ image }}'
   hosts: dockerhost
   gather_facts: no
   sudo: no
 
   vars:
     - do_debug: False
+    - do_check_docker: False
     - do_check_folders: False
     - do_check_connection: False
     - base_folder: ..
 
   vars_files:
     - "{{ base_folder }}/roles/common/vars/defaults.yml"
-    - "{{ base_folder }}/roles/site/vars/defaults.yml"
+    - "{{ base_folder }}/roles/{{ image }}/vars/defaults.yml"
 
   pre_tasks:
     - include: '{{ common_tasks_base }}/debug.yml'
@@ -24,17 +25,10 @@
     - include: '{{ common_tasks_base }}check_folders.yml'
       when: do_check_folders|bool
 
+    - include: '{{ common_tasks_base }}check_docker.yml'
+      when: do_check_docker|bool
+
   tasks:
-    - name: BOOT | Check if "docker.io" is present
-      shell: dpkg-query --list docker.io    
-      register: checkout
-      failed_when: checkout.rc != 0
-    - debug: msg="[Debug] BOOT | {{ checkout }}"
-      when: do_debug|bool and checkout is defined
-
-    - debug: msg="[Debug] BOOT | {{ container_name }}"
-      when: do_debug|bool and container_name is defined
-
     - name: BOOT | Start docker container
       include: '{{ tasks_base }}start.yml'
 
@@ -50,7 +44,5 @@
     - name: BOOT | Execute stats task
       include: "{{ common_tasks_base }}stats.yml"
 
-#    - name: Output
-#      debug: msg="[echo] {{ output.rc }}"
 #    - name: Output
 #      debug: msg="[echo] {{ hostvars[container_name].ansible_ssh_host }}"

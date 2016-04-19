@@ -1,0 +1,111 @@
+---
+- name: BUILD | Check directory "{{ image_path }}" and delete if found
+  file: path="{{ image_path }}" state=absent
+  register: checkout
+  failed_when: checkout.state != 'absent'
+- debug: msg="[debug] {{ checkout }}"
+  when: do_debug|bool
+- name: BUILD | Check directory "{{ image_path }}" and create if not found
+  file: dest="{{ image_path }}" state=directory
+  register: checkout
+  failed_when: checkout.state != 'directory'
+- debug: msg="[debug] {{ checkout }}"
+  when: do_debug|bool
+
+
+- name: BUILD | Copy "{{ image }}" docker file to localhost
+  synchronize:
+  src: "{{ files_base }}"
+  dest: "{{ image_path }}{{ image }}/"
+  delete: yes
+  rsync_opts:
+    - "--no-motd"
+    - "--exclude='**/*.DS_Store'"
+- name: BUILD | Check "{{ image }}" docker image folder
+  stat: path="{{ image_path }}{{ image }}/"
+  register: checkout
+  failed_when: checkout.stat.exists == False
+- debug: msg="[debug] {{ checkout }}"
+  when: do_debug|bool
+
+
+- name: BUILD | Create "{{ image_path }}{{ image }}/keys" folder
+  file: dest="{{ image_path }}{{ image }}/keys" state=directory
+  register: checkout
+  failed_when: checkout.state != "directory"
+- debug: msg="[debug] {{ checkout }}"
+  when: do_debug|bool
+- name: BUILD | Check "{{ image }}/keys" folder
+  stat: path="{{ image }}/keys"
+  register: checkout
+  ignore_errors: True
+- debug: msg="[debug] {{ checkout }}"
+  when: do_debug|bool
+- name: BUILD | Copy global "{{ item }}" file to destination
+  copy:
+  src: "{{ global_files_base }}/keys/{{ item }}"
+  dest: "{{ image_path }}{{ image }}/keys/{{ item }}"
+  mode: 0600
+  when: not checkout.stat.exists|bool
+  with_items:
+  - id_rsa
+  - id_rsa.pub
+- name: BUILD | Copy "{{ item }}" file to destination
+  copy:
+  src: "{{ files_base }}/keys/{{ item }}"
+  dest: "{{ image_path }}{{ image }}/keys/{{ item }}"
+  mode: 0600
+  when: checkout.stat.exists|bool
+  with_items:
+  - id_rsa
+  - id_rsa.pub
+
+
+- name: BUILD | Create "{{ image_path }}{{ image }}/etc" folder
+  file: dest="{{ image_path }}{{ image }}/etc" state=directory
+  register: checkout
+  failed_when: checkout.state != "directory"
+- debug: msg="[debug] {{ checkout }}"
+  when: do_debug|bool
+- name: BUILD | Check "{{ image }}/etc" folder
+  stat: path="{{ image }}/etc"
+  register: checkout
+  ignore_errors: True
+- debug: msg="[debug] {{ checkout }}"
+  when: do_debug|bool
+- name: BUILD | Copy global timezone file to destination
+  copy:
+  src: "{{ global_files_base }}/etc/timezone"
+  dest: "{{ image_path }}{{ image }}/etc/timezone"
+  mode: 0644
+  when: not checkout.stat.exists|bool
+- name: BUILD | Copy "{{ image }}" timezone file to destination
+  copy:
+  src: "{{ files_base }}/{{ image }}/etc/timezone"
+  dest: "{{ image_path }}{{ image }}/etc/timezone"
+  mode: 0644
+  when: checkout.stat.exists|bool
+
+
+- name: BUILD | Check get-pip.py file in files
+  stat: path="{{ files_base }}/get-pip.py"
+  register: checkout
+  ignore_errors: True
+- debug: msg="[debug] {{ checkout }}"
+  when: do_debug|bool
+- name: BUILD | Copy get-pip.py to destination if exists
+  copy:
+  src: "{{ files_base }}/get-pip.py"
+  dest: "{{ image_path }}{{ image }}/get-pip.py"
+  mode: 0644
+  when: checkout.stat.exists
+
+
+- name: BUILD | Create "{{ image }}" docker image
+  # docker_image:
+  #  name: base
+  #  path: /home/homeboy/work/playbooks/local_test/files/docker/base
+  #  state: build
+  command: docker build -t {{ image }} "{{ image_path }}{{ image }}"
+  register: checkout
+  failed_when: checkout.rc != 0

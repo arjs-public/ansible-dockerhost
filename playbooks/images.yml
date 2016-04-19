@@ -1,11 +1,12 @@
 ---
-- name: List images on dockerhost
+- name: IMAGES | List images on dockerhost
   hosts: dockerhost
   gather_facts: no
-  sudo: False
+  sudo: no
 
   vars:
     - do_debug: False
+    - do_check_docker: False
     - do_check_connection: False
     - base_folder: ..
 
@@ -20,45 +21,10 @@
     - include: '{{ common_tasks_base }}check_connection.yml'
       when: do_check_connection|bool
 
+    - include: '{{ common_tasks_base }}check_docker.yml'
+      when: do_check_docker|bool
+
   tasks:
-    - name: IMAGES | Check if "docker.io" is present
-      shell: dpkg-query --list docker.io    
-      register: checkout
-      failed_when: checkout.rc != 0
-    - debug: msg="[Debug] IMAGES | {{ checkout }}"
-      when: do_debug|bool and checkout is defined
-    
-    - name: IMAGES | Execute docker images with an grep for name "{{ image }}"
-      shell: docker images | grep "{{ image }}"
-      when: "'{{ image }}' != ''"
-      register: output
-    - debug: msg="[Debug] IMAGES | {{ checkout }}"
-      when: do_debug|bool and checkout is defined
-    
-    - name: IMAGES | Execute docker images
-      shell: docker images
-      when: "'{{ image }}' == ''"
-      register: output
-    - debug: msg="[Debug] IMAGES | {{ checkout }}"
-      when: do_debug|bool and checkout is defined
-    
-    - name: IMAGES | Execute docker status with an name "{{ image }}" 
-      shell: docker ps -a -f name="{{ image }}" | tail -n +2
-      when: "'{{ image }}' != ''"
-      register: output
-    - debug: msg="[Debug] IMAGES | {{ checkout }}"
-      when: do_debug|bool and checkout is defined
-       
-    - name: IMAGES | Execute docker status with an name "{{ image }}_{{ env_name }}"
-      shell: docker ps -a -f name="{{ image }}_{{ env_name }}" | tail -n +2
-      when: "'{{ image }}' != '' and '{{ env_name }}' != ''"
-      register: output
-    - debug: msg="[Debug] IMAGES | {{ checkout }}"
-      when: do_debug|bool and checkout is defined
-       
-    - name: IMAGES | Execute docker status
-      shell: docker ps -a
-      when: "'{{ image }}' == '' and '{{ env_name }}' == ''"
-      register: output
-    - debug: msg="[Debug] IMAGES | {{ checkout }}"
-      when: do_debug|bool and checkout is defined
+    - name: IMAGES | Execute docker build
+      include: '{{ common_tasks_base }}images.yml'
+      tags: human_log(stdout|stderr)

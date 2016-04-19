@@ -1,11 +1,4 @@
 ---
-- name: STATS | Check if "docker.io" is present
-  shell: dpkg-query --list docker.io  
-  register: checkout
-  failed_when: checkout.rc != 0
-- debug: msg="[Debug] STATS | {{ checkout }}"
-  when: do_debug|bool and checkout is defined
-
 - debug: msg="[Debug] STATS | {{ image }}_{{ app_name }}"
   when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''
 - name: STATS | Execute docker logs with an name "{{ image }}_{{ app_name }}" 

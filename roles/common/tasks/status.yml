@@ -1,11 +1,4 @@
 ---
-- name: STATUS | Check if "docker.io" is present
-  shell: dpkg-query --list docker.io  
-  register: checkout
-  failed_when: checkout.rc != 0
-- debug: msg="[Debug] STATUS | {{ checkout }}"
-  when: do_debug|bool and checkout is defined
-  
 - debug: msg="[Debug] STATUS | {{ image }}_{{ app_name }}_{{ env_name }}"
   when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''
 - name: STATUS | Execute docker ps with an name "{{ image }}_{{ app_name }}_{{ env_name }}"

@@ -1,0 +1,8 @@
+---
+- name: CHECK DOCKER | Check if "docker.io" is present
+  shell: dpkg-query --list docker.io    
+  register: checkout
+  failed_when: checkout.rc != 0
+  changed_when: checkout.rc != 0
+- debug: msg="[Debug] IMAGES1 | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
