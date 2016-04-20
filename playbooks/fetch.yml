@@ -1,5 +1,5 @@
 ---
-- name: Fetch standard images from docker hub
+- name: FETCH | Fetch standard images from docker hub
   hosts: dockerhost
   gather_facts: no
   sudo: False
@@ -20,18 +20,18 @@
       when: do_check_connection|bool
 
   tasks:
-    - debug: msg="[Debug] FETCH | {{ image }}"
+    - debug: msg="FETCH | {{ image }}"
       when: do_debug|bool and image is defined
     - name: FETCH | Check if "docker.io" is present
       shell: dpkg-query --list docker.io    
       register: checkout
       failed_when: checkout.rc != 0
-    - debug: msg="[Debug] FETCH | {{ checkout }}"
+    - debug: msg="FETCH | {{ checkout }}"
       when: do_debug|bool and checkout is defined
     
     - name: FETCH | Execute docker pull with an name "{{ image }}" 
       shell: docker pull "{{ image }}" | tail -n +2
       when: "'{{ image }}' != ''"
       register: checkout
-    - debug: msg="[Debug] FETCH | {{ checkout }}"
+    - debug: msg="FETCH | {{ checkout }}"
       when: do_debug|bool and checkout is defined

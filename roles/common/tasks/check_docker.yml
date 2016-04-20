@@ -4,5 +4,5 @@
   register: checkout
   failed_when: checkout.rc != 0
   changed_when: checkout.rc != 0
-- debug: msg="[Debug] IMAGES1 | {{ checkout }}"
+- debug: msg="CHECK DOCKER | {{ checkout }}"
   when: do_debug|bool and checkout is defined

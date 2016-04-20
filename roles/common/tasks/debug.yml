@@ -1,30 +1,30 @@
 ---
-- debug: msg="[Debug] DEBUG | {{ ansible_env }}"
+- debug: msg="DEBUG | {{ ansible_env }}"
   when: ansible_env is defined
 
-- debug: msg="[Debug] DEBUG | {{ local_base }}"
+- debug: msg="DEBUG | {{ local_base }}"
   when: local_base is defined
 
-- debug: msg="[Debug] DEBUG | {{ config_base }}"
+- debug: msg="DEBUG | {{ config_base }}"
   when: config_base is defined
 
-- debug: msg="[Debug] DEBUG | {{ roles_base }}"
+- debug: msg="DEBUG | {{ roles_base }}"
   when: roles_base is defined
 
-- debug: msg="[Debug] DEBUG | {{ files_base }}"
+- debug: msg="DEBUG | {{ files_base }}"
   when: files_base is defined
 
-- debug: msg="[Debug] DEBUG | {{ tasks_base }}"
+- debug: msg="DEBUG | {{ tasks_base }}"
   when: tasks_base is defined
 
-- debug: msg="[Debug] DEBUG | {{ image }}"
+- debug: msg="DEBUG | {{ image }}"
   when: image is defined
 
-- debug: msg="[Debug] DEBUG | {{ env_name }}"
+- debug: msg="DEBUG | {{ env_name }}"
   when: env_name is defined
 
-- debug: msg="[Debug] DEBUG | {{ app_name }}"
+- debug: msg="DEBUG | {{ app_name }}"
   when: app_name is defined
 
-- debug: msg="[Debug] DEBUG | {{ container_name }}"
+- debug: msg="DEBUG | {{ container_name }}"
   when: container_name is defined

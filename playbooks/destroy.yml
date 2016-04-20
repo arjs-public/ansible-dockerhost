@@ -30,10 +30,10 @@
       shell: dpkg-query --list docker.io    
       register: checkout
       failed_when: checkout.rc != 0
-    - debug: msg="[Debug] DESTROY | {{ checkout }}"
+    - debug: msg="DESTROY | {{ checkout }}"
       when: do_debug|bool and checkout is defined
 
-    - debug: msg="[Debug] DESTROY | {{ container_name }}"
+    - debug: msg="DESTROY | {{ container_name }}"
       when: do_debug|bool and container_name is defined
 
     - name: DESTROY | Execute stats task
@@ -51,7 +51,7 @@
     - name: DESTROY | Execute remove task
       include: '{{ common_tasks_base }}remove.yml'
 
-    - debug: msg="[Debug] DESTROY | Delete {{ volume_home }} {{ clean_up }}"
+    - debug: msg="DESTROY | Delete {{ volume_home }} {{ clean_up }}"
       when: do_debug|bool
     - name: Delete "{{ volume_home }}" folder
       file: dest="{{ volume_home }}" state=absent

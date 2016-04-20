@@ -1,5 +1,5 @@
 ---
-- debug: msg="[Debug] ADD HOST | {{ container_facts['docker_state'].Running }}"
+- debug: msg="ADD HOST | {{ container_facts['docker_state'].Running }}"
   when: do_debug|bool and container_facts is defined
 - name: ADD HOST | Add container '{{ container_name }}' to the hosts inventory
   add_host:
@@ -10,13 +10,13 @@
   with_dict: docker_containers
   when: container_facts['docker_state'].Running|bool
 
-- debug: msg="[Debug] ADD HOST | {{ hostvars[container_name] }}"
+- debug: msg="ADD HOST | {{ hostvars[container_name] }}"
   when: container_facts['docker_state'].Running|bool
 
 - name: ADD HOST | Extract IP for '{{ container_ip }}'
   set_fact: container_ip="{{ item.value.docker_networksettings.IPAddress }}"
   with_dict: docker_containers
-- debug: msg="[Debug] ADD HOST | {{ container_ip }}"
+- debug: msg="ADD HOST | {{ container_ip }}"
   when: do_debug|bool and container_ip is defined
 
 - name: ADD HOST | ping '{{ container_name }}'

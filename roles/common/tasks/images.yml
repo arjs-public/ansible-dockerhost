@@ -4,7 +4,7 @@
   when: "'{{ image }}' != ''"
   register: checkout
   changed_when: checkout.rc != 0
-- debug: msg="[Debug] IMAGES2 | {{ checkout }}"
+- debug: msg="IMAGES2 | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 
 - name: IMAGES | Execute docker images
@@ -12,7 +12,7 @@
   when: "'{{ image }}' == ''"
   register: checkout
   changed_when: checkout.rc != 0
-- debug: msg="[Debug] IMAGES | {{ checkout }}"
+- debug: msg="IMAGES | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 
 - name: IMAGES | Execute docker status with an name "{{ image }}" 
@@ -20,7 +20,7 @@
   when: "'{{ image }}' != ''"
   register: checkout
   changed_when: checkout.rc != 0
-- debug: msg="[Debug] IMAGES | {{ checkout }}"
+- debug: msg="IMAGES | {{ checkout }}"
   when: do_debug|bool and checkout is defined
   
 - name: IMAGES | Execute docker status with an name "{{ image }}_{{ env_name }}"
@@ -28,5 +28,5 @@
   when: "'{{ image }}' != '' and '{{ env_name }}' != ''"
   register: checkout
   changed_when: checkout.rc != 0
-- debug: msg="[Debug] IMAGES | {{ checkout }}"
+- debug: msg="IMAGES | {{ checkout }}"
   when: do_debug|bool and checkout is defined

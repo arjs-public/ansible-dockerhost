@@ -4,7 +4,7 @@
 
 .PHONY: help list status create delete ping
 .PHONY: test stage production
-.PHONY: boot shutdown destroy stats destroy plugins configs setup deploy
+.PHONY: start stop destroy stats destroy plugins configs setup deploy
 .PHONY: images fetch destroyi
 .PHONY: startup teardown construct cleanup wipeout
 
@@ -68,8 +68,8 @@ help:
 	$(info [Info] )
 	$(info [Info] * make <environment> <image> <appname> setup [EXTRAS=<ansible-playbook params>])
 	$(info [Info] * make <environment> <image> <appname> deploy [EXTRAS=<ansible-playbook params>])
-	$(info [Info] * make <environment> <image> <appname> boot [EXTRAS=<ansible-playbook params>])
-	$(info [Info] * make <environment> <image> <appname> shutdown [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <environment> <image> <appname> start [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <environment> <image> <appname> stop [EXTRAS=<ansible-playbook params>])
 	$(info [Info] * make <environment> <image> <appname> stats [EXTRAS=<ansible-playbook params>])
 	$(info [Info] * make <environment> <image> <appname> destroy [DELETE=true|*false ***?])
 	$(info [Info] * make INFRA=<infra name from list> [ENV=<environment> *?] startup)
@@ -106,6 +106,7 @@ help:
 # 	$(info [Info] Starting $(PLAYBOOK))
 	
 ending:
+	$(info [Info])
 	$(info [Info] Finsihed $(PLAYBOOK))
 	$(info [Info])
 
@@ -144,7 +145,6 @@ execute_playbook:
 	$(info [Info] Execute playbook '$(PLAYBOOK)' ...)
 
 execute: set_playbook verify_playbook execute_playbook
-	$(info [Info])
 
 ifeq ($(wildcard $(A_CFG)),)
 	@echo "[Info] Not executed: ansible-playbook $(PLAYBOOKPATH) $(CONFIGS) $(APPIMG) $(ENVNAME) $(EXTRAS) $(APNEXTRA)
@@ -185,14 +185,14 @@ extras: extra_config extra_plugins extra_appname
 setup: PLAYBOOK=setup
 setup: verify extras execute ending 
 
-boot: PLAYBOOK=boot
-boot: verify execute ending
+start: PLAYBOOK=start
+start: verify execute ending
 
 deploy: PLAYBOOK=deploy
 deploy: verify execute ending 
 
-shutdown: PLAYBOOK=shutdown
-shutdown: verify execute ending
+stop: PLAYBOOK=stop
+stop: verify execute ending
 
 destroy: DELETE=false
 destroy: EXTRAS += -e "clean_up=$(DELETE)"
@@ -329,9 +329,13 @@ list:
 	@pushd $(TAG_D) > /dev/null; ls -1dR */; popd > /dev/null
 	$(info [Info])
 
+
 ansible_cmd_check:
 	@which ansible > /dev/null || (echo "[Error] ansible command not found!" && exit 1)
-	
-ping: ansible_cmd_check
-	$(info [Info] ping docker host [$(DOCKERHOST)] ...)
+
+ansible_ping:
+	$(info [Info] Ping docker host [$(DOCKERHOST)] ...)
+	$(info [Info])
 	@ansible -i $(INVENTORY) -m ping $(DOCKERHOST)
+
+ping: ansible_cmd_check ansible_ping ending

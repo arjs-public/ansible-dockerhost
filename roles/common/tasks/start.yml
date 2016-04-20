@@ -1,5 +1,5 @@
 ---
-- debug: msg="[Debug] START | Use 'standard' entrypoint."
+- debug: msg="START | Use 'standard' entrypoint."
   when: do_debug|bool and not has_custom_command
 
 - name: START | Create client container "{{ container_name }}" with standard command
@@ -15,17 +15,17 @@
   register: checkout
   when: not has_custom_command
 
-- debug: msg="[Debug] START | {{ checkout }}"
+- debug: msg="START | {{ checkout }}"
   when: do_debug|bool and not has_custom_command
-- debug: msg="[Debug] START | {{ checkout.changed }}"
+- debug: msg="START | {{ checkout.changed }}"
   when: do_debug|bool and not has_custom_command
-- debug: msg="[Debug] START | {{ checkout.summary.started }}"
+- debug: msg="START | {{ checkout.summary.started }}"
   when: do_debug|bool and not has_custom_command
 
 - fail: msg="[Error] START | Container '{{ container_name }}' with standard entrypoint is not running"
   when: not has_custom_command and checkout.changed|bool and checkout.summary.started == "1"
 
-- debug: msg="[Debug] START | Use '{{ command }}' with custom entrypoint."
+- debug: msg="START | Use '{{ command }}' with custom entrypoint."
   when: do_debug|bool and has_custom_command
 
 - name: START | Create client container "{{ container_name }}" with custom command
@@ -42,11 +42,11 @@
   register: checkout
   when: has_custom_command
 
-- debug: msg="[Debug] START | {{ checkout }}"
+- debug: msg="START | {{ checkout }}"
   when: do_debug|bool and has_custom_command
-- debug: msg="[Debug] START | {{ checkout.changed }}"
+- debug: msg="START | {{ checkout.changed }}"
   when: do_debug|bool and has_custom_command
-- debug: msg="[Debug] START | {{ checkout.summary.started }}"
+- debug: msg="START | {{ checkout.summary.started }}"
   when: do_debug|bool and has_custom_command
 
 - fail: msg="[Error] START | Container '{{ container_name }}' with custom entrypoint is not running"

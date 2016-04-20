@@ -4,10 +4,10 @@
     docker_api_version: 1.17
     name: "{{ container_name }}"
   register: docker_facts
-- debug: msg="[Debug] GET FACTS | {{ docker_facts.ansible_facts.docker_containers[container_name] }}"
+- debug: msg="GET FACTS | {{ docker_facts.ansible_facts.docker_containers[container_name] }}"
   when: do_debug|bool and docker_facts is defined
 - name: GET FACTS | Set easy variable with docker facts
   set_fact: 
     container_facts: "{{ docker_facts.ansible_facts.docker_containers[container_name] }}"
-- debug: msg="[Debug] GET FACTS | {{ container_facts['docker_state'].Running }}"
+- debug: msg="GET FACTS | {{ container_facts['docker_state'].Running }}"
   when: do_debug|bool and container_facts is defined

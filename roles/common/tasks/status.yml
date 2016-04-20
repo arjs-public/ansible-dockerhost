@@ -1,38 +1,38 @@
 ---
-- debug: msg="[Debug] STATUS | {{ image }}_{{ app_name }}_{{ env_name }}"
+- debug: msg="STATUS | {{ image }}_{{ app_name }}_{{ env_name }}"
   when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''
 - name: STATUS | Execute docker ps with an name "{{ image }}_{{ app_name }}_{{ env_name }}"
   shell: docker ps -a -f name="{{ image }}_{{ app_name }}_{{ env_name }}"
   when: "'{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''"
   register: checkout
-- debug: msg="[Debug] STATUS | {{ checkout }}"
+- debug: msg="STATUS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
   
-- debug: msg="[Debug] STATUS | {{ image }}_{{ app_name }}"
+- debug: msg="STATUS | {{ image }}_{{ app_name }}"
   when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''
 - name: STATUS | Execute docker ps with an name "{{ image }}_{{ app_name }}"
   shell: docker ps -a -f name="{{ image }}_{{ app_name }}"
   when: "'{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''"
   register: checkout
-- debug: msg="[Debug] STATUS | {{ checkout }}"
+- debug: msg="STATUS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
   
-- debug: msg="[Debug] STATUS | _{{ app_name }}"
+- debug: msg="STATUS | _{{ app_name }}"
   when: do_debug|bool and '{{ image }}' == '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''
 - name: STATUS | Execute docker ps with an name "_{{ app_name }}"
   shell: docker ps -a -f name="_{{ app_name }}"
   when: "'{{ image }}' == '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''"
   register: checkout
-- debug: msg="[Debug] STATUS | {{ checkout }}"
+- debug: msg="STATUS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
   
-- debug: msg="[Debug] STATUS | {{ image }}_{{ env_name }}"
+- debug: msg="STATUS | {{ image }}_{{ env_name }}"
   when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''
 - name: STATUS | Execute docker ps with an name "{{ image }}_{{ env_name }}"
   shell: docker ps -a -f name="{{ image }}_{{ env_name }}"
   when: "'{{ image }}' != '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''"
   register: checkout
-- debug: msg="[Debug] STATUS | {{ checkout }}"
+- debug: msg="STATUS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
   
 - debug: msg="_{{ env_name }}"
@@ -41,14 +41,14 @@
   shell: docker ps -a -f name="_{{ env_name }}"
   when: "'{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''"
   register: checkout
-- debug: msg="[Debug] STATUS | {{ checkout }}"
+- debug: msg="STATUS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
   
-- debug: msg="[Debug] STATUS | Normal docker ps"
+- debug: msg="STATUS | Normal docker ps"
   when: do_debug|bool and '{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' == ''
 - name: STATUS | Execute docker ps
   shell: docker ps -a
   when: "'{{ image }}' == '' and '{{ app_name }}' == '' and '{{ env_name }}' == ''"
   register: checkout
-- debug: msg="[Debug] STATUS | {{ checkout }}"
+- debug: msg="STATUS | {{ checkout }}"
   when: do_debug|bool and checkout is defined

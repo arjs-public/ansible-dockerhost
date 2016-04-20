@@ -1,5 +1,5 @@
 ---
-- name: Stop a running {{ container_name }} container based on {{ image }}
+- name: STOP | Stop a running {{ container_name }} container based on {{ image }}
   hosts: dockerhost
   gather_facts: no
   sudo: no
@@ -29,17 +29,17 @@
       when: do_check_docker|bool
 
   tasks:
-    - name: SHUTDOWN | Execute stats task
+    - name: STOP | Execute stats task
       include: "{{ common_tasks_base }}stats.yml"
 
-    - name: SHUTDOWN | Get docker container information
+    - name: STOP | Get docker container information
       include: '{{ common_tasks_base }}get_facts.yml'
 
-    - name: SHUTDOWN | Add docker container to inventory
+    - name: STOP | Add docker container to inventory
       include: '{{ common_tasks_base }}add_host.yml'
 
-    - name: SHUTDOWN | Stop docker container
+    - name: STOP | Stop docker container
       include: '{{ common_tasks_base }}stop.yml'
 
-    - name: SHUTDOWN | Execute status task
+    - name: STOP | Execute status task
       include: "{{ common_tasks_base }}status.yml"

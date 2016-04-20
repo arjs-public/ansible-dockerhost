@@ -1,5 +1,5 @@
 ---
-- name: BOOT | Create and start a running '{{ container_name }}' container based on '{{ image }}'
+- name: START | Create and start a running '{{ container_name }}' container based on '{{ image }}'
   hosts: dockerhost
   gather_facts: no
   sudo: no
@@ -29,19 +29,19 @@
       when: do_check_docker|bool
 
   tasks:
-    - name: BOOT | Start docker container
+    - name: START | Start docker container
       include: '{{ tasks_base }}start.yml'
 
-    - name: BOOT | Get docker container information
+    - name: START | Get docker container information
       include: '{{ tasks_base }}get_facts.yml'
 
-    - name: BOOT | Add docker container to inventory
+    - name: START | Add docker container to inventory
       include: '{{ tasks_base }}add_host.yml'
 
-    - name: BOOT | Execute status task
+    - name: START | Execute status task
       include: "{{ common_tasks_base }}status.yml"
 
-    - name: BOOT | Execute stats task
+    - name: START | Execute stats task
       include: "{{ common_tasks_base }}stats.yml"
 
 #    - name: Output

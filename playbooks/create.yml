@@ -1,61 +1,25 @@
 ---
-- name: Create a new {{ env_name }} environment config based on .template.json.j2
+- name: CREATE | Create a new '{{ env_name }}' environment config based on .template.json.j2
   hosts: dockerhost
-  sudo: False
+  gather_facts: no
+  sudo: no
 
   vars:
     - do_debug: False
+    - do_check_connection: False
+    - base_folder: ..
 
   vars_files:
-    - ../roles/vars/base.yml
+    - "{{ base_folder }}/roles/common/vars/defaults.yml"
+    - "{{ base_folder }}/roles/{{ image }}/vars/defaults.yml"
 
   pre_tasks:
-    - include: '{{ tasks_base }}debug_info.yml'
-      when: do_debug == True
+    - include: '{{ common_tasks_base }}/debug.yml'
+      when: do_debug|bool
 
-    - include: '{{ tasks_base }}check_connection.yml'
+    - include: '{{ common_tasks_base }}check_connection.yml'
+      when: do_check_connection|bool
 
   tasks:
-    - debug: vars=image msg="{{ image }}"
-      when: do_debug == True and image is defined and image != ""
-
-    - name: Process template to new environment of all images
-      template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"
-      #debug: msg="{{ item | dirname }}/{{ env_name }}.json"
-      with_fileglob:
-        - "{{ config_base }}/**/.template.json.j2"
-      when: image is defined and image == ""
-
-    - name: Process template to new environment of specific image
-      template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"
-      #debug: msg="{{ item | dirname }}/{{ env_name }}.json"
-      with_fileglob:
-        - "{{ config_base }}/{{ image }}/.template.json.j2"
-      when: image is defined and image != ""
-
-    - name: Process template to new environment of specific image with extras
-      template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"
-      #debug: msg="{{ item | dirname }}/{{ env_name }}.json"
-      with_fileglob:
-        - "{{ config_base }}/{{ image }}/{{ appname }}/.template.json.j2"
-      when: image is defined and image != "" and appname is defined and appname != ""
-
-    - name: Create "{{ item }}" folder specific for jenkins
-      file: dest="{{ item }}" state=directory
-      register: checkout
-      failed_when: checkout.state != "directory"
-      with_items:
-      - "{{ jenkins_base }}/{{ env_name }}"
-      - "{{ jenkins_data_base }}/{{ env_name }}"
-      when: image is defined and image == "" and appname != ""
-
-    - name: Create "{{ item }}" folder for "{{ image }}"
-      file: dest="{{ item }}" state=directory
-      register: checkout
-      failed_when: checkout.state != "directory"
-      with_items:
-      - "{{ extra_base }}/{{ image }}"
-      - "{{ extra_base }}/{{ image }}/{{ appname }}"
-      - "{{ extra_base }}/{{ image }}/{{ appname }}/{{ env_name }}"
-      when: image is defined and image != "" and appname != "" and env_name != ""
-
+    - name: CREATE | Create docker environment
+      include: '{{ tasks_base }}create.yml'

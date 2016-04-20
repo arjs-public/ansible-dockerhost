@@ -1,7 +1,7 @@
 ---
-- debug: msg="[Debug] STOP | {{ container_name }}"
+- debug: msg="STOP | {{ container_name }}"
   when: do_debug|bool and container_name is defined
-- debug: msg="[Debug] STOP | {{ container_facts }}"
+- debug: msg="STOP | {{ container_facts }}"
   when: do_debug|bool and container_facts is defined
 - name: STOP | Stop client container
   docker:

@@ -1,5 +1,5 @@
 ---
-- debug: msg="[Debug] SETUP | {{ templates_base }}{{ item }} {{ volume_home }}/{{ item }}"
+- debug: msg="SETUP | {{ templates_base }}{{ item }} {{ volume_home }}/{{ item }}"
   with_items:
     - index.html
     - offline.html
@@ -12,5 +12,5 @@
     - offline.html
   failed_when: checkout.state != "file"
   tags: nginx
-- debug: msg="[Debug] SETUP | {{ checkout }}"
+- debug: msg="SETUP | {{ checkout }}"
   when: do_debug|bool and checkout is defined

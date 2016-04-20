@@ -5,7 +5,7 @@
   remote_user: root
   delegate_to: "{{ container_name }}"
   when: do_debug|bool
-- debug: msg="[Debug] INSTALL | {{ checkout }}"
+- debug: msg="INSTALL | {{ checkout }}"
   when: do_debug|bool
 
 - name: INSTALL | Installing nginx
@@ -25,7 +25,7 @@
   delegate_to: "{{ container_name }}"
   tags: nginx
 
-- debug: msg="[Debug] INSTALL | Copy {{ files_base }}default {{ site_default_path }}/default"
+- debug: msg="INSTALL | Copy {{ files_base }}default {{ site_default_path }}/default"
   when: do_debug|bool
 - name: INSTALL | Prepare special nginx config
   copy: src="{{ files_base }}default" dest="{{ site_default_path }}/default" mode=644
@@ -34,10 +34,10 @@
   register: checkout
   failed_when: checkout.state != "file"
   tags: nginx
-- debug: msg="[Debug] INSTALL | {{ checkout }}"
+- debug: msg="INSTALL | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 
-- debug: msg="[Debug] INSTALL | {{ templates_base }}{{ item }} {{ volume_home }}/{{ item }}"
+- debug: msg="INSTALL | {{ templates_base }}{{ item }} {{ volume_home }}/{{ item }}"
   with_items:
     - index.html
     - offline.html
@@ -50,7 +50,7 @@
     - offline.html
   failed_when: checkout.state != "file"
   tags: nginx
-- debug: msg="[Debug] INSTALL | {{ checkout }}"
+- debug: msg="INSTALL | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 
 - name: INSTALL | Starting NGINX
@@ -67,9 +67,9 @@
   delegate_to: "{{ container_name }}"
   tags: nginx
      
-- debug: msg="[Debug] INSTALL | {{ inventory_hostname }}"
+- debug: msg="INSTALL | {{ inventory_hostname }}"
   when: do_debug|bool and inventory_hostname is defined
-- debug: msg="[Debug] INSTALL | {{ container_ip }}"
+- debug: msg="INSTALL | {{ container_ip }}"
   when: do_debug|bool and container_ip is defined
 - name: INSTALL | Check
   local_action: uri url=http://{{ container_ip }}
@@ -78,7 +78,7 @@
   remote_user: root
   delegate_to: "{{ container_name }}"
   tags: nginx
-- debug: msg="[Debug] INSTALL | {{ checkout.status }}"
+- debug: msg="INSTALL | {{ checkout.status }}"
   when: do_debug|bool and checkout is defined
 
 - name: INSTALL | Check offline.html
@@ -88,7 +88,7 @@
   remote_user: root
   delegate_to: "{{ container_name }}"
   tags: nginx
-- debug: msg="[Debug] INSTALL | {{ checkout.status }}"
+- debug: msg="INSTALL | {{ checkout.status }}"
   when: do_debug|bool and checkout is defined
 
 # - name: INSTALL | Stopping NGINX

@@ -1,5 +1,5 @@
 ---
-- name: SITE | Boot website
+- name: START | START website
   hosts: dockerhost
   gather_facts: no
   sudo: no
@@ -25,30 +25,30 @@
       when: do_check_folders|bool
 
   tasks:
-    - name: BOOT | Check if "docker.io" is present
+    - name: START | Check if "docker.io" is present
       shell: dpkg-query --list docker.io    
       register: checkout
       failed_when: checkout.rc != 0
-    - debug: msg="[Debug] BOOT | {{ checkout }}"
+    - debug: msg="START | {{ checkout }}"
       when: do_debug|bool and checkout is defined
 
-    - debug: msg="[Debug] BOOT | {{ container_name }}"
+    - debug: msg="START | {{ container_name }}"
       when: do_debug|bool and container_name is defined
 
-    - name: BOOT | Start docker container
+    - name: START | Start docker container
       include: "{{ common_tasks_base }}start.yml"
 
-    - name: BOOT | Get docker container information
+    - name: START | Get docker container information
       include: "{{ common_tasks_base }}get_facts.yml"
 
-    - name: BOOT | Add docker container to inventory
+    - name: START | Add docker container to inventory
       include: "{{ common_tasks_base }}add_host.yml"
 
-    - name: BOOT | Install nginx
+    - name: START | Install nginx
       include: "{{ tasks_base }}install.yml"
 
-    - name: BOOT | Execute status task
+    - name: START | Execute status task
       include: "{{ common_tasks_base}}status.yml"
 
-    - name: BOOT | Execute stats task
+    - name: START | Execute stats task
       include: "{{ common_tasks_base}}stats.yml"

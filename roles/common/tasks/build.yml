@@ -3,14 +3,14 @@
   file: path="{{ image_path }}" state=absent
   register: checkout
   failed_when: checkout.state != 'absent'
-- debug: msg="[debug] {{ checkout }}"
-  when: do_debug|bool
+- debug: msg="BUILD | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
 - name: BUILD | Check directory "{{ image_path }}" and create if not found
   file: dest="{{ image_path }}" state=directory
   register: checkout
   failed_when: checkout.state != 'directory'
-- debug: msg="[debug] {{ checkout }}"
-  when: do_debug|bool
+- debug: msg="BUILD | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
 
 
 - name: BUILD | Copy "{{ image }}" docker file to localhost
@@ -25,22 +25,22 @@
   stat: path="{{ image_path }}{{ image }}/"
   register: checkout
   failed_when: checkout.stat.exists == False
-- debug: msg="[debug] {{ checkout }}"
-  when: do_debug|bool
+- debug: msg="BUILD | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
 
 
 - name: BUILD | Create "{{ image_path }}{{ image }}/keys" folder
   file: dest="{{ image_path }}{{ image }}/keys" state=directory
   register: checkout
   failed_when: checkout.state != "directory"
-- debug: msg="[debug] {{ checkout }}"
-  when: do_debug|bool
+- debug: msg="BUILD | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
 - name: BUILD | Check "{{ image }}/keys" folder
   stat: path="{{ image }}/keys"
   register: checkout
   ignore_errors: True
-- debug: msg="[debug] {{ checkout }}"
-  when: do_debug|bool
+- debug: msg="BUILD | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
 - name: BUILD | Copy global "{{ item }}" file to destination
   copy:
   src: "{{ global_files_base }}/keys/{{ item }}"
@@ -65,14 +65,14 @@
   file: dest="{{ image_path }}{{ image }}/etc" state=directory
   register: checkout
   failed_when: checkout.state != "directory"
-- debug: msg="[debug] {{ checkout }}"
-  when: do_debug|bool
+- debug: msg="BUILD | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
 - name: BUILD | Check "{{ image }}/etc" folder
   stat: path="{{ image }}/etc"
   register: checkout
   ignore_errors: True
-- debug: msg="[debug] {{ checkout }}"
-  when: do_debug|bool
+- debug: msg="BUILD | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
 - name: BUILD | Copy global timezone file to destination
   copy:
   src: "{{ global_files_base }}/etc/timezone"
@@ -91,8 +91,8 @@
   stat: path="{{ files_base }}/get-pip.py"
   register: checkout
   ignore_errors: True
-- debug: msg="[debug] {{ checkout }}"
-  when: do_debug|bool
+- debug: msg="BUILD | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
 - name: BUILD | Copy get-pip.py to destination if exists
   copy:
   src: "{{ files_base }}/get-pip.py"
@@ -109,3 +109,5 @@
   command: docker build -t {{ image }} "{{ image_path }}{{ image }}"
   register: checkout
   failed_when: checkout.rc != 0
+- debug: msg="BUILD | {{ checkout }}"
+  when: do_debug|bool and checkout is defined

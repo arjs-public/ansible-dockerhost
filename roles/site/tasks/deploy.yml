@@ -7,7 +7,7 @@
 #   delegate_to: "{{ container_name }}"
 #   tags: nginx
 
-- debug: msg="[Debug] DEPLOY | {{ templates_base }}{{ item }} to {{ nginx_html_path }}/{{ item }}"
+- debug: msg="DEPLOY | {{ templates_base }}{{ item }} to {{ nginx_html_path }}/{{ item }}"
   with_items:
     - offline.html
   remote_user: root
@@ -22,12 +22,12 @@
   delegate_to: "{{ container_name }}"
   register: checkout
   tags: nginx
-- debug: msg="[Debug] DEPLOY | {{ checkout }}"
+- debug: msg="DEPLOY | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 
-- debug: msg="[Debug] DEPLOY | {{ artifact_spec }}"
+- debug: msg="DEPLOY | {{ artifact_spec }}"
   when: do_debug|bool and artifact_spec is defined
-- debug: msg="[Debug] DEPLOY | {{ artifact_path }}"
+- debug: msg="DEPLOY | {{ artifact_path }}"
   when: do_debug|bool and artifact_path is defined
 - name: DEPLOY | Downloading artifact
   get_url: 
@@ -37,7 +37,7 @@
   remote_user: root
   delegate_to: "{{ container_name }}"
   register: checkout
-- debug: msg="[Debug] DEPLOY | {{ checkout }}"
+- debug: msg="DEPLOY | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 - name: DEPLOY | Unarchive artifact
   unarchive:
@@ -47,7 +47,7 @@
   remote_user: root
   delegate_to: "{{ container_name }}"
   register: checkout
-- debug: msg="[Debug] DEPLOY | {{ checkout }}"
+- debug: msg="DEPLOY | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 
 - name: DEPLOY | Remove special "{{ item }}"
@@ -60,7 +60,7 @@
   delegate_to: "{{ container_name }}"
   register: checkout
   tags: nginx
-- debug: msg="[Debug] DEPLOY | {{ checkout }}"
+- debug: msg="DEPLOY | {{ checkout }}"
   when: do_debug|bool and checkout is defined
   
 - name: INSTALL | Starting NGINX
@@ -71,9 +71,9 @@
   delegate_to: "{{ container_name }}"
   tags: nginx
      
-- debug: msg="[Debug] DEPLOY | {{ inventory_hostname }}"
+- debug: msg="DEPLOY | {{ inventory_hostname }}"
   when: do_debug|bool and inventory_hostname is defined
-- debug: msg="[Debug] DEPLOY | {{ container_ip }}"
+- debug: msg="DEPLOY | {{ container_ip }}"
   when: do_debug|bool and container_ip is defined
 - name: DEPLOY | Check
   local_action: uri url=http://{{ container_ip }}
@@ -82,7 +82,7 @@
   remote_user: root
   delegate_to: "{{ container_name }}"
   tags: nginx
-- debug: msg="[Debug] DEPLOY | {{ checkout.status }}"
+- debug: msg="DEPLOY | {{ checkout.status }}"
   when: do_debug|bool and checkout is defined
 
 - name: DEPLOY | Check offline.html
@@ -92,5 +92,5 @@
   remote_user: root
   delegate_to: "{{ container_name }}"
   tags: nginx
-- debug: msg="[Debug] DEPLOY | {{ checkout.status }}"
+- debug: msg="DEPLOY | {{ checkout.status }}"
   when: do_debug|bool and checkout is defined

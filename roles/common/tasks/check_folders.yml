@@ -3,19 +3,19 @@
   file: dest={{ config_base }} state=directory
   register: checkout
   failed_when: checkout.state != "directory"
-- debug: msg="[debug] CHECK FOLDERS | {{ checkout }}"
+- debug: msg="CHECK FOLDERS | {{ checkout }}"
   when: do_debug|bool
 
-- debug: msg="[debug] CHECK FOLDERS | Conditional {{ volume_home }}"
+- debug: msg="CHECK FOLDERS | Conditional {{ volume_home }}"
   when: do_debug|bool and volume_home != ""
 - name: CHECK FOLDERS | Check "{{ volume_home }}" folder and create if not exists
   file: dest="{{ volume_home }}" state=directory mode=0775
   register: checkout
   failed_when: checkout.state != "directory"
   when: volume_home != ""
-- debug: msg="[debug] CHECK FOLDERS | {{ checkout }}"
+- debug: msg="CHECK FOLDERS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 
 - name: CHECK FOLDERS | Info about unset "{{ volume_home }}" folder variable
-  debug: msg="[debug] CHECK FOLDERS | Variable 'volume_home' not set, hence creation was skipped."
+  debug: msg="CHECK FOLDERS | Variable 'volume_home' not set, hence creation was skipped."
   when: do_debug|bool and volume_home == ""
