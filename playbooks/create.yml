@@ -10,8 +10,8 @@
     - base_folder: ..
 
   vars_files:
-    - "{{ base_folder }}/roles/common/vars/defaults.yml"
-    - "{{ base_folder }}/roles/{{ image }}/vars/defaults.yml"
+    - '{{ base_folder }}/roles/common/vars/defaults.yml'
+    - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
     - include: '{{ common_tasks_base }}/debug.yml'

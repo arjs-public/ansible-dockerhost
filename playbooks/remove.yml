@@ -1,5 +1,5 @@
 ---
-- name: STOP | Stop a running '{{ container_name }}' container based on '{{ image }}'
+- name: REMOVE | Stop a running '{{ container_name }}' container based on '{{ image }}' and delete
   hosts: dockerhost
   gather_facts: no
   sudo: no
@@ -10,6 +10,7 @@
     - do_check_folders: False
     - do_check_connection: False
     - base_folder: ..
+    - clean_up: False
 
   vars_files:
     - '{{ base_folder }}/roles/common/vars/defaults.yml'
@@ -29,17 +30,20 @@
       when: do_check_docker|bool
 
   tasks:
-    - name: STOP | Execute stats task
+    - name: REMOVE | Execute stats task
       include: '{{ common_tasks_base }}stats.yml'
 
-    - name: STOP | Get docker container information
+    - name: REMOVE | Get docker container information
       include: '{{ common_tasks_base }}get_facts.yml'
 
-    - name: STOP | Add docker container to inventory
+    - name: REMOVE | Add docker container to inventory
       include: '{{ common_tasks_base }}add_host.yml'
 
-    - name: STOP | Stop docker container
+    - name: REMOVE | Stop docker container
       include: '{{ common_tasks_base }}stop.yml'
 
-    - name: STOP | Execute status task
+    - name: REMOVE | Execute remove task
+      include: '{{ common_tasks_base }}remove.yml'
+
+    - name: REMOVE | Execute status task
       include: '{{ common_tasks_base }}status.yml'

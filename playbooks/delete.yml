@@ -1,60 +1,26 @@
 ---
-- name: Delete a {{ env_name }} environment config
+- name: DELETE | Delete a '{{ env_name }}' environment config
   hosts: dockerhost
-  sudo: False
+  gather_facts: no
+  sudo: no
 
   vars:
-    - clean_up: False
     - do_debug: False
+    - do_check_connection: False
+    - base_folder: ..
+    - clean_up: False
 
   vars_files:
-    - ../roles/vars/base.yml
+    - '{{ base_folder }}/roles/common/vars/defaults.yml'
+    - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
-    - include: '{{ tasks_base }}debug_info.yml'
-      when: do_debug == True
+    - include: '{{ common_tasks_base }}/debug.yml'
+      when: do_debug|bool
 
-    - include: '{{ tasks_base }}check_connection.yml'
+    - include: '{{ common_tasks_base }}check_connection.yml'
+      when: do_check_connection|bool
 
   tasks:
-    - debug: vars=image msg="{{ image }}"
-      when: do_debug == True and image is defined and image != ""
-
-    - name: Cleanup environment config files from all images
-      file: dest="{{ item }}" state=absent
-      #debug: msg="{{ item }}"
-      register: checkout
-      failed_when: checkout.state != "absent"
-      with_fileglob:
-        - "{{ config_base }}/**/{{ env_name }}.json"
-      when: image is defined and image == ""
-
-    - name: Cleanup environment config file from specific image
-      file: dest="{{ item }}" state=absent
-      #debug: msg="{{ item }}"
-      register: checkout
-      failed_when: checkout.state != "absent"
-      with_fileglob:
-        - "{{ config_base }}/{{ image }}/{{ env_name }}.json"
-      when: image is defined and image != ""
-
-    - name: Cleanup environment config file from specific image with extras
-      file: dest="{{ item }}" state=absent
-      #debug: msg="{{ item }}"
-      register: checkout
-      failed_when: checkout.state != "absent"
-      with_fileglob:
-        - "{{ config_base }}/{{ image }}/{{ pyapp }}/{{ env_name }}.json"
-      when: image is defined and image != "" and pyapp is defined and pyapp != ""
-
-    - debug: vars=clean_up msg="DELETE? {{ clean_up }}"
-      when: clean_up|bool and image is defined
-
-    - name: Delete "{{ item }}" folder
-      file: dest="{{ item }}" state=absent
-      register: checkout
-      failed_when: checkout.state != "absent"
-      with_items:
-      - "{{ jenkins_base }}/{{ env_name }}"
-      - "{{ jenkins_data_base }}/{{ env_name }}"
-      when: clean_up|bool and image is defined and image == ""
+    - name: DELETE | Delete docker environment
+      include: '{{ tasks_base }}delete.yml'

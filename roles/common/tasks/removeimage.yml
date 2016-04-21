@@ -1,6 +1,17 @@
 ---
-- name: DOCKER | Remove image
+- name: REMOVE IMAGE | Remove image '{{ image }}'
   docker_image:
     docker_api_version: 1.17
-    name: "{{ image }}"
+    name: '{{ image }}'
     state: absent
+  when: image != ''
+  register: checkout
+- debug: msg='REMOVE IMAGE | {{ checkout }}'
+  when: do_debug|bool and checkout is defined
+
+# - name: REMOVE IMAGE | Execute docker rmi with an name '{{ image }}' 
+#   shell: docker rmi "{{ image }}" | tail -n +2
+#   when: image != ''
+#   register: checkout
+# - debug: msg='REMOVE IMAGE | {{ checkout }}'
+#   when: do_debug|bool and checkout is defined

@@ -12,8 +12,8 @@
     - base_folder: ..
 
   vars_files:
-    - "{{ base_folder }}/roles/common/vars/defaults.yml"
-    - "{{ base_folder }}/roles/{{ image }}/vars/defaults.yml"
+    - '{{ base_folder }}/roles/common/vars/defaults.yml'
+    - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
     - include: '{{ common_tasks_base }}/debug.yml'
@@ -39,10 +39,10 @@
       include: '{{ tasks_base }}add_host.yml'
 
     - name: START | Execute status task
-      include: "{{ common_tasks_base }}status.yml"
+      include: '{{ common_tasks_base }}status.yml'
 
     - name: START | Execute stats task
-      include: "{{ common_tasks_base }}stats.yml"
+      include: '{{ common_tasks_base }}stats.yml'
 
 #    - name: Output
 #      debug: msg="[echo] {{ hostvars[container_name].ansible_ssh_host }}"

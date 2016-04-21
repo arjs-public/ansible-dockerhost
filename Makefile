@@ -3,9 +3,9 @@
 #
 
 .PHONY: help list status create delete ping
-.PHONY: test stage production
-.PHONY: start stop destroy stats destroy plugins configs setup deploy
-.PHONY: images fetch destroyi
+.PHONY: try develop test stage production
+.PHONY: start stop remove stats destroy plugins configs setup deploy
+.PHONY: images fetch removeimage
 .PHONY: startup teardown construct cleanup wipeout
 
 # --------- Defaults
@@ -54,13 +54,6 @@ ifneq ($(wildcard $(VPF_FILE)),)
  CONFIGS += --vault-password-file ./$(VPF_FILE)
 endif
 
-# --------- Include
-
-include configs/makefiles/images.mk
-include configs/makefiles/environments.mk
-include configs/makefiles/sites.mk
-include configs/makefiles/apps.mk
-
 # --------- Rules
 
 help:
@@ -71,7 +64,7 @@ help:
 	$(info [Info] * make <environment> <image> <appname> start [EXTRAS=<ansible-playbook params>])
 	$(info [Info] * make <environment> <image> <appname> stop [EXTRAS=<ansible-playbook params>])
 	$(info [Info] * make <environment> <image> <appname> stats [EXTRAS=<ansible-playbook params>])
-	$(info [Info] * make <environment> <image> <appname> destroy [DELETE=true|*false ***?])
+	$(info [Info] * make <environment> <image> <appname> remove [DELETE=true|*false ***?])
 	$(info [Info] * make INFRA=<infra name from list> [ENV=<environment> *?] startup)
 	$(info [Info] * make INFRA=<infra name from list> teardown)
 	$(info [Info] * make INFRA=<infra name from list> construct)
@@ -79,7 +72,7 @@ help:
 	$(info [Info] * make ENV=<Environment name> *? [IMG=<appgroup> 5*?] [NAME=<appname> 6*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete))
 	$(info [Info] * make IMG=<image to build> build)
 	$(info [Info] * make IMG=<image from dockerhub> fetch)
-	$(info [Info] * make IMG=<image from images> *? destroyi)
+	$(info [Info] * make IMG=<image from images> *? removeimage)
 	$(info [Info] * make ping | status | images | list | wipeout ****?)
 	$(info [Info] )
 	$(info [Info] *? see 'make list' output for available options; default: ENV = develop)
@@ -98,12 +91,16 @@ help:
 	$(info [Info] * FILES_D = $(FILES_D))
 	$(info [Info] * A_CFG = $(A_CFG))
 	$(info [Info] )
+	@true
+
+# --------- Include
+
+include configs/makefiles/images.mk
+include configs/makefiles/environments.mk
+include configs/makefiles/sites.mk
+include configs/makefiles/apps.mk
 
 # -------- Helpers handling
-
-# starting:
-# 	$(info [Info])
-# 	$(info [Info] Starting $(PLAYBOOK))
 	
 ending:
 	$(info [Info])
@@ -194,10 +191,10 @@ deploy: verify execute ending
 stop: PLAYBOOK=stop
 stop: verify execute ending
 
-destroy: DELETE=false
-destroy: EXTRAS += -e "clean_up=$(DELETE)"
-destroy: PLAYBOOK=destroy
-destroy: verify execute ending
+remove: DELETE=false
+remove: EXTRAS += -e "clean_up=$(DELETE)"
+remove: PLAYBOOK=remove
+remove: verify execute ending
 
 stats: PLAYBOOK=stats
 stats: verify execute ending
@@ -250,8 +247,8 @@ images: filter_img execute ending
 fetch: PLAYBOOK=fetch
 fetch: set_img execute ending
 
-destroyi: PLAYBOOK=destroyi
-destroyi: verify_var_img execute ending
+removeimage: PLAYBOOK=removeimage
+removeimage: verify_var_img execute ending
 
 # -------- Wipe.out or debugging
 
@@ -270,7 +267,7 @@ startup_doing: verify_infra
 	do \
 		echo "[Info]  Booting $$l ..."; \
 		make IMG=$$l ENV=$(ENV) setup; \
-		make IMG=$$l ENV=$(ENV) boot; \
+		make IMG=$$l ENV=$(ENV) start; \
 		echo; \
 	done
 
@@ -283,7 +280,7 @@ teardown_dowing: verify_infra
 	@for l in `tac $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo "[Info] Shuting down $$l"; \
-		make IMG=$$l ENV=$(ENV) shutdown; \
+		make IMG=$$l ENV=$(ENV) stop; \
 		echo; \
 	done
 
@@ -307,7 +304,7 @@ cleanup_doing:
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
 		echo "[Info] Removing $$l"; \
-		make IMG=$$l ENV=$(ENV) DELETE=$(DELETE) destroy; \
+		make IMG=$$l ENV=$(ENV) DELETE=$(DELETE) remove; \
 		echo; \
 	done
 

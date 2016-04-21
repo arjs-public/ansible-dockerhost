@@ -1,5 +1,5 @@
 ---
-- name: Destroys all local running containers from local docker host
+- name: Destroys all local running containers from local docker host '{{ container_host }}'
   hosts: dockerhost
   sudo: False
 

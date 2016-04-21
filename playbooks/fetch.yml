@@ -1,8 +1,8 @@
 ---
-- name: FETCH | Fetch standard images from docker hub
+- name: FETCH | Fetch standard images from docker hub '{{ inventory_host }}'
   hosts: dockerhost
   gather_facts: no
-  sudo: False
+  sudo: no
 
   vars:
     - do_debug: False
@@ -10,7 +10,7 @@
     - base_folder: ..
 
   vars_files:
-    - "{{ base_folder }}/roles/common/vars/defaults.yml"
+    - '{{ base_folder }}/roles/common/vars/defaults.yml'
 
   pre_tasks:
     - include: '{{ common_tasks_base }}/debug.yml'
