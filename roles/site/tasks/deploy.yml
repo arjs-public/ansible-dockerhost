@@ -4,63 +4,63 @@
 #     name: nginx
 #     state: stopped
 #   remote_user: root
-#   delegate_to: "{{ container_name }}"
+#   delegate_to: '{{ container_name }}'
 #   tags: nginx
 
-- debug: msg="DEPLOY | {{ templates_base }}{{ item }} to {{ nginx_html_path }}/{{ item }}"
+- debug: msg='DEPLOY | {{ templates_base }}{{ item }} to {{ nginx_html_path }}/{{ item }}'
   with_items:
     - offline.html
   remote_user: root
-  delegate_to: "{{ container_name }}"
+  delegate_to: '{{ container_name }}'
   when: do_debug|bool
-- name: DEPLOY | Prepare special "{{ item }}"
-  template: src="{{ templates_base }}{{ item }}" dest="{{ nginx_html_path }}/{{ item }}" mode=644
+- name: DEPLOY | Prepare special '{{ item }}'
+  template: src='{{ templates_base }}{{ item }}' dest='{{ nginx_html_path }}/{{ item }}' mode=644
   with_items:
     - offline.html
-  failed_when: checkout.state != "file"
+  failed_when: checkout.state != 'file'
   remote_user: root
-  delegate_to: "{{ container_name }}"
+  delegate_to: '{{ container_name }}'
   register: checkout
   tags: nginx
-- debug: msg="DEPLOY | {{ checkout }}"
+- debug: msg='DEPLOY | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- debug: msg="DEPLOY | {{ artifact_spec }}"
+- debug: msg='DEPLOY | {{ artifact_spec }}'
   when: do_debug|bool and artifact_spec is defined
-- debug: msg="DEPLOY | {{ artifact_path }}"
+- debug: msg='DEPLOY | {{ artifact_path }}'
   when: do_debug|bool and artifact_path is defined
 - name: DEPLOY | Downloading artifact
   get_url: 
-    url: "{{ artifactory_base_url }}/{{ artifact_spec }}/{{ artifact_path }}{{ artifact_version }}/{{ artifact_name }}" 
-    dest: "/tmp/{{ app_name }}.{{ version }}.tgz"  
+    url: '{{ artifactory_base_url }}/{{ artifact_spec }}/{{ artifact_path }}{{ artifact_version }}/{{ artifact_name }}' 
+    dest: '/tmp/{{ app_name }}.{{ version }}.tgz'  
     mode: 0644
   remote_user: root
-  delegate_to: "{{ container_name }}"
+  delegate_to: '{{ container_name }}'
   register: checkout
-- debug: msg="DEPLOY | {{ checkout }}"
+- debug: msg='DEPLOY | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 - name: DEPLOY | Unarchive artifact
   unarchive:
     copy: no 
-    src: "/tmp/{{ app_name }}.{{ version }}.tgz" 
-    dest: "{{ nginx_html_path }}"  
+    src: '/tmp/{{ app_name }}.{{ version }}.tgz' 
+    dest: '{{ nginx_html_path }}'  
   remote_user: root
-  delegate_to: "{{ container_name }}"
+  delegate_to: '{{ container_name }}'
   register: checkout
-- debug: msg="DEPLOY | {{ checkout }}"
+- debug: msg='DEPLOY | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- name: DEPLOY | Remove special "{{ item }}"
-  file: dest="{{ item }}" state=absent
+- name: DEPLOY | Remove special '{{ item }}'
+  file: dest='{{ item }}' state=absent
   with_items:
-    - "{{ nginx_html_path }}/offline.html"
-    - "/tmp/{{ app_name }}.{{ version }}.tgz"
-  failed_when: checkout.state != "absent"
+    - '{{ nginx_html_path }}/offline.html'
+    - '/tmp/{{ app_name }}.{{ version }}.tgz'
+  failed_when: checkout.state != 'absent'
   remote_user: root
-  delegate_to: "{{ container_name }}"
+  delegate_to: '{{ container_name }}'
   register: checkout
   tags: nginx
-- debug: msg="DEPLOY | {{ checkout }}"
+- debug: msg='DEPLOY | {{ checkout }}'
   when: do_debug|bool and checkout is defined
   
 - name: INSTALL | Starting NGINX
@@ -68,21 +68,21 @@
     name: nginx
     state: reloaded
   remote_user: root
-  delegate_to: "{{ container_name }}"
+  delegate_to: '{{ container_name }}'
   tags: nginx
      
-- debug: msg="DEPLOY | {{ inventory_hostname }}"
+- debug: msg='DEPLOY | {{ inventory_hostname }}'
   when: do_debug|bool and inventory_hostname is defined
-- debug: msg="DEPLOY | {{ container_ip }}"
+- debug: msg='DEPLOY | {{ container_ip }}'
   when: do_debug|bool and container_ip is defined
 - name: DEPLOY | Check
   local_action: uri url=http://{{ container_ip }}
   register: checkout
   failed_when: checkout.status != 200
   remote_user: root
-  delegate_to: "{{ container_name }}"
+  delegate_to: '{{ container_name }}'
   tags: nginx
-- debug: msg="DEPLOY | {{ checkout.status }}"
+- debug: msg='DEPLOY | {{ checkout.status }}'
   when: do_debug|bool and checkout is defined
 
 - name: DEPLOY | Check offline.html
@@ -90,7 +90,7 @@
   register: checkout
   failed_when: checkout.status != 404
   remote_user: root
-  delegate_to: "{{ container_name }}"
+  delegate_to: '{{ container_name }}'
   tags: nginx
-- debug: msg="DEPLOY | {{ checkout.status }}"
+- debug: msg='DEPLOY | {{ checkout.status }}'
   when: do_debug|bool and checkout is defined

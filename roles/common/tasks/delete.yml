@@ -1,60 +1,60 @@
 ---
-- debug: msg="DELETE | {{ item }}"
+- debug: msg='DELETE | {{ item }}'
   with_fileglob:
-  - "{{ config_base }}/**/{{ env_name }}.json"
-  when: do_debug|bool and image is defined and image == ""
+  - '{{ config_base }}/**/{{ env_name }}.json'
+  when: do_debug|bool and image is defined and image == ''
 - name: DELETE | Cleanup environment config files from all images
-  file: dest="{{ item }}" state=absent
+  file: dest='{{ item }}' state=absent
   with_fileglob:
-  - "{{ config_base }}/**/{{ env_name }}.json"
-  when: image is defined and image == ""
-  failed_when: checkout.state != "absent"
+  - '{{ config_base }}/**/{{ env_name }}.json'
+  when: image is defined and image == ''
+  failed_when: checkout.state != 'absent'
   register: checkout
-- debug: msg="DELETE | {{ checkout }}"
+- debug: msg='DELETE | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- debug: msg="DELETE | {{ item }}"
+- debug: msg='DELETE | {{ item }}'
   with_fileglob:
-  - "{{ config_base }}/{{ image }}/{{ env_name }}.json"
-  when: do_debug|bool and image is defined and image != ""
+  - '{{ config_base }}/{{ image }}/{{ env_name }}.json'
+  when: do_debug|bool and image is defined and image != ''
 - name: DELETE | Cleanup environment config file from specific image
-  file: dest="{{ item }}" state=absent
+  file: dest='{{ item }}' state=absent
   with_fileglob:
-  - "{{ config_base }}/{{ image }}/{{ env_name }}.json"
-  when: image is defined and image != ""
-  failed_when: checkout.state != "absent"
+  - '{{ config_base }}/{{ image }}/{{ env_name }}.json'
+  when: image is defined and image != ''
+  failed_when: checkout.state != 'absent'
   register: checkout
-- debug: msg="DELETE | {{ checkout }}"
+- debug: msg='DELETE | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- debug: msg="DELETE | {{ item }}"
+- debug: msg='DELETE | {{ item }}'
   with_fileglob:
-  - "{{ config_base }}/{{ image }}/{{ pyapp }}/{{ env_name }}.json"
-  when: do_debug|bool and image is defined and image != "" and pyapp is defined and pyapp != ""
+  - '{{ config_base }}/{{ image }}/{{ pyapp }}/{{ env_name }}.json'
+  when: do_debug|bool and image is defined and image != '' and pyapp is defined and pyapp != ''
 - name: DELETE | Cleanup environment config file from specific image with extras
-  file: dest="{{ item }}" state=absent
+  file: dest='{{ item }}' state=absent
   with_fileglob:
-  - "{{ config_base }}/{{ image }}/{{ pyapp }}/{{ env_name }}.json"
-  when: image is defined and image != "" and pyapp is defined and pyapp != ""
-  failed_when: checkout.state != "absent"
+  - '{{ config_base }}/{{ image }}/{{ pyapp }}/{{ env_name }}.json'
+  when: image is defined and image != '' and pyapp is defined and pyapp != ''
+  failed_when: checkout.state != 'absent'
   register: checkout
-- debug: msg="DELETE | {{ checkout }}"
+- debug: msg='DELETE | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- debug: msg="DELETE | DELETE? {{ clean_up }}"
+- debug: msg='DELETE | DELETE? {{ clean_up }}'
   when: do_debug|bool and clean_up is defined
-- debug: msg="DELETE | {{ item | dirname }}/{{ env_name }}.json"
+- debug: msg='DELETE | {{ item | dirname }}/{{ env_name }}.json'
   with_items:
-  - "{{ jenkins_base }}/{{ env_name }}"
-  - "{{ jenkins_data_base }}/{{ env_name }}"
-  when: do_debug|bool and clean_up|bool and image is defined and image == ""
-- name: DELETE | Delete "{{ item }}" folder
-  file: dest="{{ item }}" state=absent
+  - '{{ jenkins_base }}/{{ env_name }}'
+  - '{{ jenkins_data_base }}/{{ env_name }}'
+  when: do_debug|bool and clean_up|bool and image is defined and image == ''
+- name: DELETE | Delete '{{ item }}' folder
+  file: dest='{{ item }}' state=absent
   with_items:
-  - "{{ jenkins_base }}/{{ env_name }}"
-  - "{{ jenkins_data_base }}/{{ env_name }}"
-  when: clean_up|bool and image is defined and image == ""
-  failed_when: checkout.state != "absent"
+  - '{{ jenkins_base }}/{{ env_name }}'
+  - '{{ jenkins_data_base }}/{{ env_name }}'
+  when: clean_up|bool and image is defined and image == ''
+  failed_when: checkout.state != 'absent'
   register: checkout
-- debug: msg="DELETE | {{ checkout }}"
+- debug: msg='DELETE | {{ checkout }}'
   when: do_debug|bool and checkout is defined

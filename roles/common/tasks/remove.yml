@@ -2,16 +2,16 @@
 - name: REMOVE | Remove obsolete container
   docker:
     docker_api_version: 1.17
-    name: "{{ container_name }}"
-    image: "{{ image }}"
+    name: '{{ container_name }}'
+    image: '{{ image }}'
     state: absent
 
-- debug: msg="REMOVE | Delete {{ volume_home }}? {{ clean_up }}"
+- debug: msg='REMOVE | Delete {{ volume_home }}? {{ clean_up }}'
   when: do_debug|bool and clean_up is defined
-- name: Delete "{{ volume_home }}" folder
-  file: dest="{{ volume_home }}" state=absent
+- name: Delete '{{ volume_home }}' folder
+  file: dest='{{ volume_home }}' state=absent
   when: clean_up|bool
-  failed_when: checkout.state != "absent"
+  failed_when: checkout.state != 'absent'
   register: checkout
-- debug: msg="REMOVE | {{ checkout }}"
+- debug: msg='REMOVE | {{ checkout }}'
   when: do_debug|bool and checkout is defined

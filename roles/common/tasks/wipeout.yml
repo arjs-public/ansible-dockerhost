@@ -1,0 +1,6 @@
+---
+- name: WIPEOUT | Execute docker stop and rm 
+  shell: for j in $(docker ps -a -q); do echo Removing $j; echo docker stop $j; echo docker rm $j; echo; done
+  register: checkout
+- debug: msg='REMOVE | {{ checkout }}'
+  when: do_debug|bool and checkout is defined

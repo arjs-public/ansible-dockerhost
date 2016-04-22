@@ -1,73 +1,73 @@
 ---
-- debug: msg="CREATE | {{ item | dirname }}/{{ env_name }}.json"
+- debug: msg='CREATE | {{ item | dirname }}/{{ env_name }}.json'
   with_fileglob:
-  - "{{ config_base }}/**/.template.json.j2"
-  when: do_debug|bool and image is defined and image == ""
+  - '{{ config_base }}/**/.template.json.j2'
+  when: do_debug|bool and image is defined and image == ''
 - name: CREATE | Process template to new environment of all images
-  template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"
+  template: src='{{ item }}' dest='{{ item | dirname }}/{{ env_name }}.json'
   with_fileglob:
-  - "{{ config_base }}/**/.template.json.j2"
-  when: image is defined and image == ""
+  - '{{ config_base }}/**/.template.json.j2'
+  when: image is defined and image == ''
   register: checkout
-- debug: msg="CREATE | {{ checkout }}"
+- debug: msg='CREATE | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- debug: msg="CREATE | {{ item | dirname }}/{{ env_name }}.json"
+- debug: msg='CREATE | {{ item | dirname }}/{{ env_name }}.json'
   with_fileglob:
-  - "{{ config_base }}/{{ image }}/.template.json.j2"
-  when: do_debug|bool and image is defined and image != ""
+  - '{{ config_base }}/{{ image }}/.template.json.j2'
+  when: do_debug|bool and image is defined and image != ''
 - name: CREATE | Process template to new environment of specific image
-  template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"
+  template: src='{{ item }}' dest='{{ item | dirname }}/{{ env_name }}.json'
   with_fileglob:
-  - "{{ config_base }}/{{ image }}/.template.json.j2"
-  when: image is defined and image != ""
+  - '{{ config_base }}/{{ image }}/.template.json.j2'
+  when: image is defined and image != ''
   register: checkout
-- debug: msg="CREATE | {{ checkout }}"
+- debug: msg='CREATE | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- debug: msg="CREATE | {{ item | dirname }}/{{ env_name }}.json"
+- debug: msg='CREATE | {{ item | dirname }}/{{ env_name }}.json'
   with_fileglob:
-  - "{{ config_base }}/{{ image }}/{{ app_name }}/.template.json.j2"
-  when: do_debug|bool and image is defined and image != "" and app_name is defined and app_name != ""
+  - '{{ config_base }}/{{ image }}/{{ app_name }}/.template.json.j2'
+  when: do_debug|bool and image is defined and image != '' and app_name is defined and app_name != ''
 - name: CREATE | Process template to new environment of specific image with extras
-  template: src="{{ item }}" dest="{{ item | dirname }}/{{ env_name }}.json"
+  template: src='{{ item }}' dest='{{ item | dirname }}/{{ env_name }}.json'
   with_fileglob:
-  - "{{ config_base }}/{{ image }}/{{ app_name }}/.template.json.j2"
-  when: image is defined and image != "" and app_name is defined and app_name != ""
+  - '{{ config_base }}/{{ image }}/{{ app_name }}/.template.json.j2'
+  when: image is defined and image != '' and app_name is defined and app_name != ''
   register: checkout
-- debug: msg="CREATE | {{ checkout }}"
+- debug: msg='CREATE | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- debug: msg="CREATE | {{ item }}"
+- debug: msg='CREATE | {{ item }}'
   with_items:
-  - "{{ jenkins_base }}/{{ env_name }}"
-  - "{{ jenkins_data_base }}/{{ env_name }}"
-  when: do_debug|bool and image is defined and image == "" and app_name != ""
-- name: CREATE | Create "{{ item }}" folder specific for jenkins
-  file: dest="{{ item }}" state=directory
+  - '{{ jenkins_base }}/{{ env_name }}'
+  - '{{ jenkins_data_base }}/{{ env_name }}'
+  when: do_debug|bool and image is defined and image == '' and app_name != ''
+- name: CREATE | Create '{{ item }}' folder specific for jenkins
+  file: dest='{{ item }}' state=directory
   with_items:
-  - "{{ jenkins_base }}/{{ env_name }}"
-  - "{{ jenkins_data_base }}/{{ env_name }}"
-  when: image is defined and image == "" and app_name != ""
-  failed_when: checkout.state != "directory"
+  - '{{ jenkins_base }}/{{ env_name }}'
+  - '{{ jenkins_data_base }}/{{ env_name }}'
+  when: image is defined and image == '' and app_name != ''
+  failed_when: checkout.state != 'directory'
   register: checkout
-- debug: msg="CREATE | {{ checkout }}"
+- debug: msg='CREATE | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- debug: msg="CREATE | {{ item }}"
+- debug: msg='CREATE | {{ item }}'
   with_items:
-  - "{{ extra_base }}/{{ image }}"
-  - "{{ extra_base }}/{{ image }}/{{ app_name }}"
-  - "{{ extra_base }}/{{ image }}/{{ app_name }}/{{ env_name }}"
-  when: do_debug|bool and image is defined and image != "" and app_name != "" and env_name != ""
-- name: CREATE | Create "{{ item }}" folder for "{{ image }}"
-  file: dest="{{ item }}" state=directory
+  - '{{ extra_base }}/{{ image }}'
+  - '{{ extra_base }}/{{ image }}/{{ app_name }}'
+  - '{{ extra_base }}/{{ image }}/{{ app_name }}/{{ env_name }}'
+  when: do_debug|bool and image is defined and image != '' and app_name != '' and env_name != ''
+- name: CREATE | Create '{{ item }}' folder for '{{ image }}'
+  file: dest='{{ item }}' state=directory
   with_items:
-  - "{{ extra_base }}/{{ image }}"
-  - "{{ extra_base }}/{{ image }}/{{ app_name }}"
-  - "{{ extra_base }}/{{ image }}/{{ app_name }}/{{ env_name }}"
-  when: image is defined and image != "" and app_name != "" and env_name != ""
-  failed_when: checkout.state != "directory"
+  - '{{ extra_base }}/{{ image }}'
+  - '{{ extra_base }}/{{ image }}/{{ app_name }}'
+  - '{{ extra_base }}/{{ image }}/{{ app_name }}/{{ env_name }}'
+  when: image is defined and image != '' and app_name != '' and env_name != ''
+  failed_when: checkout.state != 'directory'
   register: checkout
-- debug: msg="CREATE | {{ checkout }}"
+- debug: msg='CREATE | {{ checkout }}'
   when: do_debug|bool and checkout is defined

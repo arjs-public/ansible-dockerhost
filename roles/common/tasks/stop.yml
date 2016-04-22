@@ -1,12 +1,12 @@
 ---
-- debug: msg="STOP | {{ container_name }}"
+- debug: msg='STOP | {{ container_name }}'
   when: do_debug|bool and container_name is defined
-- debug: msg="STOP | {{ container_facts }}"
+- debug: msg='STOP | {{ container_facts }}'
   when: do_debug|bool and container_facts is defined
 - name: STOP | Stop client container
   docker:
     docker_api_version: 1.17
-    image: "{{ image }}"
-    name: "{{ container_name }}"
+    image: '{{ image }}'
+    name: '{{ container_name }}'
     state: stopped
   when: container_facts['docker_state'].Running|bool

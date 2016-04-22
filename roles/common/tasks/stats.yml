@@ -1,27 +1,27 @@
 ---
-- debug: msg="STATS | {{ image }}_{{ app_name }}"
-  when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''
-- name: STATS | Execute docker logs with an name "{{ image }}_{{ app_name }}" 
-  shell: docker logs --tail="30" "{{ image }}_{{ app_name }}"
-  when: "'{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' == ''"
+- debug: msg='STATS | {{ image }}_{{ app_name }}'
+  when: do_debug|bool and image != '' and app_name != '' and env_name == ''
+- name: STATS | Execute docker logs with an name '{{ image }}_{{ app_name }}' 
+  shell: docker logs --tail='30' '{{ image }}_{{ app_name }}'
+  when: image != '' and app_name != '' and env_name == ''
   register: checkout
-- debug: msg="STATS | {{ checkout }}"
+- debug: msg='STATS | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- debug: msg="STATS | {{ image }}_{{ env_name }}"
-  when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''
-- name: STATS | Execute docker logs with an name "{{ image }}_{{ env_name }}" 
-  shell: docker logs --tail="30" "{{ image }}_{{ env_name }}"
-  when: "'{{ image }}' != '' and '{{ app_name }}' == '' and '{{ env_name }}' != ''"
+- debug: msg='STATS | {{ image }}_{{ env_name }}'
+  when: do_debug|bool and image != '' and app_name == '' and env_name != ''
+- name: STATS | Execute docker logs with an name '{{ image }}_{{ env_name }}' 
+  shell: docker logs --tail='30' '{{ image }}_{{ env_name }}'
+  when: image != '' and app_name == '' and env_name != ''
   register: checkout
-- debug: msg="STATS | {{ checkout }}"
+- debug: msg='STATS | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- debug: msg="STATS | {{ image }}_{{ app_name }}_{{ env_name }}"
-  when: do_debug|bool and '{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''
-- name: STATS | Execute docker logs with an name "{{ image }}_{{ app_name }}_{{ env_name }}" 
-  shell: docker logs --tail="30" "{{ image }}_{{ app_name }}_{{ env_name }}"
-  when: "'{{ image }}' != '' and '{{ app_name }}' != '' and '{{ env_name }}' != ''"
+- debug: msg='STATS | {{ image }}_{{ app_name }}_{{ env_name }}'
+  when: do_debug|bool and image != '' and app_name != '' and env_name != ''
+- name: STATS | Execute docker logs with an name '{{ image }}_{{ app_name }}_{{ env_name }}' 
+  shell: docker logs --tail='30' '{{ image }}_{{ app_name }}_{{ env_name }}'
+  when: image != '' and app_name != '' and env_name != ''
   register: checkout
-- debug: msg="STATS | {{ checkout }}"
+- debug: msg='STATS | {{ checkout }}'
   when: do_debug|bool and checkout is defined

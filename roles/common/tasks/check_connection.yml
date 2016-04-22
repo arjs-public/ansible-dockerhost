@@ -1,9 +1,9 @@
 ---
 - name: CHECK CONNECTION | Check connection
-  shell: echo "Ok!"
+  shell: echo 'Ok!'
   register: echout
   changed_when: echout.rc != 0
 
 - name: CHECK CONNECTION | Fail when not Ok is returned!
-  fail: msg="[info] {{ echout.stdout }}"
-  when: echout.stdout != "Ok!"
+  fail: msg='[info] {{ echout.stdout }}'
+  when: echout.stdout != 'Ok!'

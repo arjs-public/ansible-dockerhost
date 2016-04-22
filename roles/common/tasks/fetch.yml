@@ -1,0 +1,7 @@
+---
+- name: FETCH | Execute docker pull with an name "{{ image }}" 
+  shell: docker pull "{{ image }}" | tail -n +2
+  when: image != ''
+  register: checkout
+- debug: msg="FETCH | {{ checkout }}"
+  when: do_debug|bool and checkout is defined

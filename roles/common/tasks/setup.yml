@@ -1,0 +1,5 @@
+---
+- debug: msg='SETUP | {{ volume_home }}'
+  when: do_debug|bool
+- debug: msg='SETUP | {{ checkout }}'
+  when: do_debug|bool and checkout is defined

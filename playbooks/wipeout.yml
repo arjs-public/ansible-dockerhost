@@ -1,36 +1,35 @@
 ---
-- name: Destroys all local running containers from local docker host '{{ container_host }}'
+- name: WIPEOUT | Destroys all local running containers from local docker host '{{ container_host }}'
   hosts: dockerhost
-  sudo: False
+  gather_facts: no
+  sudo: no
 
   vars:
     - do_debug: False
+    - do_check_docker: False
+    - do_check_connection: False
+    - base_folder: ..
 
   vars_files:
-    - ../roles/vars/base.yml
+    - '{{ base_folder }}/roles/common/vars/defaults.yml'
+    - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
-    - include: '{{ tasks_base }}debug_info.yml'
-      when: do_debug == True
+    - include: '{{ common_tasks_base }}/debug.yml'
+      when: do_debug|bool
 
-    - include: '{{ tasks_base }}check_connection.yml'
+    - include: '{{ common_tasks_base }}check_connection.yml'
+      when: do_check_connection|bool
+
+    - include: '{{ common_tasks_base }}check_docker.yml'
+      when: do_check_docker|bool
 
   tasks:
-    - name: Check if "docker.io" is present
-      shell: dpkg-query --list docker.io    
-      register: checkout
-    - debug: msg="{{ checkout }}"
-      when: do_debug == True
-    
-    - name: Execute docker stop and rm 
-      shell: for j in $(docker ps -a -q); do echo Removing $j; echo docker stop $j; echo docker rm $j; echo; done
-      register: checkout
-    - debug: msg="{{ checkout }}"
-      when: do_debug == True
-       
-    - name: Execute docker status
-      shell: docker ps -a
-      when: "'{{ image }}' == '' and '{{ env_name }}' == ''"
-      register: output
-    - debug: msg="{{ output }}"
-      when: do_debug == True
+    - name: WIPEOUT | Execute stats task
+      include: '{{ common_tasks_base }}stats.yml'
+
+    - name: WIPEOUT | Execute wipeout task
+      include: '{{ common_tasks_base }}wipeout.yml'
+
+    - name: WIPEOUT | Execute status task
+      include: '{{ common_tasks_base }}status.yml'
