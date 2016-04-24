@@ -1,7 +1,7 @@
 ---
 - name: IMAGES | Execute docker images with an grep for name '{{ image }}'
   shell: docker images | grep '{{ image }}'
-  when: ''{{ image }}' != '''
+  when: image != ''
   register: checkout
   changed_when: checkout.rc != 0
 - debug: msg='IMAGES | {{ checkout }}'
@@ -9,7 +9,7 @@
 
 - name: IMAGES | Execute docker images
   shell: docker images
-  when: ''{{ image }}' == '''
+  when: image == ''
   register: checkout
   changed_when: checkout.rc != 0
 - debug: msg='IMAGES | {{ checkout }}'
@@ -17,7 +17,7 @@
 
 - name: IMAGES | Execute docker status with an name '{{ image }}' 
   shell: docker ps -a -f name='{{ image }}' | tail -n +2
-  when: ''{{ image }}' != '''
+  when: image != ''
   register: checkout
   changed_when: checkout.rc != 0
 - debug: msg='IMAGES | {{ checkout }}'
@@ -25,7 +25,7 @@
   
 - name: IMAGES | Execute docker status with an name '{{ image }}_{{ env_name }}'
   shell: docker ps -a -f name='{{ image }}_{{ env_name }}' | tail -n +2
-  when: ''{{ image }}' != '' and '{{ env_name }}' != '''
+  when: image != '' and env_name != ''
   register: checkout
   changed_when: checkout.rc != 0
 - debug: msg='IMAGES | {{ checkout }}'
