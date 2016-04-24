@@ -128,28 +128,50 @@ verify: verify_var_img verify_var_env verify_var_name
 
 # -------- Playbook handling
 
-set_playbook:
+define SET_PLAYBOOK
 	$(if $(PLAYBOOK),,$(eval PLAYBOOK=main))
 	$(eval PLAYBOOKPATH = $(if $(wildcard $(PB_D)/$(PLAYBOOK).yml),$(PB_D)/$(PLAYBOOK).yml,$(PB_D_B)/$(PLAYBOOK).yml))
 	$(info [Info] Using Playbook: $(PLAYBOOKPATH) ...)	
+endef
+
+define VERIFY_PLAYBOOK
+	$(info [Info] Verify playbook $(PLAYBOOKPATH) ...)
+	$(if $(wildcard $(PLAYBOOKPATH)), 
+	  $(info [Info] Found playbook $(PLAYBOOKPATH) ...), 
+	  $(error [Error] No playbook found!)
+	)
+endef
+
+define EXECUTE_ERROR
+	$(info [Info])
+	$(error [Info] Not executed: ansible-playbook $(PLAYBOOKPATH) $(CONFIGS) $(APPIMG) $(ENVNAME) $(EXTRAS) $(APNEXTRA))
+endef
+
+define EXECUTE_PLAYBOOK
+	$(info [Info])
+	@ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(CONFIGS) $(APPIMG) $(ENVNAME) $(EXTRAS) $(APNEXTRA)
+endef
+
+define EXECUTE
+	$(call SET_PLAYBOOK)
+	$(call VERIFY_PLAYBOOK)
+	$(info [Info] )
+	$(info [Info] Execute playbook '$(PLAYBOOK)' ...)
+	$(if $(wildcard $(A_CFG)),$(call EXECUTE_PLAYBOOK),$(call EXECUTE_ERROR))
+endef
+
+set_playbook:
+	$(call SET_PLAYBOOK)
 
 verify_playbook:
-	$(info [Info] Verify playbook $(PLAYBOOKPATH) ...)
-	@test -f $(PLAYBOOKPATH) && echo "[Info] Found playbook $(PLAYBOOKPATH) ..." || (echo "[Error] No playbook found!" && exit 1)
+	$(call VERIFY_PLAYBOOK)
 
 execute_playbook: 
-	$(info [Info])
+	$(info [Info] )
 	$(info [Info] Execute playbook '$(PLAYBOOK)' ...)
+	$(if $(wildcard $(A_CFG)),$(call EXECUTE_PLAYBOOK),$(call EXECUTE_ERROR))
 
 execute: set_playbook verify_playbook execute_playbook
-
-ifeq ($(wildcard $(A_CFG)),)
-	@echo "[Info] Not executed: ansible-playbook $(PLAYBOOKPATH) $(CONFIGS) $(APPIMG) $(ENVNAME) $(EXTRAS) $(APNEXTRA)
-	exit 1
-else
-	@ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(CONFIGS) $(APPIMG) $(ENVNAME) $(EXTRAS) $(APNEXTRA)
-endif
-	$(info [Info])
 
 # -------- Extras handling
 
@@ -243,6 +265,9 @@ filter_img:
 
 images: PLAYBOOK=images
 images: filter_img execute ending
+
+fetchall: PLAYBOOK=fetch
+fetchall: $(DOCKER_IMAGES) ending
 
 fetch: PLAYBOOK=fetch
 fetch: set_img execute ending

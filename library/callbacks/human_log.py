@@ -59,7 +59,6 @@ class CallbackModule(object):
         human_log(res)
 
     def runner_on_ok(self, host, res):
-        # print "tags:", self.task.tags
         human_log(res, extract_fields(self.task.tags, self.task.play_vars))
 
     def runner_on_error(self, host, msg):
