@@ -21,6 +21,7 @@
 OUT_FIELDS = ['cmd', 'command', 'start', 'end', 'delta', 'msg', 'stdout', 'stderr']
 
 def extract_fields(tags, vars):
+    fields = []
     for t in tags:
         values = t.split('(')
         marker = values[0]

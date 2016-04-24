@@ -1,0 +1,10 @@
+{
+  "container_name": "cidb_develop",
+  "ports": ["9082:6379"],
+  "volume_home": "/extra/data/jenkins/develop",
+  "volumes": ["/extra/data/jenkins/develop:/data"],
+  "links": [],
+  "env_name": "develop",
+  "has_custom_command": true,
+  "command": "redis-server --appendonly yes"
+}

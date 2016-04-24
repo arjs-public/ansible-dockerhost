@@ -4,6 +4,7 @@
   when: image != ''
   register: checkout
   changed_when: checkout.rc != 0
+  tags: human_log(stdout|stderr)
 - debug: msg='IMAGES | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
@@ -12,21 +13,6 @@
   when: image == ''
   register: checkout
   changed_when: checkout.rc != 0
-- debug: msg='IMAGES | {{ checkout }}'
-  when: do_debug|bool and checkout is defined
-
-- name: IMAGES | Execute docker status with an name '{{ image }}' 
-  shell: docker ps -a -f name='{{ image }}' | tail -n +2
-  when: image != ''
-  register: checkout
-  changed_when: checkout.rc != 0
-- debug: msg='IMAGES | {{ checkout }}'
-  when: do_debug|bool and checkout is defined
-  
-- name: IMAGES | Execute docker status with an name '{{ image }}_{{ env_name }}'
-  shell: docker ps -a -f name='{{ image }}_{{ env_name }}' | tail -n +2
-  when: image != '' and env_name != ''
-  register: checkout
-  changed_when: checkout.rc != 0
+  tags: human_log(stdout|stderr)
 - debug: msg='IMAGES | {{ checkout }}'
   when: do_debug|bool and checkout is defined

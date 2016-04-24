@@ -30,10 +30,17 @@ site:
 	$(call SET_APPIMG_ENV)
 	
 cictl:
-	@echo CICTL
+	$(eval IMG=cictl)
+	$(call SET_APPIMG_ENV)
+	
+simple:
+	$(eval IMG=simple)
+	$(call SET_APPIMG_ENV)
 	
 base:
-	@echo BASE
+	$(eval IMG=base)
+	$(call SET_APPIMG_ENV)
 	
 apps:
-	@echo APPS
+	$(eval IMG=apps)
+	$(call SET_APPIMG_ENV)

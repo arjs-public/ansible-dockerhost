@@ -1,0 +1,8 @@
+{
+  "container_name": "cidb_test",
+  "ports": ["9081:6379"],
+  "volumes": ["/extra/data/jenkins/test:/data"],
+  "env_name": "test",
+  "has_custom_command": true,
+  "command": "redis-server --appendonly yes"
+}

@@ -1,15 +1,16 @@
 ---
-volume_home: "{{ extra_base }}/site"
+container_name: site
+volume_home: "{{ extra_base }}/{{ container_name }}"
+roles_folder: "{{ global_roles_base }}{{ container_name }}/"
+config_base: "{{ roles_folder }}defaults/"
+tasks_base: "{{ roles_folder }}tasks/"
+files_base: "{{ roles_folder }}files/"
+templates_base: "{{ roles_folder }}templates/"
+
+site_name: '{{ app_name }}'
+www_site_base: '{{ volume_home }}/{{ env_name }}}/{{ site_name }}}'
 www_port_pre: 95
 www_ports_pre: 96
-www_site_base: '{{ volume_home }}/{{ env_name }}}/{{ site_name }}}'
-site_name: '{{ app_name }}'
-site_folder: "{{ global_roles_base }}site/"
-config_base: "{{ site_folder }}defaults/"
-tasks_base: "{{ site_folder }}tasks/"
-files_base: "{{ site_folder }}files/"
-templates_base: "{{ site_folder }}templates/"
-
 site_default_path: /etc/nginx/sites-available
 files_static: ../files/app/static
 nginx_html_path: /var/www/html

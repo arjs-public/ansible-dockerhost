@@ -1,4 +1,6 @@
 ---
+- debug: msg='BUILD | {{ image_path }}'
+  when: do_debug|bool and image_path is defined
 - name: BUILD | Check directory '{{ image_path }}' and delete if found
   file: path='{{ image_path }}' state=absent
   register: checkout
@@ -15,12 +17,12 @@
 
 - name: BUILD | Copy '{{ image }}' docker file to localhost
   synchronize:
-  src: '{{ files_base }}'
-  dest: '{{ image_path }}{{ image }}/'
-  delete: yes
-  rsync_opts:
-    - '--no-motd'
-    - '--exclude='**/*.DS_Store''
+    src: '{{ files_base }}'
+    dest: '{{ image_path }}{{ image }}/'
+    delete: yes
+    rsync_opts:
+      - '--no-motd'
+      - '--exclude="**/*.DS_Store"'
 - name: BUILD | Check '{{ image }}' docker image folder
   stat: path='{{ image_path }}{{ image }}/'
   register: checkout
@@ -43,18 +45,18 @@
   when: do_debug|bool and checkout is defined
 - name: BUILD | Copy global '{{ item }}' file to destination
   copy:
-  src: '{{ global_files_base }}/keys/{{ item }}'
-  dest: '{{ image_path }}{{ image }}/keys/{{ item }}'
-  mode: 0600
+    src: '{{ global_files_base }}/keys/{{ item }}'
+    dest: '{{ image_path }}{{ image }}/keys/{{ item }}'
+    mode: 0600
   when: not checkout.stat.exists|bool
   with_items:
   - id_rsa
   - id_rsa.pub
 - name: BUILD | Copy '{{ item }}' file to destination
   copy:
-  src: '{{ files_base }}/keys/{{ item }}'
-  dest: '{{ image_path }}{{ image }}/keys/{{ item }}'
-  mode: 0600
+    src: '{{ files_base }}/keys/{{ item }}'
+    dest: '{{ image_path }}{{ image }}/keys/{{ item }}'
+    mode: 0600
   when: checkout.stat.exists|bool
   with_items:
   - id_rsa
@@ -75,15 +77,15 @@
   when: do_debug|bool and checkout is defined
 - name: BUILD | Copy global timezone file to destination
   copy:
-  src: '{{ global_files_base }}/etc/timezone'
-  dest: '{{ image_path }}{{ image }}/etc/timezone'
-  mode: 0644
+    src: '{{ global_files_base }}/etc/timezone'
+    dest: '{{ image_path }}{{ image }}/etc/timezone'
+    mode: 0644
   when: not checkout.stat.exists|bool
 - name: BUILD | Copy '{{ image }}' timezone file to destination
   copy:
-  src: '{{ files_base }}/{{ image }}/etc/timezone'
-  dest: '{{ image_path }}{{ image }}/etc/timezone'
-  mode: 0644
+    src: '{{ files_base }}/{{ image }}/etc/timezone'
+    dest: '{{ image_path }}{{ image }}/etc/timezone'
+    mode: 0644
   when: checkout.stat.exists|bool
 
 
@@ -95,9 +97,9 @@
   when: do_debug|bool and checkout is defined
 - name: BUILD | Copy get-pip.py to destination if exists
   copy:
-  src: '{{ files_base }}/get-pip.py'
-  dest: '{{ image_path }}{{ image }}/get-pip.py'
-  mode: 0644
+    src: '{{ files_base }}/get-pip.py'
+    dest: '{{ image_path }}{{ image }}/get-pip.py'
+    mode: 0644
   when: checkout.stat.exists
 
 
@@ -109,5 +111,6 @@
   command: docker build -t {{ image }} '{{ image_path }}{{ image }}'
   register: checkout
   failed_when: checkout.rc != 0
-- debug: msg='BUILD | {{ checkout }}'
+  tags: human_log(stdout|stderr)
+- debug: msg="BUILD | {{ checkout }}"
   when: do_debug|bool and checkout is defined

@@ -2,7 +2,7 @@
 - debug: msg='STATUS | {{ image }}_{{ app_name }}_{{ env_name }}'
   when: do_debug|bool and image != '' and app_name != '' and env_name != ''
 - name: STATUS | Execute docker ps with an name '{{ image }}_{{ app_name }}_{{ env_name }}'
-  shell: docker ps -a -f name='{{ image }}_{{ app_name }}_{{ env_name }}'
+  shell: docker ps -a -f name='{{ image }}_{{ app_name }}_{{ env_name }}' | tail -n +2
   when: image != '' and app_name != '' and env_name != ''
   register: checkout
 - debug: msg='STATUS | {{ checkout }}'
@@ -11,7 +11,7 @@
 - debug: msg='STATUS | {{ image }}_{{ app_name }}'
   when: do_debug|bool and image != '' and app_name != '' and env_name == ''
 - name: STATUS | Execute docker ps with an name '{{ image }}_{{ app_name }}'
-  shell: docker ps -a -f name='{{ image }}_{{ app_name }}'
+  shell: docker ps -a -f name='{{ image }}_{{ app_name }}' | tail -n +2
   when: image != '' and app_name != '' and env_name == ''
   register: checkout
 - debug: msg='STATUS | {{ checkout }}'
@@ -29,13 +29,13 @@
 - debug: msg='STATUS | {{ image }}_{{ env_name }}'
   when: do_debug|bool and image != '' and app_name == '' and env_name != ''
 - name: STATUS | Execute docker ps with an name '{{ image }}_{{ env_name }}'
-  shell: docker ps -a -f name='{{ image }}_{{ env_name }}'
+  shell: docker ps -a -f name='{{ image }}_{{ env_name }}' | tail -n +2
   when: image != '' and app_name == '' and env_name != ''
   register: checkout
 - debug: msg='STATUS | {{ checkout }}'
   when: do_debug|bool and checkout is defined
   
-- debug: msg='_{{ env_name }}'
+- debug: msg='STATUS | _{{ env_name }}'
   when: do_debug|bool and image == '' and app_name == '' and env_name != ''
 - name: STATUS | Execute docker ps with an name '_{{ env_name }}'
   shell: docker ps -a -f name='_{{ env_name }}'
@@ -44,6 +44,16 @@
 - debug: msg='STATUS | {{ checkout }}'
   when: do_debug|bool and checkout is defined
   
+- debug: msg='STATUS | {{ image }}'
+  when: do_debug|bool and image == '' and app_name == '' and env_name == ''
+- name: STATUS | Execute docker status with an name '{{ image }}' 
+  shell: docker ps -a -f name='{{ image }}' | tail -n +2
+  when: image != '' and app_name == '' and env_name == ''
+  register: checkout
+  changed_when: checkout.rc != 0
+- debug: msg='STATUS | {{ checkout }}'
+  when: do_debug|bool and checkout is defined
+
 - debug: msg='STATUS | Normal docker ps'
   when: do_debug|bool and image == '' and app_name == '' and env_name == ''
 - name: STATUS | Execute docker ps
