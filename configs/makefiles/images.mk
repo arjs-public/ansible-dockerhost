@@ -29,8 +29,16 @@ site:
 	$(eval IMG=site)
 	$(call SET_APPIMG_ENV)
 	
+apps:
+	$(eval IMG=apps)
+	$(call SET_APPIMG_ENV)
+	
 cictl:
 	$(eval IMG=cictl)
+	$(call SET_APPIMG_ENV)
+	
+cidb:
+	$(eval IMG=cidb)
 	$(call SET_APPIMG_ENV)
 	
 simple:
@@ -39,8 +47,4 @@ simple:
 	
 base:
 	$(eval IMG=base)
-	$(call SET_APPIMG_ENV)
-	
-apps:
-	$(eval IMG=apps)
 	$(call SET_APPIMG_ENV)

@@ -1,5 +1,5 @@
 ---
-- name: FETCH | Fetch standard images from docker hub '{{ container_host }}'
+- name: FETCH | Fetch standard images from docker hub '{{ inventory_hostname }}'
   hosts: dockerhost
   gather_facts: no
   become: no

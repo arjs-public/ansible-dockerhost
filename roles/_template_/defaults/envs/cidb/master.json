@@ -1,8 +1,0 @@
-{
-  "container_name": "cidb_master",
-  "ports": ["9080:6379"],
-  "volumes": ["/extra/data/jenkins/master:/data"],
-  "env_name": "master",
-  "has_custom_command": true,
-  "command": "redis-server --appendonly yes"
-}

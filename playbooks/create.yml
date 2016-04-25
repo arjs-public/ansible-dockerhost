@@ -2,7 +2,7 @@
 - name: CREATE | Create a new '{{ env_name }}' environment config based on .template.json.j2
   hosts: dockerhost
   gather_facts: no
-  sudo: no
+  become: no
 
   vars:
     - do_debug: False

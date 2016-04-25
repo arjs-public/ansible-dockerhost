@@ -1,8 +1,8 @@
 ---
-- name: IMAGES | List images on docker host '{{ inventory_host }}'
+- name: IMAGES | List images on docker host '{{ inventory_hostname }}'
   hosts: dockerhost
   gather_facts: no
-  sudo: no
+  become: no
 
   vars:
     - do_debug: False

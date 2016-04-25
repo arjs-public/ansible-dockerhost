@@ -2,7 +2,7 @@
 - name: STATS | List containers statistics on docker host '{{ container_host }}'
   hosts: dockerhost
   gather_facts: no
-  sudo: no
+  become: no
 
   vars:
     - do_debug: False

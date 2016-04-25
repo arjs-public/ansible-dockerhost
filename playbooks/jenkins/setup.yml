@@ -1,8 +1,8 @@
 ---
-- name: Create a '{{ container_name }}' container based on '{{ image }}'
+- name: JENKINS SETUP | Create a '{{ container_name }}' container based on '{{ image }}'
   hosts: dockerhost
   gather_facts: no
-  sudo: no
+  become: no
 
   vars:
     - do_debug: False
@@ -12,6 +12,7 @@
 
   vars_files:
     - '{{ base_folder }}/roles/common/vars/defaults.yml'
+    - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
     - include: '{{ common_tasks_base }}/debug.yml'
@@ -24,23 +25,6 @@
       when: do_check_folders|bool
 
   tasks:
-    - name: Check "{{ volume_home }}/plugins" folder
-      file: dest="{{ volume_home }}/plugins" state=directory mode=0775
-      register: checkout
-      failed_when: checkout.state != "directory"
-    - debug: msg="{{checkout}}"
-      when: do_debug == True
-
-    - name: Check "{{ volume_home }}/users" folder
-      file: dest="{{ volume_home }}/users" state=directory mode=0775
-      register: checkout
-      failed_when: checkout.state != "directory"
-    - debug: msg="{{checkout}}"
-      when: do_debug == True
-
-    - name: Check "{{ volume_home }}/jobs" folder
-      file: dest="{{ volume_home }}/jobs" state=directory mode=0775
-      register: checkout
-      failed_when: checkout.state != "directory"
-    - debug: msg="{{checkout}}"
-      when: do_debug == True
+    - name: JENKINS SETUP | Execute Setup task
+      include: '{{ tasks_base }}setup.yml'
+  

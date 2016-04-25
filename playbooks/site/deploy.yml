@@ -2,7 +2,7 @@
 - name: DEPLOY | Prepares and deploys a working websites
   hosts: dockerhost
   gather_facts: no
-  sudo: no
+  become: no
 
   vars:
     - do_debug: False

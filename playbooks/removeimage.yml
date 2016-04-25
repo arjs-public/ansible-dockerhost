@@ -2,7 +2,7 @@
 - name: REMOVE IMAGE | Destroys a local image '{{ image }}' from local docker repository
   hosts: dockerhost
   gather_facts: no
-  sudo: no
+  become: no
 
   vars:
     - do_debug: False

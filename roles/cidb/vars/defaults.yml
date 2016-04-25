@@ -1,5 +1,5 @@
 ---
-container_name: cictl
+container_name: cidb
 volume_home: "{{ extra_base }}/{{ container_name }}"
 roles_folder: "{{ global_roles_base }}{{ container_name }}/"
 config_base: "{{ roles_folder }}defaults/"
@@ -8,4 +8,3 @@ files_base: "{{ roles_folder }}files/"
 templates_base: "{{ roles_folder }}templates/"
 data_base: '{{ extra_base }}/data'
 jenkins_data_base: '{{ data_base }}/jenkins'
-jenkins_base: '{{ extra_base }}/jenkins'

@@ -2,7 +2,7 @@
 - name: STOP | Stop a running '{{ container_name }}' container based on '{{ image }}'
   hosts: dockerhost
   gather_facts: no
-  sudo: no
+  become: no
 
   vars:
     - do_debug: False

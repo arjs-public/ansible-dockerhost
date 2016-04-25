@@ -1,0 +1,27 @@
+---
+- debug: msg='SETUP | {{ volume_home }}/plugins'
+  when: do_debug|bool and volume_home is defined
+- name: Check 'SETUP | {{ volume_home }}/plugins' folder
+  file: dest='{{ volume_home }}/plugins' state=directory mode=0775
+  register: checkout
+  failed_when: checkout.state != 'directory'
+- debug: msg='SETUP | {{ checkout }}'
+  when: do_debug|bool and checkout is defined
+
+- debug: msg='SETUP | {{ volume_home }}/users'
+  when: do_debug|bool and volume_home is defined
+- name: Check '{{ volume_home }}/users' folder
+  file: dest='{{ volume_home }}/users' state=directory mode=0775
+  register: checkout
+  failed_when: checkout.state != 'directory'
+- debug: msg='SETUP | {{ checkout }}'
+  when: do_debug|bool and checkout is defined
+
+- debug: msg='SETUP | {{ volume_home }}/jobs'
+  when: do_debug|bool and volume_home is defined
+- name: Check '{{ volume_home }}/jobs' folder
+  file: dest='{{ volume_home }}/jobs' state=directory mode=0775
+  register: checkout
+  failed_when: checkout.state != 'directory'
+- debug: msg='SETUP | {{ checkout }}'
+  when: do_debug|bool and checkout is defined

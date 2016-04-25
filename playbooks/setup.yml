@@ -2,7 +2,7 @@
 - name: SETUP | Create a '{{ container_name }}' container based on '{{ image }}'
   hosts: dockerhost
   gather_facts: no
-  sudo: no
+  become: no
 
   vars:
     - do_debug: False
@@ -12,6 +12,7 @@
 
   vars_files:
     - '{{ base_folder }}/roles/common/vars/defaults.yml'
+    - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
     - include: '{{ common_tasks_base }}/debug.yml'
