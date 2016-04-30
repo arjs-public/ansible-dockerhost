@@ -1,29 +1,31 @@
 .PHONY: *
 
-define ENV_COMMON =
-	$(info [Info] Use environment: $(ENV))
-	$(eval ENVNAME=-e "env_name=$(ENV)")
-	$(info [Info] Use environment extra: $(ENVNAME))
+
+define ENV_COMMON
+	$(if $(ENV),$(info [Info] Use environment: $(ENV)),$(error [Error] ENV not set!))
+	$(eval EXTRA_ENV=-e "env_name=$(ENV)")
+	$(info [Info] Use environment extra: $(EXTRA_ENV))
 	$(eval EXTRAS += -e "artifact_spec=$(ARTIFACT_SPEC)" -e "artifact_name=$(ARTIFACT_NAME)")
 	$(info [Info])
 	@true
 endef
 
-define try =
-	$(eval ENV=try)
-	$(eval ARTIFACT_SPEC=libs-snapshot-local/sites)
-	$(eval ARTIFACT_NAME=ci/current.tgz)
+define SET_ENV_INFO
+	$(eval ENV=$(1))
+	$(eval ARTIFACT_SPEC=libs-snapshot-local/$(2))
+	$(eval ARTIFACT_NAME=$(3))
 	$(call ENV_COMMON)
 endef
 
+
+verify_var_env:
+	$(if $(ENV),,$(error [Error] ENV not set!))
+
 try:
-	$(call try)
+	$(call SET_ENV_INFO,$@,sites,ci/current.tgz)
 
 develop:
-	$(eval ENV=develop)
-	#$(eval ARTIFACT_SPEC=libs-release-local/sites)
-	$(eval ARTIFACT_SPEC=libs-snapshot-local/sites)
-	$(eval ARTIFACT_NAME=ci/current.tgz)
-	$(call ENV_COMMON)
+	$(call SET_ENV_INFO,$@,sites,ci/current.tgz)
 
+#$(eval ARTIFACT_SPEC=libs-release-local/sites)
 #v2.arjs.net.0.1.6.tgz

@@ -20,10 +20,8 @@ $(eval BASE_D=$(shell pwd))
 # $(info [Info] Use BASE_D: $(BASE_D))
 PB_D_B = $(BASE_D)/playbooks
 # $(info [Info] Use PB_D_B: $(PB_D_B))
-PB_D = $(if $(IMG),$(PB_D_B)/$(IMG),$(PB_D_B))
-# $(info [Info] Use PB_D: $(PB_D))
-CNFG_D = $(if $(IMG),$(BASE_D)/roles/$(IMG)/defaults,$(BASE_D)/roles/defaults)
-# $(info [Info] Use CNFG_D: $(CNFG_D))
+PB_D_I = $(if $(IMG),$(PB_D_B)/$(IMG),$(PB_D_B))
+# $(info [Info] Use PB_D_I: $(PB_D_I))
 TAG_D = $(BASE_D)/roles/files
 FILES_D = $(BASE_D)/roles/files
 TEMPLATES_D = $(BASE_D)/roles/templates
@@ -34,42 +32,22 @@ VPF_FILE = configs/.secrets/vpf.txt
 # $(info [Info] Use A_CFG: $(A_CFG))
 INVENTORY = $(BASE_D)/inventory/inventory
 
-# --------- Extra config variables
-ifeq ($(wildcard $(CNFG_D)/envs/$(ENV).json),)
- # $(info [Info] Check for $(CNFG_D)/envs/$(NAME)/$(ENV).json)
- ifeq ($(wildcard $(CNFG_D)/envs/$(NAME)/$(ENV).json),)
-  # $(info [Info] No Environment found)
-  CONFIGS =
- else
-  # $(info [Info] Environment with $(NAME))
-  CONFIGS = -e "@$(CNFG_D)/envs/$(NAME)/$(ENV).json"
- endif
-else
- # $(info [Info] Environment without $(NAME))
- CONFIGS = -e "@$(CNFG_D)/envs/$(ENV).json"
-endif
-
-# --------- Passwort vault
-ifneq ($(wildcard $(VPF_FILE)),)
- CONFIGS += --vault-password-file ./$(VPF_FILE)
-endif
-
 # --------- Rules
 
 help:
 	$(info [Info] -- Help ---------)
 	$(info [Info] )
-	$(info [Info] * make <environment> <image> <appname> setup [EXTRAS=<ansible-playbook params>])
-	$(info [Info] * make <environment> <image> <appname> deploy [EXTRAS=<ansible-playbook params>])
-	$(info [Info] * make <environment> <image> <appname> start [EXTRAS=<ansible-playbook params>])
-	$(info [Info] * make <environment> <image> <appname> stop [EXTRAS=<ansible-playbook params>])
-	$(info [Info] * make <environment> <image> <appname> stats [EXTRAS=<ansible-playbook params>])
-	$(info [Info] * make <environment> <image> <appname> remove [DELETE=true|*false ***?])
+	$(info [Info] * make <appname> <environment> <image> setup [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <appname> <environment> <image> deploy [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <appname> <environment> <image> start [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <appname> <environment> <image> stop [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <appname> <environment> <image> stats [EXTRAS=<ansible-playbook params>])
+	$(info [Info] * make <appname> <environment> <image> remove [DELETE=true|*false ***?])
 	$(info [Info] * make INFRA=<infra name from list> [ENV=<environment> *?] startup)
 	$(info [Info] * make INFRA=<infra name from list> teardown)
 	$(info [Info] * make INFRA=<infra name from list> construct)
 	$(info [Info] * make INFRA=<infra name from list> [DELETE=true|*false ***?] cleanup)
-	$(info [Info] * make ENV=<Environment name> *? [IMG=<appgroup> 5*?] [NAME=<appname> 6*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete))
+	$(info [Info] * make ENV=<Environment name> *? [IMG=<appgroup> 5*?] [APP=<app name> 6*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete))
 	$(info [Info] * make IMG=<image to build> build)
 	$(info [Info] * make IMG=<image from dockerhub> fetch)
 	$(info [Info] * make IMG=<image from images> *? removeimage)
@@ -80,14 +58,14 @@ help:
 	$(info [Info] ***? Very dangerous, since deletes all associated folders on 'dockerhost')
 	$(info [Info] ****? Very dangerous, since it kills all docker containers on 'dockerhost')
 	$(info [Info] *****? IMG empty means ENV Environment in all Applications; IMG set, means ENV Environment for specific Application)
-	$(info [Info] ******? NAME needed for special image)
+	$(info [Info] ******? APP needed for special image)
 	$(info [Info] )
 	$(info [Info] -- Defaults ---------)
 	$(info [Info] * ENV = $(ENV))
 	$(info [Info] * BASE_D = $(BASE_D))
-	$(info [Info] * PB_D = $(PB_D))
+	$(info [Info] * PB_D_B = $(PB_D_B))
+	$(info [Info] * PB_D_I = $(PB_D_I))
 	$(info [Info] * TAG_D = $(TAG_D))
-	$(info [Info] * CNFG_D = $(CNFG_D))
 	$(info [Info] * FILES_D = $(FILES_D))
 	$(info [Info] * A_CFG = $(A_CFG))
 	$(info [Info] )
@@ -109,28 +87,27 @@ ending:
 
 # -------- Verify handling
 
-verify_var_img:
-	@test "$(IMG)" || (echo "[Error] IMG not set!" && exit 1)
-
-verify_var_env:
-	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
-
-verify_var_name:
-	@test "$(NAME)" || (echo "[Error] NAME not set!" && exit 1)
-
 verify_port:
 	@test "$(PORT)" || (echo "[Error] PORT not set!" && exit 1)
 	$(info [Info] Use port: $(PORT))
 	$(info [Info])
 
-verify: verify_var_img verify_var_env verify_var_name
-	$(if $(NAME),,$(call SITE_RULE_STD))
+verify: verify_var_env verify_var_app verify_var_img
+	$(if $(APP),,$(call SITE_RULE_STD))
 
 # -------- Playbook handling
 
+define SET_EXTRA_VARS
+	$(if $(wildcard $(VPF_FILE)),$(eval VPF=--vault-password-file ./$(VPF_FILE)),$(eval VPF=))
+    $(info [Info] Using vpf: $(VPF))
+	$(if $(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"),$(eval CONFIGS=))
+	$(if $(wildcard $(CNFG_D)/envs/$(ENV).json),$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(ENV).json"),$(eval CONFIGS=))
+    $(info [Info] Using extra variables: $(CONFIGS))
+endef
+
 define SET_PLAYBOOK
 	$(if $(PLAYBOOK),,$(eval PLAYBOOK=main))
-	$(eval PLAYBOOKPATH = $(if $(wildcard $(PB_D)/$(PLAYBOOK).yml),$(PB_D)/$(PLAYBOOK).yml,$(PB_D_B)/$(PLAYBOOK).yml))
+	$(eval PLAYBOOKPATH = $(if $(wildcard $(PB_D_I)/$(PLAYBOOK).yml),$(PB_D_I)/$(PLAYBOOK).yml,$(PB_D_B)/$(PLAYBOOK).yml))
 	$(info [Info] Using Playbook: $(PLAYBOOKPATH) ...)	
 endef
 
@@ -144,12 +121,12 @@ endef
 
 define EXECUTE_ERROR
 	$(info [Info])
-	$(error [Info] Not executed: ansible-playbook $(PLAYBOOKPATH) $(CONFIGS) $(APPIMG) $(ENVNAME) $(EXTRAS) $(APNEXTRA))
+	$(error [Info] Not executed: ansible-playbook $(PLAYBOOKPATH) $(VPF) $(CONFIGS) $(EXTRA_IMG) $(EXTRA_ENV) $(EXTRA_APP) $(EXTRAS))
 endef
 
 define EXECUTE_PLAYBOOK
 	$(info [Info])
-	@ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(CONFIGS) $(APPIMG) $(ENVNAME) $(EXTRAS) $(APNEXTRA)
+	@ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(VPF) $(CONFIGS) $(EXTRA_IMG) $(EXTRA_ENV) $(EXTRA_APP) $(EXTRAS)
 endef
 
 define EXECUTE
@@ -159,6 +136,9 @@ define EXECUTE
 	$(info [Info] Execute playbook '$(PLAYBOOK)' ...)
 	$(if $(wildcard $(A_CFG)),$(call EXECUTE_PLAYBOOK),$(call EXECUTE_ERROR))
 endef
+
+set_extra_vars:
+	$(call SET_EXTRA_VARS)
 
 set_playbook:
 	$(call SET_PLAYBOOK)
@@ -171,38 +151,21 @@ execute_playbook:
 	$(info [Info] Execute playbook '$(PLAYBOOK)' ...)
 	$(if $(wildcard $(A_CFG)),$(call EXECUTE_PLAYBOOK),$(call EXECUTE_ERROR))
 
-execute: set_playbook verify_playbook execute_playbook
+execute: set_extra_vars set_playbook verify_playbook execute_playbook
 
 # -------- Extras handling
 
-extra_config:
-ifeq ($(wildcard $(TEMPLATES_D)/$(IMG)/$(CONFIG_F)),)
-	$(info [Info] Config ignorieren)
-else
-	@[[ -f $(TEMPLATES_D)/$(IMG)/$(CONFIG_F) ]] && make IMG=$(IMG) ENV=$(ENV) configs || (echo "[Info] No extra files available!")
-endif
-
-extra_plugins:
-ifeq ($(wildcard $(FILES_D)/$(IMG)/$(PLUGIN_F)),)
-	$(info [Info] Plugins ignorieren)
-else
-	@[[ -f $(FILES_D)/$(IMG)/$(PLUGIN_F) ]] && make IMG=$(IMG) ENV=$(ENV) plugins || (echo "[Info] No extra plugins configured!")
-endif
-
 extra_appname:
-ifeq ($(wildcard $(FILES_D)/$(IMG)/apps/$(NAME)/$(APP_F)),)
+ifeq ($(wildcard $(FILES_D)/$(IMG)/apps/$(APP)/$(APP_F)),)
 	$(info [Info] IMG ignorieren)
 else
-	@[[ -f $(FILES_D)/$(IMG)/apps/$(NAME)/$(APP_F) ]] && make IMG=$(IMG) ENV=$(ENV) NAME=$(NAME) appname || (echo "[Info] No extra appname configured!")
+	@[[ -f $(FILES_D)/$(IMG)/apps/$(APP)/$(APP_F) ]] && make IMG=$(IMG) ENV=$(ENV) APP=$(APP) appname || (echo "[Info] No extra appname configured!")
 endif
-
-extras: extra_config extra_plugins extra_appname
-	$(info [Info])
 
 # -------- Instance handling
 
 setup: PLAYBOOK=setup
-setup: verify extras execute ending 
+setup: verify execute ending 
 
 start: PLAYBOOK=start
 start: verify execute ending
@@ -224,19 +187,11 @@ stats: verify execute ending
 status: PLAYBOOK=status
 status: execute ending
 
-# -------- Jenkins handling
-
-configs: PLAYBOOK=jenkins/configs
-configs: verify execute ending
-
-plugins: PLAYBOOK=jenkins/plugins
-plugins: verify execute ending
-
 # -------- APP handling
 
-appname: NAME=
-appname: EXTRAS += -e "app_name=$(NAME)"
-appname: PLAYBOOK=$(IMG)/$(NAME)
+appname: APP=
+appname: EXTRAS += -e "app_name=$(APP)"
+appname: PLAYBOOK=$(IMG)/$(APP)
 appname: verify execute ending
 
 # -------- Environment handling
@@ -260,8 +215,8 @@ build: verify_var_img execute ending
 
 filter_img:
 	$(if $(IMG),$(info Using image: $(IMG)),)
-	$(if $(IMG),$(eval APPIMG=-e "image=$(IMG)"),)
-	$(if $(IMG),$(info APPIMG=$(APPIMG)),)
+	$(if $(IMG),$(eval EXTRA_IMG=-e "image=$(IMG)"),)
+	$(if $(IMG),$(info EXTRA_IMG=$(EXTRA_IMG)),)
 
 images: PLAYBOOK=images
 images: filter_img execute ending

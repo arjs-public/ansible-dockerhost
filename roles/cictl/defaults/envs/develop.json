@@ -1,10 +1,10 @@
 {
   "env_name": "develop",
-  "container_name": "cictl_develop",
+  "container_name": "jenkins_develop",
   "ports": ["8082:8080"],
   "volume_home": "/extra/jenkins/develop",
   "volumes": ["/extra/jenkins/develop:/var/jenkins_home"],
-  "links": ["cidb_develop:redis"],
+  "links": ["jenkins_db_develop:redis"],
   "mapped_server": "servix",
   "mapped_port": "8082",
   "db_redis_linkname": "servix",

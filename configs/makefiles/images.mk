@@ -1,50 +1,64 @@
 .PHONY: *
 
-DOCKER_IMAGES = busybox ubuntu tomcat nginx redis jenkins python python+2.7 python+2.7-onbuild
+DOCKER_IMAGES = hub.busybox \
+	hub.ubuntu \
+	hub.tomcat \
+	hub.nginx \
+	hub.redis \
+	hub.jenkins \
+	hub.python \
+	hub.python+2.7 \
+	hub.python+2.7-onbuild
 
-define SET_APPIMG
-	@test "$(IMG)" || (echo "[Error] IMG not set!" && exit 1)
-	$(info [Info] Use image: $(IMG))
-	$(eval APPIMG=-e "image=$(IMG)")
-	$(info [Info] Use image extra: $(APPIMG))
+
+define SET_EXTRA_IMG
+	$(if $(IMG),$(info [Info] Use image: $(IMG)),$(error [Error] IMG not set!))
+	$(eval EXTRA_IMG=-e "image=$(IMG)")
+	$(info [Info] Use image extra: $(EXTRA_IMG))
 	$(info [Info])
+	@true
 endef
 	
-define SET_APPIMG_ENV
+define SET_EXTRA_IMG_ENV
+	$(eval CNFG_D=$(if $(IMG),$(BASE_D)/roles/$(IMG)/defaults,$(BASE_D)/vars/roles))
 	@test "$(CNFG_D)" || (echo "[Error] CNFG_D not set!" && exit 1)
 	@test -d "$(CNFG_D)/envs/" || (echo "[Error] IMG/ENV folder not found! ($(CNFG_D)/envs/)" && exit 1)
-	$(call SET_APPIMG)
+	$(call SET_EXTRA_IMG)
 endef
 
 $(DOCKER_IMAGES):
-	$(info [Info] Processing $(subst +,:,$@))
-	$(eval IMG=$(subst +,:,$@))
-	$(call SET_APPIMG)
+	$(info [Info] Processing $(basename $(subst +,:,$@)))
+	$(eval IMG=$(basename $(subst +,:,$@)))
+	$(call SET_EXTRA_IMG)
 	$(call EXECUTE)
 
-set_img: 
-	$(call SET_APPIMG)
+
+verify_var_img:
+	$(if $(IMG),,$(error [Error] IMG not set!))
+
+set_img:
+	$(call SET_EXTRA_IMG)
 
 site:
 	$(eval IMG=site)
-	$(call SET_APPIMG_ENV)
+	$(call SET_EXTRA_IMG_ENV)
 	
 apps:
 	$(eval IMG=apps)
-	$(call SET_APPIMG_ENV)
+	$(call SET_EXTRA_IMG_ENV)
 	
 cictl:
 	$(eval IMG=cictl)
-	$(call SET_APPIMG_ENV)
+	$(call SET_EXTRA_IMG_ENV)
 	
 cidb:
 	$(eval IMG=cidb)
-	$(call SET_APPIMG_ENV)
+	$(call SET_EXTRA_IMG_ENV)
 	
 simple:
 	$(eval IMG=simple)
-	$(call SET_APPIMG_ENV)
+	$(call SET_EXTRA_IMG_ENV)
 	
 base:
 	$(eval IMG=base)
-	$(call SET_APPIMG_ENV)
+	$(call SET_EXTRA_IMG_ENV)

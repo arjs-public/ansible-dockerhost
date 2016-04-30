@@ -1,0 +1,31 @@
+---
+- debug: msg="JENKINS JOBS | {{ item | dirname | replace(templates_base, volume_home + '/') }}"
+  when: do_debug|bool
+  with_fileglob:
+    - '{{ templates_base }}/jobs/**/*.j2'
+    - '{{ templates_base }}/jobs/**/jobs/**/*.j2'
+- name: JENKINS JOBS | Create folders in '{{ volume_home }}/jobs/' for default job configs
+  file: dest='{{ item | dirname | replace(templates_base, volume_home + "/") }}' state=directory mode=0775
+  register: checkout
+  failed_when: checkout.state != 'directory'
+  with_fileglob:
+    - '{{ templates_base }}/jobs/**/*.j2'
+    - '{{ templates_base }}/jobs/**/jobs/**/*.j2'
+  register: checkout
+- debug: msg="JENKINS JOBS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
+
+
+- debug: msg="JENKINS JOBS | {{ item | dirname | replace(templates_base, volume_home + '/') }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+  when: do_debug|bool
+  with_fileglob:
+    - '{{ templates_base }}/jobs/**/*.j2'
+    - '{{ templates_base }}/jobs/**/jobs/**/*.j2'
+- name: JENKINS JOBS | Process templates for default job configs
+  template: src='{{ item }}' dest="{{ item | dirname | replace(templates_base, volume_home + '/') }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+  with_fileglob:
+    - '{{ templates_base }}/jobs/**/*.j2'
+    - '{{ templates_base }}/jobs/**/jobs/**/*.j2'
+  register: checkout
+- debug: msg="JENKINS JOBS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined

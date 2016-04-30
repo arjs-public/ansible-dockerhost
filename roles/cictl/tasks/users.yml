@@ -1,0 +1,27 @@
+---
+- debug: msg="JENKINS USERS | {{ volume_home }}/users/{{ item | dirname | basename }}/"
+  when: do_debug|bool
+  with_fileglob:
+    - '{{ templates_base }}users/**/*.j2'
+- name: JENKINS USERS | Create folders in '{{ volume_home }}/users/' for default user configs
+  file: dest='{{ volume_home }}/users/{{ item | dirname | basename }}/' state=directory mode=0775
+  failed_when: checkout.state != 'directory'
+  with_fileglob:
+    - '{{ templates_base }}users/**/*.j2'
+  register: checkout
+- debug: msg="JENKINS USERS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
+
+
+- debug: msg="JENKINS USERS | {{ volume_home }}/users/{{ item | dirname | basename }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+  when: do_debug|bool
+  with_fileglob:
+    - '{{ templates_base }}/users/**/*.j2'
+- name: JENKINS USERS | Process templates for default user configs
+  template: src='{{ item }}' dest="{{ volume_home }}/users/{{ item | dirname | basename }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+  with_fileglob:
+    - '{{ templates_base }}/users/**/*.j2'
+  failed_when: checkout.state != 'file'
+  register: checkout
+- debug: msg="JENKINS USERS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined

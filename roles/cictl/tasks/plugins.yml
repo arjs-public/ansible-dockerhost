@@ -1,0 +1,46 @@
+---
+- debug: msg="JENKINS PLUGINS | {{ files_base }}{{ item }} -> {{ volume_home }}/tmp/{{ item }}"
+  when: do_debug|bool and jenkins_extra_plugins is defined
+  with_items:
+    - plugins.sh
+    - '{{ jenkins_extra_plugins }}'
+- name: JENKINS PLUGINS | Copy plugins files
+  copy: src='{{ files_base }}{{ item }}' dest='{{ volume_home }}/tmp/{{ item }}'
+  with_items:
+    - plugins.sh
+    - plugins.ini
+  changed_when: checkout.state != 'file'
+  register: checkout
+
+- name: JENKINS PLUGINS | Handle plugins.sh
+  shell: 'chmod +x {{ volume_home }}/tmp/plugins.sh'
+  changed_when: checkout.rc != 0
+  register: checkout
+- debug: msg="JENKINS PLUGINS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
+
+- debug: msg="JENKINS PLUGINS | {{ volume_home }}/tmp/plugins.sh {{ volume_home }}/tmp/{{ item }} {{ volume_home }}/plugins"
+  when: do_debug|bool and jenkins_extra_plugins is defined
+  with_items: 
+    - '{{ jenkins_extra_plugins }}'
+- name: JENKINS PLUGINS | Handle plugins
+  shell: '{{ volume_home }}/tmp/plugins.sh {{ volume_home }}/tmp/{{ item }} {{ volume_home }}/plugins'
+  with_items: 
+    - '{{ jenkins_extra_plugins }}'
+  changed_when: checkout.rc != 0
+  register: checkout
+- debug: msg="JENKINS PLUGINS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
+
+
+- debug: msg="JENKINS PLUGINS | {{ item }} -> {{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+  when: do_debug|bool
+  with_fileglob:
+    - '{{ templates_base }}plugins/*.j2'
+- name: JENKINS PLUGINS | Process template for plugins
+  template: src="{{ item }}" dest="{{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+  with_fileglob:
+    - '{{ templates_base }}plugins/*.j2'
+  register: checkout
+- debug: msg="JENKINS PLUGINS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined

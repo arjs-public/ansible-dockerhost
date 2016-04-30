@@ -8,13 +8,17 @@
     - do_debug: False
     - do_check_folders: False
     - do_check_connection: False
-    - base_folder: ..
+    - base_folder: ../..
 
   vars_files:
     - '{{ base_folder }}/roles/common/vars/defaults.yml'
     - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
+    - '{{ base_folder }}/roles/{{ image }}/vars/{{ image }}.vault'
 
   pre_tasks:
+    - debug: msg="{{ lookup('pipe', 'ls -la ' + base_folder + '/configs/.secrets/vpf.txt') }}"
+      when: do_debug|bool
+
     - include: '{{ common_tasks_base }}/debug.yml'
       when: do_debug|bool
 
@@ -27,4 +31,15 @@
   tasks:
     - name: JENKINS SETUP | Execute Setup task
       include: '{{ tasks_base }}setup.yml'
-  
+
+    - name: JENKINS SETUP | Execute Configs task
+      include: '{{ tasks_base }}configs.yml'
+
+    - name: JENKINS SETUP | Execute Plugins task
+      include: '{{ tasks_base }}plugins.yml'
+
+    - name: JENKINS SETUP | Execute Users task
+      include: '{{ tasks_base }}users.yml'
+
+    - name: JENKINS SETUP | Execute Jobs task
+      include: '{{ tasks_base }}jobs.yml'

@@ -1,0 +1,50 @@
+---
+- debug: msg="JENKINS CONFIGS | {{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+  when: do_debug|bool
+  with_fileglob:
+    - '{{ templates_base }}*.j2'
+- name: JENKINS CONFIGS | Process template for configs
+  template: src='{{ item }}' dest="{{ volume_home }}/{{ item | basename | regex_replace('^(.*)\.j2$', '\\1') }}"
+  with_fileglob:
+    - '{{ templates_base }}*.j2'
+  register: checkout
+- debug: msg="JENKINS CONFIGS | {{ checkout.msg }}"
+  when: do_debug|bool and checkout is defined
+
+
+- name: JENKINS CONFIGS | Show password
+  local_action:
+    module: shell cat '{{ base_folder }}/configs/.secrets/vpf.txt'
+  when: do_debug|bool
+- name: JENKINS CONFIGS | Show credentials vault
+  local_action:
+    module: shell ansible-vault view --vault-password-file='{{ base_folder }}/configs/.secrets/vpf.txt' '{{ files_base }}credentials.xml.vault'
+  when: do_debug|bool
+  changed_when: checkout.rc != 0
+  register: checkout
+- debug: msg="JENKINS CONFIGS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
+- name: JENKINS CONFIGS | Create decrypted credentials file
+  local_action:
+    module: shell ansible-vault view --vault-password-file='{{ base_folder }}/configs/.secrets/vpf.txt' '{{ files_base }}credentials.xml.vault' > '{{ files_base }}credentials.xml'
+  changed_when: checkout.rc != 0
+  register: checkout
+- debug: msg="JENKINS CONFIGS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
+
+- debug: msg="JENKINS CONFIGS | {{ files_base }}credentials.xml -> {{ volume_home }}/credentials.xml"
+  when: do_debug|bool and checkout is defined
+- name: JENKINS CONFIGS | Copy decrypted credentials file
+  copy: src='{{ files_base }}credentials.xml' dest='{{ volume_home }}/credentials.xml'
+  changed_when: checkout.state != 'file'
+  register: checkout
+- debug: msg="JENKINS CONFIGS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
+
+- name: JENKINS CONFIGS | Clean up credentials
+  local_action:
+    module: file path='{{ files_base }}credentials.xml' state=absent
+  changed_when: checkout.state != 'absent'
+  register: checkout
+- debug: msg="JENKINS CONFIGS | {{ checkout }}"
+  when: do_debug|bool and checkout is defined
