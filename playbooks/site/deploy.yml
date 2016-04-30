@@ -9,11 +9,11 @@
     - do_check_folders: False
     - do_check_connection: False
     - base_folder: ../..
-    - version: 0.1.6
+    - artifact_version: 0.1.6
 
   vars_files:
     - "{{ base_folder }}/roles/common/vars/defaults.yml"
-    - "{{ base_folder }}/roles/site/vars/defaults.yml"
+    - "{{ base_folder }}/roles/{{ image }}/vars/defaults.yml"
 
   pre_tasks:
     - include: '{{ common_tasks_base }}/debug.yml'

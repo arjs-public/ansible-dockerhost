@@ -48,9 +48,10 @@ help:
 	$(info [Info] * make INFRA=<infra name from list> construct)
 	$(info [Info] * make INFRA=<infra name from list> [DELETE=true|*false ***?] cleanup)
 	$(info [Info] * make ENV=<Environment name> *? [IMG=<appgroup> 5*?] [APP=<app name> 6*?] (PORT=<Port extension to use> **? create | [DELETE=true ***?] delete))
-	$(info [Info] * make IMG=<image to build> build)
-	$(info [Info] * make IMG=<image from dockerhub> fetch)
-	$(info [Info] * make IMG=<image from images> *? removeimage)
+	$(info [Info] * make <image> build)
+	$(info [Info] * make <image> *? removeimage)
+	$(info [Info] * make hub.<image from dockerhub> fetch)
+	$(info [Info] * make fetchall)
 	$(info [Info] * make ping | status | images | list | wipeout ****?)
 	$(info [Info] )
 	$(info [Info] *? see 'make list' output for available options; default: ENV = develop)
@@ -92,16 +93,18 @@ verify_port:
 	$(info [Info] Use port: $(PORT))
 	$(info [Info])
 
-verify: verify_var_env verify_var_app verify_var_img
-	$(if $(APP),,$(call SITE_RULE_STD))
-
 # -------- Playbook handling
 
 define SET_EXTRA_VARS
 	$(if $(wildcard $(VPF_FILE)),$(eval VPF=--vault-password-file ./$(VPF_FILE)),$(eval VPF=))
     $(info [Info] Using vpf: $(VPF))
-	$(if $(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"),$(eval CONFIGS=))
-	$(if $(wildcard $(CNFG_D)/envs/$(ENV).json),$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(ENV).json"),$(eval CONFIGS=))
+	$(if $(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),
+		$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"),
+		$(if $(wildcard $(CNFG_D)/envs/$(ENV).json),
+			$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(ENV).json"),
+			$(eval CONFIGS=)
+		)
+	)
     $(info [Info] Using extra variables: $(CONFIGS))
 endef
 
@@ -153,60 +156,50 @@ execute_playbook:
 
 execute: set_extra_vars set_playbook verify_playbook execute_playbook
 
-# -------- Extras handling
-
-extra_appname:
-ifeq ($(wildcard $(FILES_D)/$(IMG)/apps/$(APP)/$(APP_F)),)
-	$(info [Info] IMG ignorieren)
-else
-	@[[ -f $(FILES_D)/$(IMG)/apps/$(APP)/$(APP_F) ]] && make IMG=$(IMG) ENV=$(ENV) APP=$(APP) appname || (echo "[Info] No extra appname configured!")
-endif
-
 # -------- Instance handling
 
 setup: PLAYBOOK=setup
-setup: verify execute ending 
+setup: verify_var_env verify_var_app verify_var_img execute ending 
 
 start: PLAYBOOK=start
-start: verify execute ending
+start: verify_var_env verify_var_app verify_var_img execute ending
 
 deploy: PLAYBOOK=deploy
-deploy: verify execute ending 
+deploy: verify_var_env verify_var_app verify_var_img execute ending 
 
 stop: PLAYBOOK=stop
-stop: verify execute ending
+stop: verify_var_env verify_var_app verify_var_img execute ending
 
 remove: DELETE=false
 remove: EXTRAS += -e "clean_up=$(DELETE)"
 remove: PLAYBOOK=remove
-remove: verify execute ending
+remove: verify_var_env verify_var_app verify_var_img execute ending
 
 stats: PLAYBOOK=stats
-stats: verify execute ending
+stats: verify_var_env verify_var_app verify_var_img execute ending
 
 status: PLAYBOOK=status
 status: execute ending
 
 # -------- APP handling
 
-appname: APP=
-appname: EXTRAS += -e "app_name=$(APP)"
-appname: PLAYBOOK=$(IMG)/$(APP)
-appname: verify execute ending
+#appname: APP=
+#appname: EXTRAS += -e "app_name=$(APP)"
+#appname: PLAYBOOK=$(IMG)/$(APP)
+#appname: verify execute ending
 
 # -------- Environment handling
 
 create: ENV=
 create: PLAYBOOK=create
-create: EXTRAS += -e "env_name=$(ENV)" -e "port=$(PORT)"
-create: verify_var_env verify_port verify_var_img verify_extra execute ending
+create: EXTRAS += -e "port=$(PORT)"
+create: verify_var_env verify_var_app verify_var_img verify_port execute ending
 
 delete: ENV=
 delete: DELETE=false
 delete: PLAYBOOK=delete
-delete: EXTRAS += -e "env_name=$(ENV)"
 delete: EXTRAS += -e "clean_up=$(DELETE)"
-delete: verify_var_env verify_var_img verify_extra execute ending
+delete: verify_var_env verify_var_app verify_var_img execute ending
 
 # -------- Image handling
 
@@ -230,7 +223,7 @@ fetch: set_img execute ending
 removeimage: PLAYBOOK=removeimage
 removeimage: verify_var_img execute ending
 
-# -------- Wipe.out or debugging
+# -------- Wipe.out
 
 wipeout: PLAYBOOK=wipeout
 wipeout: execute ending

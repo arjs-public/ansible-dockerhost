@@ -1,9 +1,9 @@
 ---
-- debug: msg='CHECK FOLDERS | {{ volume_home }}'
+- debug: msg="CHECK FOLDERS | {{ volume_home }}"
   when: do_debug|bool and volume_home is defined
 - name: CHECK FOLDERS | Create '{{ volume_home }}' folder if not exists
   file: dest='{{ volume_home }}' state=directory mode=0775
   failed_when: checkout.state != 'directory' or checkout.state == 'absent' 
   register: checkout
-- debug: msg='CHECK FOLDERS | {{ checkout }}'
+- debug: msg="CHECK FOLDERS | {{ checkout }}"
   when: do_debug|bool and checkout is defined

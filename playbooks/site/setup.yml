@@ -1,5 +1,5 @@
 ---
-- name: SETUP | Prepares and deploys a working websites
+- name: SITE SETUP | Prepares and deploys a working websites
   hosts: dockerhost
   gather_facts: no
   become: no
@@ -11,8 +11,8 @@
     - base_folder: ../..
 
   vars_files:
-    - "{{ base_folder }}/roles/common/vars/defaults.yml"
-    - "{{ base_folder }}/roles/site/vars/defaults.yml"
+    - '{{ base_folder }}/roles/common/vars/defaults.yml'
+    - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
     - include: '{{ common_tasks_base }}/debug.yml'
@@ -25,11 +25,11 @@
       when: do_check_folders|bool
 
   tasks:
-    - name: SETUP | Check variables
-	  include: '{{ tasks_base }}check_vars.yml'
+    - name: SITE SETUP | Check variables
+      include: '{{ tasks_base }}check_vars.yml'
       
-    - name: SETUP | Create "{{ volume_home }}" folder if not exists
-	  include: '{{ tasks_base }}check_folders.yml'
+    - name: SITE SETUP | Create "{{ volume_home }}" folder if not exists
+      include: '{{ tasks_base }}check_folders.yml'
 
-    - name: SETUP | Copy initial files
-	  include: '{{ tasks_base }}setup.yml'
+    - name: SITE SETUP | Copy initial files
+      include: '{{ tasks_base }}setup.yml'

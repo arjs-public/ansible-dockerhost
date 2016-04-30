@@ -1,10 +1,10 @@
 ---
-- debug: msg='SETUP | {{ templates_base }}{{ item }} {{ volume_home }}/{{ item }}'
+- debug: msg="SITE SETUP | {{ templates_base }}{{ item }} {{ volume_home }}/{{ item }}"
   with_items:
     - index.html
     - offline.html
   when: do_debug|bool
-- name: SETUP | Prepare special '{{ item }}'
+- name: SITE SETUP | Prepare special '{{ item }}'
   template: src='{{ templates_base }}{{ item }}' dest='{{ volume_home }}/{{ item }}' mode=644
   register: checkout
   with_items:
@@ -12,5 +12,5 @@
     - offline.html
   failed_when: checkout.state != 'file'
   tags: nginx
-- debug: msg='SETUP | {{ checkout }}'
+- debug: msg="SITE SETUP | {{ checkout }}"
   when: do_debug|bool and checkout is defined

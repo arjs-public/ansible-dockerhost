@@ -1,31 +1,21 @@
 .PHONY: *
 
 define SITE_INFO
-	$(info [Info] Use application name: $(NAME))
-	$(info [Info] Use application name extra: $(APNEXTRA))
-	$(info [Info] Use application environment: $(CONFIGS))
+	$(info [Info] Use application name: $(APP))
+	$(info [Info] Use application name extra: $(EXTRA_APP))
+	$(info [Info] Use extra vars: $(EXTRAS))
 	$(info [Info])
 endef
 
-define SITE_RULE_STD
-	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
-	@test -s $(CNFG_D)/envs/$(NAME)/$(ENV).json || (echo "[Error] ENV json not found! ($(CNFG_D)/envs/$(NAME)/$(ENV).json))" && exit 1)
-	$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(ENV).json")
+define SET_EXTRA_SITE
+	$(eval APP=$(1))
+	$(if $(APP),,$(error [Error] APP not set!))
+	$(eval ARTIFACT_PATH=$(shell echo $(APP) | tr '.' '\n' | tac | tr '\n' '/'))
+	$(eval EXTRA_APP=-e "app_name=$(APP)")
+	$(eval EXTRAS += -e "artifact_path=$(ARTIFACT_PATH)")
 	$(call SITE_INFO)
-endef
-
-define SITE_RULE
-	@test "$(ENV)" || (echo "[Error] ENV not set!" && exit 1)
-	@test "$(NAME)" || (echo "[Error] NAME not set!" && exit 1)
-	@test -s $(CNFG_D)/envs/$(NAME)/$(ENV).json || (echo "[Error] ENV/NAME json not found! ($(CNFG_D)/envs/$(NAME)/$(ENV).json))" && exit 1)
-	$(eval APNEXTRA=-e "app_name=$(NAME)")
-	$(eval CONFIGS=-e  "@$(CNFG_D)/envs/$(NAME)/$(ENV).json")
-	$(call SITE_INFO)
+	@true
 endef
 
 v2.arjs.net:
-	$(eval NAME=$@)
-	$(eval ARTIFACT_PATH=$(shell echo $(NAME) | tr '.' '\n' | tac | tr '\n' '/'))
-	$(eval ARTIFACT_VERSION="0.1.6")
-	$(eval EXTRAS += -e "artifact_path=$(ARTIFACT_PATH)" -e "artifact_version=$(ARTIFACT_VERSION)")
-	$(call SITE_RULE)
+	$(call SET_EXTRA_SITE,$@)
