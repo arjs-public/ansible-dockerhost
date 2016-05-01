@@ -30,13 +30,13 @@
 
   tasks:
     - name: START | Start docker container
-      include: '{{ tasks_base }}start.yml'
+      include: '{{ common_tasks_base }}start.yml'
 
     - name: START | Get docker container information
-      include: '{{ tasks_base }}get_facts.yml'
+      include: '{{ common_tasks_base }}get_facts.yml'
 
     - name: START | Add docker container to inventory
-      include: '{{ tasks_base }}add_host.yml'
+      include: '{{ common_tasks_base }}add_host.yml'
 
     - name: START | Execute status task
       include: '{{ common_tasks_base }}status.yml'
