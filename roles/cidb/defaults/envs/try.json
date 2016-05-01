@@ -1,6 +1,5 @@
 {
   "env_name": "try",
-  "container_name": "cidb_try",
   "ports": ["9085:6379"],
   "volume_home": "/extra/data/jenkins/try",
   "volumes": ["/extra/data/jenkins/try:/data"],

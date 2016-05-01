@@ -1,6 +1,5 @@
 {
   "env_name": "{{ env_name }}",
-  "container_name": "{{ app_name }}_{{ env_name }}",
   "ports": ["{{ port_pre }}{{ port }}:8080"],
   "volume_home": "{{ jenkins_base }}/{{ env_name }}",
   "volumes": ["{{ jenkins_base }}/{{ env_name }}:/var/jenkins_home"],

@@ -1,5 +1,4 @@
 {
-  "container_name": "site_v2.arjs.net_try",
   "ports": ["9595:80", "9695:443"],
   "volume_home": "/extra/site/v2.arjs.net/try",
   "volumes": ["/extra/site/v2.arjs.net/try:/var/www/html"],

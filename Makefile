@@ -95,6 +95,20 @@ verify_port:
 
 # -------- Playbook handling
 
+define SET_CONTAINER_NAME
+	$(if $(IMG),
+		$(if $(APP),
+			$(if $(ENV),
+				$(eval EXTRAS += -e "container_name=$(IMG)_$(APP)_$(ENV)"),
+				$(eval EXTRAS += -e "container_name=$(IMG)_$(APP)")
+			),
+			$(eval EXTRAS += -e "container_name=$(IMG)")
+		),
+		$(warning [Warning] Cannot set container name!)
+		$(eval EXTRAS += -e "container_name=")
+	)
+endef
+
 define SET_EXTRA_VARS
 	$(if $(wildcard $(VPF_FILE)),$(eval VPF=--vault-password-file ./$(VPF_FILE)),$(eval VPF=))
     $(info [Info] Using vpf: $(VPF))
@@ -105,7 +119,7 @@ define SET_EXTRA_VARS
 			$(eval CONFIGS=)
 		)
 	)
-    $(info [Info] Using extra variables: $(CONFIGS))
+    $(info [Info] Using extra config variables: $(CONFIGS))
 endef
 
 define SET_PLAYBOOK
@@ -139,6 +153,9 @@ define EXECUTE
 	$(if $(wildcard $(A_CFG)),$(call EXECUTE_PLAYBOOK),$(call EXECUTE_ERROR))
 endef
 
+set_container_name:
+	$(call SET_CONTAINER_NAME)
+
 set_extra_vars:
 	$(call SET_EXTRA_VARS)
 
@@ -152,7 +169,9 @@ verify_playbook:
 execute_playbook: 
 	$(if $(wildcard $(A_CFG)),$(call EXECUTE_PLAYBOOK),$(call EXECUTE_ERROR))
 
-execute: set_extra_vars set_playbook verify_playbook execute_playbook
+execute: set_container_name set_extra_vars set_playbook verify_playbook execute_playbook
+
+execute_no_container: set_extra_vars set_playbook verify_playbook execute_playbook
 
 # -------- Instance handling
 
@@ -177,14 +196,7 @@ stats: PLAYBOOK=stats
 stats: verify_var_env verify_var_app verify_var_img execute ending
 
 status: PLAYBOOK=status
-status: execute ending
-
-# -------- APP handling
-
-#appname: APP=
-#appname: EXTRAS += -e "app_name=$(APP)"
-#appname: PLAYBOOK=$(IMG)/$(APP)
-#appname: verify execute ending
+status: execute_no_container ending
 
 # -------- Environment handling
 
@@ -202,7 +214,7 @@ delete: verify_var_env verify_var_app verify_var_img execute ending
 # -------- Image handling
 
 build: PLAYBOOK=build
-build: verify_var_img execute ending
+build: verify_var_img execute_no_container ending
 
 filter_img:
 	$(if $(IMG),$(info Using image: $(IMG)),)
@@ -210,7 +222,7 @@ filter_img:
 	$(if $(IMG),$(info EXTRA_IMG=$(EXTRA_IMG)),)
 
 images: PLAYBOOK=images
-images: filter_img execute ending
+images: filter_img execute_no_container ending
 
 fetchall: PLAYBOOK=fetch
 fetchall: 
@@ -221,15 +233,15 @@ fetchall:
 	@true
 
 fetch: PLAYBOOK=fetch
-fetch: verify_var_img execute ending
+fetch: verify_var_img execute_no_container ending
 
 removeimage: PLAYBOOK=removeimage
-removeimage: verify_var_img execute ending
+removeimage: verify_var_img execute_no_container ending
 
 # -------- Wipe.out
 
 wipeout: PLAYBOOK=wipeout
-wipeout: execute ending
+wipeout: execute_no_container ending
 
 # -------- Infra handling
 

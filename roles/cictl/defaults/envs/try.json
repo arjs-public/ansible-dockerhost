@@ -1,6 +1,5 @@
 {
   "env_name": "try",
-  "container_name": "jenkins_try",
   "ports": ["8085:8080"],
   "volume_home": "/extra/jenkins/try",
   "volumes": ["/extra/jenkins/try:/var/jenkins_home"],

@@ -1,5 +1,4 @@
 {
-  "container_name": "{{ image }}_{{ app_name }}_{{ env_name }}",
   "ports": ["{{ port_www_pre }}{{ port }}:80", "{{ port_wwws_pre }}{{ port }}:443"],
   "volume_home": "{{ www_site_base }}/{{ app_name }}/{{ env_name }}",
   "volumes": ["{{ www_site_base }}/{{ app_name }}/{{ env_name }}:/var/www/html"],

@@ -1,6 +1,5 @@
 {
   "env_name": "{{ env_name }}",
-  "container_name": "{{ item | dirname | basename }}_{{ env_name }}",
   "ports": ["{{ port_db_pre }}{{ port }}:6379"],
   "volume_home": "{{ jenkins_data_base }}/{{ env_name }}",
   "volumes": ["{{ jenkins_data_base }}/{{ env_name }}:/data"],

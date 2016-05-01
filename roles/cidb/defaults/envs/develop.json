@@ -1,6 +1,5 @@
 {
   "env_name": "develop",
-  "container_name": "cidb_develop",
   "ports": ["9082:6379"],
   "volume_home": "/extra/data/jenkins/develop",
   "volumes": ["/extra/data/jenkins/develop:/data"],
