@@ -1,5 +1,5 @@
 ---
-- name: START | START website
+- name: START | Start a running website '{{ container_name }}' container based on '{{ image }}'
   hosts: dockerhost
   gather_facts: no
   become: no
