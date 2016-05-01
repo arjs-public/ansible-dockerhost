@@ -1,7 +1,5 @@
 ---
-container_name: cidb
-volume_home: "{{ extra_base }}/{{ container_name }}"
-roles_folder: "{{ global_roles_base }}{{ container_name }}/"
+roles_folder: "{{ global_roles_base }}{{ image }}/"
 config_base: "{{ roles_folder }}defaults/"
 tasks_base: "{{ roles_folder }}tasks/"
 files_base: "{{ roles_folder }}files/"
