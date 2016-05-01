@@ -46,7 +46,7 @@
   
 - debug: msg='STATUS | {{ image }}'
   when: do_debug|bool and image == '' and app_name == '' and env_name == ''
-- name: STATUS | Execute docker status with an name '{{ image }}' 
+- name: STATUS | Execute docker ps with an name '{{ image }}' 
   shell: docker ps -a -f name='{{ image }}' | tail -n +2
   when: image != '' and app_name == '' and env_name == ''
   register: checkout
@@ -56,9 +56,9 @@
 
 - debug: msg='STATUS | Normal docker ps'
   when: do_debug|bool and image == '' and app_name == '' and env_name == ''
-- name: STATUS | Execute docker ps
+- name: STATUS | Execute normal docker ps
   shell: docker ps -a
-  when: image == '' and app_name == '' and env_name == '''
+  when: image == '' and app_name == '' and env_name == ''
   register: checkout
 - debug: msg='STATUS | {{ checkout }}'
   when: do_debug|bool and checkout is defined

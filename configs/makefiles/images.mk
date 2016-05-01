@@ -5,6 +5,7 @@ DOCKER_IMAGES = hub.busybox \
 	hub.tomcat \
 	hub.nginx \
 	hub.redis \
+	hub.mariadb \
 	hub.jenkins \
 	hub.python \
 	hub.python+2.7 \
@@ -27,10 +28,9 @@ define SET_EXTRA_IMG_ENV
 endef
 
 $(DOCKER_IMAGES):
-	$(info [Info] Processing $(basename $(subst +,:,$@)))
-	$(eval IMG=$(basename $(subst +,:,$@)))
+	$(eval IMG=$(basename $(subst +,:,$(subst .,,$(suffix $@)))))
+	$(info [Info] Processing $(IMG))
 	$(call SET_EXTRA_IMG)
-	$(call EXECUTE)
 
 
 verify_var_img:

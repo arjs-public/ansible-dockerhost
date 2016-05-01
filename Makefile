@@ -123,20 +123,19 @@ define VERIFY_PLAYBOOK
 endef
 
 define EXECUTE_ERROR
-	$(info [Info])
 	$(error [Info] Not executed: ansible-playbook $(PLAYBOOKPATH) $(VPF) $(CONFIGS) $(EXTRA_IMG) $(EXTRA_ENV) $(EXTRA_APP) $(EXTRAS))
 endef
 
 define EXECUTE_PLAYBOOK
+	$(info [Info] Execute playbook '$(PLAYBOOK)' ...)
 	$(info [Info])
 	@ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(VPF) $(CONFIGS) $(EXTRA_IMG) $(EXTRA_ENV) $(EXTRA_APP) $(EXTRAS)
 endef
 
 define EXECUTE
-	$(call SET_PLAYBOOK)
-	$(call VERIFY_PLAYBOOK)
-	$(info [Info] )
-	$(info [Info] Execute playbook '$(PLAYBOOK)' ...)
+	$(eval IMG=$(subst +,:,$(subst hub.,,$(1))))
+	$(info [Info] Processing $(IMG))
+	$(call SET_EXTRA_IMG)
 	$(if $(wildcard $(A_CFG)),$(call EXECUTE_PLAYBOOK),$(call EXECUTE_ERROR))
 endef
 
@@ -147,11 +146,10 @@ set_playbook:
 	$(call SET_PLAYBOOK)
 
 verify_playbook:
+	$(info [Info] )
 	$(call VERIFY_PLAYBOOK)
 
 execute_playbook: 
-	$(info [Info] )
-	$(info [Info] Execute playbook '$(PLAYBOOK)' ...)
 	$(if $(wildcard $(A_CFG)),$(call EXECUTE_PLAYBOOK),$(call EXECUTE_ERROR))
 
 execute: set_extra_vars set_playbook verify_playbook execute_playbook
@@ -215,10 +213,15 @@ images: PLAYBOOK=images
 images: filter_img execute ending
 
 fetchall: PLAYBOOK=fetch
-fetchall: $(DOCKER_IMAGES) ending
+fetchall: 
+	$(call SET_PLAYBOOK)
+	$(call VERIFY_PLAYBOOK)
+	$(foreach hub,$(DOCKER_IMAGES),$(info $(hub)))
+	$(foreach hub,$(DOCKER_IMAGES),$(call EXECUTE,$(hub)))
+	@true
 
 fetch: PLAYBOOK=fetch
-fetch: set_img execute ending
+fetch: verify_var_img execute ending
 
 removeimage: PLAYBOOK=removeimage
 removeimage: verify_var_img execute ending
@@ -286,18 +289,22 @@ cleanup: verify_var_env verify_infra cleanup_doing ending
 
 
 list:
-	$(info [Info] List Infrastructures [$(CNFG_D)/infra/] ...)
-	@pushd $(CNFG_D)/infra/ > /dev/null; ls -1 *.txt | cut -d _ -f 2 | cut -d . -f 1; popd > /dev/null
+	$(eval CNFG_D=$(BASE_D)/vars)
+	$(info [Info] List Infrastructures [infra/] ...)
+	$(eval output=$(shell pushd $(CNFG_D)/infra/ > /dev/null; ls -1 *.txt | cut -d _ -f 2 | cut -d . -f 1; popd > /dev/null))
+	$(foreach out,$(output),$(info [Info] - $(out)))
 	$(info [Info])
-	$(info [Info] List Application Stacks [$(CNFG_D)/envs/] ...)
-	@pushd $(CNFG_D)/envs/ > /dev/null; ls -1dR */; popd > /dev/null
+	$(info [Info] List Application Stack Images [roles/] ...)
+	$(eval output=$(shell pushd $(BASE_D)/roles/ > /dev/null; ls -1dR */ | grep -vE "_template_|common"; popd > /dev/null))
+	$(foreach out,$(output),$(info [Info] - $(out)))
 	$(info [Info])
-	$(info [Info] List Environments in Application Stacks [$(CNFG_D)/envs/] ...)
-	@pushd $(CNFG_D)/envs/ > /dev/null; ls -1dR **/*.json | cut -d / -f 2 | cut -d . -f 1 | sort -u; popd > /dev/null
+	$(info [Info] List Environments in Application Stacks [envs/] ...)
+	$(eval output=$(shell pushd $(BASE_D)/roles/ > /dev/null; ls -1R */defaults/envs/*.json | cut -d / -f 1,4 | cut -d . -f 1 | sort -u; popd > /dev/null))
+	$(foreach out,$(output),$(info [Info] - $(out)))
+	$(eval output=$(shell pushd $(BASE_D)/roles/ > /dev/null; ls -1R */defaults/envs/**/*.json | cut -d / -f 1,4,5 | sed "s/.json//" | sort -u; popd > /dev/null))
+	$(foreach out,$(output),$(info [Info] - $(out)))
 	$(info [Info])
-	$(info [Info] List Custom Docker Images [$(TAG_D)] ...)
-	@pushd $(TAG_D) > /dev/null; ls -1dR */; popd > /dev/null
-	$(info [Info])
+	@true
 
 
 ansible_cmd_check:
