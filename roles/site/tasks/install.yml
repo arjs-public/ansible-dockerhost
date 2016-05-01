@@ -1,6 +1,6 @@
 ---
-- name: INSTALL | Check if 'hostname'
-  shell: hostname -f    
+- name: INSTALL | Check 'hostname' and 'uname'
+  shell: hostname -f && uname -a    
   register: checkout
   remote_user: root
   delegate_to: '{{ container_name }}'
