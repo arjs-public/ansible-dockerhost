@@ -43,6 +43,3 @@
 
     - name: START | Execute stats task
       include: '{{ common_tasks_base }}stats.yml'
-
-#    - name: Output
-#      debug: msg="[echo] {{ hostvars[container_name].ansible_ssh_host }}"
