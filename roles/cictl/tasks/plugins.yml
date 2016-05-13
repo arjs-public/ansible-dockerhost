@@ -24,7 +24,7 @@
   with_items: 
     - '{{ jenkins_extra_plugins }}'
 - name: JENKINS PLUGINS | Handle plugins
-  shell: '{{ volume_home }}/tmp/plugins.sh {{ volume_home }}/tmp/{{ item }} {{ volume_home }}/plugins'
+  shell: '{{ volume_home }}/tmp/plugins.sh {{ volume_home }}/tmp/{{ item }} {{ volume_home }}/plugins' true
   with_items: 
     - '{{ jenkins_extra_plugins }}'
   changed_when: checkout.rc != 0
