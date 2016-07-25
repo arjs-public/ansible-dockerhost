@@ -40,7 +40,7 @@ class CallbackModule(CallbackBase):
         
         if vars:
             for k, v in vars.iteritems():
-                print("k, v:", k, v)
+                # print("k, v:", k, v)
                 if k == 'human_log':
                     for i in v:
                         if i not in fields:

@@ -1,5 +1,5 @@
 ---
-- name: IMAGES | List images on docker host '{{ inventory_hostname }}'
+- name: IMAGES | List images on docker host
   hosts: dockerhost
   gather_facts: no
   become: no
@@ -12,7 +12,6 @@
 
   vars_files:
     - '{{ base_folder }}/roles/common/vars/defaults.yml'
-    - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
     - include: '{{ common_tasks_base }}/debug.yml'
@@ -25,6 +24,6 @@
       when: do_check_docker|bool
 
   tasks:
-    - name: IMAGES | Execute docker build
+    - name: IMAGES | Execute docker build on '{{ inventory_hostname }}'
       include: '{{ common_tasks_base }}images.yml'
       tags: human_log(stdout|stderr)

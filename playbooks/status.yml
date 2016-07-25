@@ -1,5 +1,5 @@
 ---
-- name: STATUS | List status of container(s) on docker host '{{ inventory_host }}'
+- name: STATUS | List status of container(s) on docker host
   hosts: dockerhost
   gather_facts: no
   become: no
@@ -13,7 +13,6 @@
 
   vars_files:
     - '{{ base_folder }}/roles/common/vars/defaults.yml'
-    - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
     - include: '{{ common_tasks_base }}/debug.yml'
@@ -29,5 +28,5 @@
       when: do_check_docker|bool
 
   tasks:
-    - name: STATUS | Execute status task
+    - name: STATUS | Execute status task on '{{ inventory_host }}'
       include: '{{ common_tasks_base}}status.yml'

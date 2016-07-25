@@ -1,5 +1,5 @@
 ---
-- name: BUILD | Build image '{{ image }}' on docker host '{{ container_host }}'
+- name: BUILD | Build image '{{ image }}' on docker host
   hosts: dockerhost
   gather_facts: no
   become: no
@@ -25,8 +25,8 @@
       when: do_check_docker|bool
 
   tasks:
-    - name: BUILD | Execute docker build
+    - name: BUILD | Execute docker build on '{{ inventory_hostname }}'
       include: '{{ common_tasks_base }}build.yml'
     
-    - name: BUILD | Execute docker images
+    - name: BUILD | Execute docker images on '{{ inventory_hostname }}'
       include: '{{ common_tasks_base }}images.yml'

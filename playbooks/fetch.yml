@@ -1,5 +1,5 @@
 ---
-- name: FETCH | Fetch standard images from docker hub '{{ inventory_hostname }}'
+- name: FETCH | Fetch standard images from docker hub
   hosts: dockerhost
   gather_facts: no
   become: no
@@ -24,6 +24,6 @@
       when: do_check_docker|bool
 
   tasks:
-    - name: FETCH | Execute fetch task 
+    - name: FETCH | Execute fetch task for '{{ inventory_hostname }}'
       include: '{{ common_tasks_base }}fetch.yml'
       tags: human_log(stdout|stderr)
