@@ -57,8 +57,17 @@ class CallbackModule(CallbackBase):
         if type(data) == dict:
             for field in self._fields:
                 if field in data.keys() and data[field]:
-                    output = self._format_output(data[field])
-                    print("\n{0}: {1}".format(field, output.replace("\\n","\n")))
+                    if not isinstance(data[field], list):
+                        output = self._format_output(data[field].encode('utf-8').decode('utf-8'))
+                        if field in ('stdout', 'stderr'):
+                            print("\n{0}:\n{1}".format(field, output.replace("\\n","\n")))
+                        else:
+                            print("\n{0}: {1}".format(field, output.replace("\\n","\n")))
+                    else:
+                        output = self._format_output(data[field])
+                        for line in data[field]:
+                            output = self._format_output(line.encode('utf-8').decode('utf-8'))
+                            print("{0}: {1}".format(field, output.replace("\\n","\n")))
 
     def _format_output(self, output):
         # Strip unicode
@@ -147,10 +156,13 @@ class CallbackModule(CallbackBase):
         pass
 
     def playbook_on_task_start(self, name, is_conditional):
-        if name.tags:
-            self._fields = self.extract_fields(name.tags, name.get_vars())
-        else:
-            self._fields = None
+        pass
+
+    def v2_playbook_on_task_start(self, task, is_conditional):
+        self._fields = None
+        if task and not isinstance(task, unicode):
+            if task.tags:
+                self._fields = self.extract_fields(task.tags, task.get_vars())
 
     def playbook_on_vars_prompt(self, varname, private=True, prompt=None,
                                 encrypt=None, confirm=False, salt_size=None,
