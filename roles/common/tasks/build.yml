@@ -7,22 +7,19 @@
   failed_when: checkout.state != 'absent'
 - debug: msg='BUILD | {{ checkout }}'
   when: do_debug|bool and checkout is defined
-- name: BUILD | Check directory '{{ image_path }}' and create if not found
-  file: dest='{{ image_path }}' state=directory
+- name: BUILD | Check directory '{{ image_path }}{{ image }}/' and create if not found
+  file: dest='{{ image_path }}{{ image }}/' state=directory
   register: checkout
   failed_when: checkout.state != 'directory'
 - debug: msg='BUILD | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
 
-- name: BUILD | Copy '{{ image }}' docker file to localhost
-  synchronize:
+- name: BUILD | Copy '{{ image }}' files from '{{ files_base }}' to '{{ image_path }}{{ image }}/' on '{{ inventory_hostname }}'
+  copy:
     src: '{{ files_base }}'
     dest: '{{ image_path }}{{ image }}/'
-    delete: yes
-    rsync_opts:
-      - '--no-motd'
-      - '--exclude="**/*.DS_Store"'
+    mode: 0644
 - name: BUILD | Check '{{ image }}' docker image folder
   stat: path='{{ image_path }}{{ image }}/'
   register: checkout
