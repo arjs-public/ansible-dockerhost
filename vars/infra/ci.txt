@@ -1,2 +1,2 @@
-cidb
-cictl
+jenkins:cidb
+jenkins:cictl

@@ -6,42 +6,46 @@
 
 
 - debug: msg="ADD HOST | {{ docker_containers[container_name].docker_networksettings.Networks.bridge.IPAddress }}"
-  when: do_debug|bool and docker_containers[container_name].docker_networksettings.Networks.bridge.IPAddress is defined
+  #when: do_debug|bool and docker_containers[container_name].docker_networksettings.Networks.bridge.IPAddress is defined
 - name: ADD HOST | Add container '{{ container_name }}' to the hosts inventory
   add_host:
     hostname: '{{ container_name }}'
     groups: docker
-    ansible_ssh_host: '{{ item.value.docker_networksettings.Networks.bridge.IPAddress }}'
+    ansible_ssh_host: '{{ docker_containers[container_name].docker_networksettings.Networks.bridge.IPAddress }}'
+    # ansible_ssh_host: '{{ item.value.docker_networksettings.Networks.bridge.IPAddress }}'
     ansible_ssh_port: 22
-  with_dict: docker_containers
+  # with_dict: docker_containers
   when: container_facts['docker_state'].Running|bool and docker_containers[container_name].docker_networksettings.Networks.bridge.IPAddress is defined
 
 - debug: msg='ADD HOST | {{ hostvars[container_name] }}'
   when: do_debug|bool and container_facts['docker_state'].Running|bool
 - name: ADD HOST | Extract IP for '{{ container_ip }}'
-  set_fact: container_ip='{{ item.value.docker_networksettings.Networks.bridge.IPAddress }}'
-  with_dict: docker_containers
+  set_fact: container_ip='{{ docker_containers[container_name].docker_networksettings.Networks.bridge.IPAddress }}'
+  # set_fact: container_ip='{{ item.value.docker_networksettings.Networks.bridge.IPAddress }}'
+  # with_dict: docker_containers
   when: container_facts['docker_state'].Running|bool and docker_containers[container_name].docker_networksettings.Networks.bridge.IPAddress is defined
 - debug: msg='ADD HOST | {{ container_ip }}'
   when: do_debug|bool and container_ip is defined
 
 
 - debug: msg="ADD HOST | {{ docker_containers[container_name].docker_networksettings.Networks.bridge.IPAddress }}"
-  when: do_debug|bool and docker_containers[container_name].docker_networksettings.IPAddress is defined
+  # when: do_debug|bool and docker_containers[container_name].docker_networksettings.IPAddress is defined
 - name: ADD HOST | Add container '{{ container_name }}' to the hosts inventory
   add_host:
     hostname: '{{ container_name }}'
     groups: docker
-    ansible_ssh_host: '{{ item.value.docker_networksettings.IPAddress }}'
+    ansible_ssh_host: '{{ docker_containers[container_name].docker_networksettings.Networks.bridge.IPAddress }}'
+    # ansible_ssh_host: '{{ item.value.docker_networksettings.IPAddress }}'
     ansible_ssh_port: 22
-  with_dict: docker_containers
+  # with_dict: docker_containers
   when: container_facts['docker_state'].Running|bool and docker_containers[container_name].docker_networksettings.IPAddress is defined
 
 - debug: msg='ADD HOST | {{ hostvars[container_name] }}'
   when: do_debug|bool and container_facts['docker_state'].Running|bool
 - name: ADD HOST | Extract IP for '{{ container_ip }}'
-  set_fact: container_ip='{{ item.value.docker_networksettings.IPAddress }}'
-  with_dict: docker_containers
+  set_fact: container_ip='{{ docker_containers[container_name].docker_networksettings.Networks.bridge.IPAddress }}'
+  # set_fact: container_ip='{{ item.value.docker_networksettings.Networks.bridge.IPAddress }}'
+  # with_dict: docker_containers
   when: container_facts['docker_state'].Running|bool and docker_containers[container_name].docker_networksettings.IPAddress is defined
 - debug: msg='ADD HOST | {{ container_ip }}'
   when: do_debug|bool and container_ip is defined

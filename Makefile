@@ -18,6 +18,8 @@ PLUGIN_F = plugins.ini
 APP_F = app.py
 $(eval BASE_D=$(shell pwd))
 # $(info [Info] Use BASE_D: $(BASE_D))
+$(eval CNFG_D=$(BASE_D)/vars)
+# $(info [Info] Use CNFG_D: $(CNFG_D))
 PB_D_B = $(BASE_D)/playbooks
 # $(info [Info] Use PB_D_B: $(PB_D_B))
 PB_D_I = $(if $(IMG),$(PB_D_B)/$(IMG),$(PB_D_B))
@@ -25,7 +27,7 @@ PB_D_I = $(if $(IMG),$(PB_D_B)/$(IMG),$(PB_D_B))
 TAG_D = $(BASE_D)/roles/files
 FILES_D = $(BASE_D)/roles/files
 TEMPLATES_D = $(BASE_D)/roles/templates
-$(eval ANSIBLE_CFG=$(shell netstat -all | grep ' 6379 ' > /dev/null && echo redis || echo default))
+$(eval ANSIBLE_CFG=$(shell netstat -p tcp | grep ' 6379 ' > /dev/null && echo redis || echo default))
 # $(info [Info] Use ANSIBLE_CFG: $(ANSIBLE_CFG))
 A_CFG = $(BASE_D)/configs/$(ANSIBLE_CFG).cfg
 VPF_FILE = configs/.secrets/vpf.txt
@@ -80,7 +82,7 @@ include configs/makefiles/sites.mk
 include configs/makefiles/apps.mk
 
 # -------- Helpers handling
-	
+
 ending:
 	$(info [Info])
 	$(info [Info] Finsihed $(PLAYBOOK))
@@ -125,13 +127,13 @@ endef
 define SET_PLAYBOOK
 	$(if $(PLAYBOOK),,$(eval PLAYBOOK=main))
 	$(eval PLAYBOOKPATH = $(if $(wildcard $(PB_D_I)/$(PLAYBOOK).yml),$(PB_D_I)/$(PLAYBOOK).yml,$(PB_D_B)/$(PLAYBOOK).yml))
-	$(info [Info] Using Playbook: $(PLAYBOOKPATH) ...)	
+	$(info [Info] Using Playbook: $(PLAYBOOKPATH) ...)
 endef
 
 define VERIFY_PLAYBOOK
 	$(info [Info] Verify playbook $(PLAYBOOKPATH) ...)
-	$(if $(wildcard $(PLAYBOOKPATH)), 
-	  $(info [Info] Found playbook $(PLAYBOOKPATH) ...), 
+	$(if $(wildcard $(PLAYBOOKPATH)),
+	  $(info [Info] Found playbook $(PLAYBOOKPATH) ...),
 	  $(error [Error] No playbook found!)
 	)
 endef
@@ -143,7 +145,7 @@ endef
 define EXECUTE_PLAYBOOK
 	$(info [Info] Execute playbook '$(PLAYBOOK)' ...)
 	$(info [Info])
-	@ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(VPF) $(CONFIGS) $(EXTRA_IMG) $(EXTRA_ENV) $(EXTRA_APP) $(EXTRAS)
+	ANSIBLE_CONFIG=$(A_CFG) ansible-playbook $(PLAYBOOKPATH) $(VPF) $(CONFIGS) $(EXTRA_IMG) $(EXTRA_ENV) $(EXTRA_APP) $(EXTRAS)
 endef
 
 define EXECUTE
@@ -166,7 +168,7 @@ verify_playbook:
 	$(info [Info] )
 	$(call VERIFY_PLAYBOOK)
 
-execute_playbook: 
+execute_playbook:
 	$(if $(wildcard $(A_CFG)),$(call EXECUTE_PLAYBOOK),$(call EXECUTE_ERROR))
 
 execute: set_container_name set_extra_vars set_playbook verify_playbook execute_playbook
@@ -176,13 +178,13 @@ execute_no_container: set_extra_vars set_playbook verify_playbook execute_playbo
 # -------- Instance handling
 
 setup: PLAYBOOK=setup
-setup: verify_var_env verify_var_app verify_var_img execute ending 
+setup: verify_var_env verify_var_app verify_var_img execute ending
 
 start: PLAYBOOK=start
 start: verify_var_env verify_var_app verify_var_img execute ending
 
 deploy: PLAYBOOK=deploy
-deploy: verify_var_env verify_var_app verify_var_img execute ending 
+deploy: verify_var_env verify_var_app verify_var_img execute ending
 
 stop: PLAYBOOK=stop
 stop: verify_var_env verify_var_app verify_var_img execute ending
@@ -225,7 +227,7 @@ images: PLAYBOOK=images
 images: filter_img execute_no_container ending
 
 fetchall: PLAYBOOK=fetch
-fetchall: 
+fetchall:
 	$(call SET_PLAYBOOK)
 	$(call VERIFY_PLAYBOOK)
 	$(foreach hub,$(DOCKER_IMAGES),$(info $(hub)))
@@ -253,9 +255,14 @@ startup_doing: verify_infra
 	$(info [Info] Startup '$(INFRA)' ...)
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \
-		echo "[Info]  Booting $$l ..."; \
-		make IMG=$$l ENV=$(ENV) setup; \
-		make IMG=$$l ENV=$(ENV) start; \
+	  echo "[Info]  Current line is $$l"; \
+	  export appname=$$(echo $$l | cut -d ':' -f 1); \
+		echo "[Info]  Current appname is $$appname"; \
+		export image=$$(echo $$l | cut -d ':' -f 2); \
+		echo "[Info]  Current image is $$image"; \
+		echo "[Info]  Booting $${appname} with $${image} ..."; \
+		make $${appname} ${ENV} $${image} setup; \
+		make $${appname} ${ENV} $${image} start; \
 		echo; \
 	done
 
@@ -287,7 +294,7 @@ construct_doing:
 construct: verify_infra construct_doing do_images ending
 
 
-cleanup_doing: 
+cleanup_doing:
 	$(info [Info] Cleanup '$(INFRA)' ...)
 	@for l in `cat $(CNFG_D)/infra/$(INFRA).txt`; \
 	do \

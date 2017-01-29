@@ -1,53 +1,55 @@
 ---
 - debug: msg='START | Use "standard" entrypoint.'
-  when: do_debug|bool and not has_custom_command
+  when: do_debug|bool and not has_custom_command|bool
 
 - name: START | Create client container '{{ container_name }}' with standard command
-  docker:
-    docker_api_version: 1.17
+  docker_container:
+    api_version: 1.17
     image: '{{ image }}'
     name: '{{ container_name }}'
-    detach: False
-    expose: '{{ ports }}'
-    ports: '{{ ports }}'
+    exposed_ports: '{{ ports }}'
     volumes: '{{ volumes }}'
-    state: running
+    state: started
   register: checkout
-  when: not has_custom_command
+  when: not has_custom_command|bool
 
 - debug: msg='START | {{ checkout }}'
-  when: do_debug|bool and not has_custom_command
+  when: do_debug|bool and not has_custom_command|bool
 - debug: msg='START | {{ checkout.changed }}'
-  when: do_debug|bool and not has_custom_command
+  when: do_debug|bool and not has_custom_command|bool
 - debug: msg='START | {{ checkout.summary.started }}'
-  when: do_debug|bool and not has_custom_command
+  when: do_debug|bool and not has_custom_command|bool
 
-- fail: msg='[Error] START | Container '{{ container_name }}' with standard entrypoint is not running'
-  when: not has_custom_command and checkout.changed|bool and checkout.summary.started == '1'
+# - fail: msg='[Error] START | Container '{{ container_name }}' with standard entrypoint is not running'
+#   when: not has_custom_command|bool and checkout.changed|bool and checkout.summary.started == '1'
 
 - debug: msg='START | Use "{{ command }}" with custom entrypoint.'
-  when: do_debug|bool and has_custom_command
-
+  when: do_debug|bool and has_custom_command|bool
+- debug: msg='START | Use image "{{ image }}"'
+  when: do_debug|bool and has_custom_command|bool
+- debug: msg='START | Use container_name "{{ container_name }}"'
+  when: do_debug|bool and has_custom_command|bool
+- debug: msg='START | Use ports "{{ ports }}"'
+  when: do_debug|bool and has_custom_command|bool
+- debug: msg='START | Use volumes "{{ volumes }}"'
+  when: do_debug|bool and has_custom_command|bool
 - name: START | Create client container '{{ container_name }}' with custom command
-  docker:
-    docker_api_version: 1.17
+  docker_container:
     image: '{{ image }}'
     name: '{{ container_name }}'
-    detach: False
-    expose: '{{ ports }}'
-    ports: '{{ ports }}'
+    exposed_ports: '{{ ports }}'
     volumes: '{{ volumes }}'
     command: '{{ command }}'
-    state: running
+    state: started
   register: checkout
-  when: has_custom_command
+  when: has_custom_command|bool
 
 - debug: msg='START | {{ checkout }}'
-  when: do_debug|bool and has_custom_command
+  when: do_debug|bool and has_custom_command|bool
 - debug: msg='START | {{ checkout.changed }}'
-  when: do_debug|bool and has_custom_command
+  when: do_debug|bool and has_custom_command|bool
 - debug: msg='START | {{ checkout.summary.started }}'
-  when: do_debug|bool and has_custom_command
+  when: do_debug|bool and has_custom_command|bool
 
-- fail: msg='[Error] START | Container "{{ container_name }}" with custom entrypoint is not running'
-  when: has_custom_command and checkout.changed|bool and checkout.summary.started == '1'
+# - fail: msg='[Error] START | Container "{{ container_name }}" with custom entrypoint is not running'
+#   when: has_custom_command|bool and checkout.changed|bool and checkout.summary.started == '1'
