@@ -45,6 +45,7 @@
 - debug: msg='START | {{ checkout }}'
   #when: do_debug|bool and not has_custom_command|bool
 - debug: msg='START | {{ ansible_docker_container }}'
+  when: ansible_docker_container is defined
   #when: do_debug|bool and not has_custom_command|bool
 
 # - fail: msg='[Error] START | Container '{{ container_name }}' with standard entrypoint is not running'
