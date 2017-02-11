@@ -2,9 +2,8 @@
 
 
 define ENV_INFO
-	$(info [Info] Use environment name: $(APP))
-	$(info [Info] Use environment name extra: $(EXTRA_APP))
-	$(info [Info] Use extra vars: $(EXTRAS))
+	$(info [Info] Use environment name: $(ENV))
+	$(info [Info] Use environment name extra: $(EXTRA_ENV))
 	$(info [Info])
 	@true
 endef
