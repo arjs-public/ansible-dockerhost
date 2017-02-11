@@ -13,9 +13,9 @@ DOCKER_IMAGES = hub.busybox \
 
 
 define SET_EXTRA_IMG
-	$(if $(IMG),$(info [Info] Use image: $(IMG)),$(error [Error] IMG not set!))
+	$(if $(IMG),$(info [Info] Use image name: $(IMG)),$(error [Error] IMG not set!))
 	$(eval EXTRA_IMG=-e "image=$(IMG)")
-	$(info [Info] Use image extra: $(EXTRA_IMG))
+	$(info [Info] Use image name extra: $(EXTRA_IMG))
 	$(info [Info])
 	@true
 endef
