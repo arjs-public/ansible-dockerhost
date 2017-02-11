@@ -112,7 +112,7 @@ define SET_CONTAINER_NAME
 endef
 
 define SET_EXTRA_VARS
-	$(if $(wildcard $(VPF_FILE)),$(eval VPF=--vault-password-file ./$(VPF_FILE)),$(eval VPF=))
+	$(if $(wildcard $(VPF_FILE)),$(eval VPF=--vault-password-file $(VPF_FILE)),$(eval VPF=))
     $(info [Info] Using vpf: $(VPF))
 	$(if $(wildcard $(CNFG_D)/envs/$(APP)/$(ENV).json),
 		$(eval CONFIGS=-e "@$(CNFG_D)/envs/$(APP)/$(ENV).json"),
