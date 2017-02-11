@@ -25,6 +25,6 @@ verify_var_app:
 jenkins: 
 	$(call SET_APP_NAME,$@)
 
-site:
+v2.arjs.net:
 	$(call SET_APP_NAME,$@)
 	$(call SET_APP_ARTIFACT_INFO,$@,sites,ci/current.tgz)
