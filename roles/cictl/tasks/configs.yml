@@ -14,21 +14,24 @@
 
 - name: JENKINS CONFIGS | Show password
   local_action:
-    module: shell cat '{{ base_folder }}/configs/.secrets/vpf.txt'
+    module: shell cat '{{ vpf_file_path }}'
   when: do_debug|bool
+  tags: human_log(cmd|stderr|stdout)
 - name: JENKINS CONFIGS | Show credentials vault
   local_action:
-    module: shell ansible-vault view --vault-password-file='{{ base_folder }}/configs/.secrets/vpf.txt' '{{ files_base }}credentials.xml.vault'
+    module: shell ansible-vault view --vault-password-file='{{ vpf_file_path }}' '{{ files_base }}credentials.xml.vault'
   when: do_debug|bool
   changed_when: checkout.rc != 0
   register: checkout
+  tags: human_log(cmd|stderr|stdout)
 - debug: msg="JENKINS CONFIGS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 - name: JENKINS CONFIGS | Create decrypted credentials file
   local_action:
-    module: shell ansible-vault view --vault-password-file='{{ base_folder }}/configs/.secrets/vpf.txt' '{{ files_base }}credentials.xml.vault' > '{{ files_base }}credentials.xml'
+    module: shell ansible-vault view --vault-password-file='{{ vpf_file_path }}' '{{ files_base }}credentials.xml.vault' > '{{ files_base }}credentials.xml'
   changed_when: checkout.rc != 0
   register: checkout
+  tags: human_log(cmd|stderr|stdout)
 - debug: msg="JENKINS CONFIGS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 

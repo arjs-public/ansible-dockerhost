@@ -16,7 +16,10 @@
     - '{{ base_folder }}/roles/{{ image }}/vars/{{ image }}.vault'
 
   pre_tasks:
-    - debug: msg="{{ lookup('pipe', 'ls -la ' + base_folder + '/configs/.secrets/vpf.txt') }}"
+    - set_fact: vpf_file_path="{{ global_folder + 'configs/.secrets/vpf.txt' }}"
+    - debug: msg="{{ vpf_file_path }}"
+      when: do_debug|bool
+    - debug: msg="{{ lookup('pipe', 'ls -la ' + vpf_file_path) }}"
       when: do_debug|bool
 
     - include: '{{ common_tasks_base }}/debug.yml'

@@ -6,12 +6,11 @@
     - '{{ templates_base }}/jobs/**/jobs/**/*.j2'
 - name: JENKINS JOBS | Create folders in '{{ volume_home }}/jobs/' for default job configs
   file: dest='{{ item | dirname | replace(templates_base, volume_home + "/") }}' state=directory mode=0775
-  register: checkout
   failed_when: checkout.state != 'directory'
+  register: checkout
   with_fileglob:
     - '{{ templates_base }}/jobs/**/*.j2'
     - '{{ templates_base }}/jobs/**/jobs/**/*.j2'
-  register: checkout
 - debug: msg="JENKINS JOBS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 

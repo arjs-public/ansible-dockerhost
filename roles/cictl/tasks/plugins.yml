@@ -9,12 +9,12 @@
   with_items:
     - plugins.sh
     - plugins.ini
-  changed_when: checkout.state != 'file'
+  changed_when: "checkout.state != 'file'"
   register: checkout
 
-- name: JENKINS PLUGINS | Handle plugins.sh
-  shell: 'chmod +x {{ volume_home }}/tmp/plugins.sh'
-  changed_when: checkout.rc != 0
+- name: JENKINS PLUGINS | Handle plugins.sh execution flag
+  file: path='{{ volume_home }}/tmp/plugins.sh' state=file mode=0755
+  changed_when: checkout.mode != '0755' and checkout.state != 'file'
   register: checkout
 - debug: msg="JENKINS PLUGINS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
@@ -24,11 +24,12 @@
   with_items: 
     - '{{ jenkins_extra_plugins }}'
 - name: JENKINS PLUGINS | Handle plugins
-  shell: '{{ volume_home }}/tmp/plugins.sh {{ volume_home }}/tmp/{{ item }} {{ volume_home }}/plugins' true
+  shell: '{{ volume_home }}/tmp/plugins.sh {{ volume_home }}/tmp/{{ item }} {{ volume_home }}/plugins true'
   with_items: 
     - '{{ jenkins_extra_plugins }}'
   changed_when: checkout.rc != 0
   register: checkout
+  tags: human_log(cmd|stderr|stdout)
 - debug: msg="JENKINS PLUGINS | {{ checkout }}"
   when: do_debug|bool and checkout is defined
 
