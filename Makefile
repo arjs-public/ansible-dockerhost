@@ -27,7 +27,7 @@ PB_D_I = $(if $(IMG),$(PB_D_B)/$(IMG),$(PB_D_B))
 TAG_D = $(BASE_D)/roles/files
 FILES_D = $(BASE_D)/roles/files
 TEMPLATES_D = $(BASE_D)/roles/templates
-$(eval ANSIBLE_CFG=$(shell netstat -p tcp | grep ' 6379 ' > /dev/null && echo redis || echo default))
+$(eval ANSIBLE_CFG=$(shell netstat -p tcp 2>/dev/null | grep ' 6379 ' > /dev/null && echo redis || echo default))
 # $(info [Info] Use ANSIBLE_CFG: $(ANSIBLE_CFG))
 A_CFG = $(BASE_D)/configs/$(ANSIBLE_CFG).cfg
 VPF_FILE = configs/.secrets/vpf.txt
