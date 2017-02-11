@@ -30,7 +30,7 @@ TEMPLATES_D = $(BASE_D)/roles/templates
 $(eval ANSIBLE_CFG=$(shell netstat -p tcp 2>/dev/null | grep ' 6379 ' > /dev/null && echo redis || echo default))
 # $(info [Info] Use ANSIBLE_CFG: $(ANSIBLE_CFG))
 A_CFG = $(BASE_D)/configs/$(ANSIBLE_CFG).cfg
-VPF_FILE = configs/.secrets/vpf.txt
+VPF_FILE = $(BASE_D)/configs/.secrets/vpf.txt
 # $(info [Info] Use A_CFG: $(A_CFG))
 INVENTORY = $(BASE_D)/inventory/inventory
 
