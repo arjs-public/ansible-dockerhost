@@ -10,6 +10,7 @@ define ENV_INFO
 endef
 
 define SET_ENV_NAME
+	$(eval ENV=$(1))
 	$(if $(ENV),,$(error [Error] ENV not set!))
 	$(eval EXTRA_ENV=-e "env_name=$(ENV)")
 	@true
