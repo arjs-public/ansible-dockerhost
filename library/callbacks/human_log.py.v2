@@ -32,6 +32,7 @@ class CallbackModule(CallbackBase):
     _fields = OUT_FIELDS
     
     def extract_fields(self, tags, vars):
+        fields = []
         for t in tags:
             values = t.split('(')
             marker = values[0]
@@ -57,14 +58,16 @@ class CallbackModule(CallbackBase):
         if type(data) == dict:
             for field in self._fields:
                 if field in data.keys() and data[field]:
-                    if not isinstance(data[field], list):
+                    if not isinstance(data[field], list) and not isinstance(data[field], dict):
                         output = self._format_output(data[field].encode('utf-8').decode('utf-8'))
-                        if field in ('stdout', 'stderr'):
-                            print("\n{0}:\n{1}".format(field, output.replace("\\n","\n")))
+                        if field in ('stdout', 'stdout_lines', 'stderr'):
+                            print("{0}:\n{1}".format(field, output.replace("\\n","\n")))
                         else:
-                            print("\n{0}: {1}".format(field, output.replace("\\n","\n")))
-                    else:
+                            print("{0}: {1}".format(field, output.replace("\\n","\n")))
+                    elif isinstance(data[field], dict):
                         output = self._format_output(data[field])
+                        print("{0}:\n{1}".format(field, output.replace("\\n","\n")))
+                    else:
                         for line in data[field]:
                             output = self._format_output(line.encode('utf-8').decode('utf-8'))
                             print("{0}: {1}".format(field, output.replace("\\n","\n")))
@@ -86,7 +89,7 @@ class CallbackModule(CallbackBase):
             for index, item in enumerate(output):
                 copy = item
                 if type(item) == dict:
-                    for field in FIELDS:
+                    for field in OUT_FIELDS:
                         if field in item.keys():
                             copy[field] = self._format_output(item[field])
                 real_output.append(copy)
