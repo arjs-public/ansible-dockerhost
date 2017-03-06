@@ -13,6 +13,9 @@
 
 # Inspired from: https://gist.github.com/cliffano/9868180
 # Improved and made compatible with Ansible v2
+"""
+human_log
+"""
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
@@ -29,66 +32,89 @@ OUT_FIELDS = ['cmd', 'command', 'start', 'end', 'delta', 'msg', 'stdout', 'stder
 
 
 class CallbackModule(CallbackBase):
+    '''
+    CallbackModule
+    '''
     _fields = OUT_FIELDS
-    
-    def extract_fields(self, tags, vars):
-        fields = []
-        for t in tags:
-            values = t.split('(')
+
+    def extract_fields(self, tags, variables):
+        '''
+        extract_fields
+        '''
+        fields = None
+        for tag in tags:
+            values = tag.split('(')
             marker = values[0]
             if marker == 'human_log':
                 fields = values[1].replace(')', '').split('|')
-        
-        if vars:
-            for k, v in vars.iteritems():
-                # print("k, v:", k, v)
-                if k == 'human_log':
-                    for i in v:
+
+        if variables:
+            for key, values in variables.iteritems():
+                if key == 'human_log':
+                    fields = []
+                    for i in values:
                         if i not in fields:
                             fields.append(i)
-        
+
         # print fields
         return fields
 
     def human_log(self, data):
+        '''
+        human_log
+        '''
         if not self._fields:
-            global OUT_FIELDS
             self._fields = OUT_FIELDS
 
-        if type(data) == dict:
+        if isinstance(data, dict):
             for field in self._fields:
                 if field in data.keys() and data[field]:
-                    if not isinstance(data[field], list) and not isinstance(data[field], dict):
-                        output = self._format_output(data[field].encode('utf-8').decode('utf-8'))
-                        if field in ('stdout', 'stdout_lines', 'stderr'):
-                            print("{0}:\n{1}".format(field, output.replace("\\n","\n")))
-                        else:
-                            print("{0}: {1}".format(field, output.replace("\\n","\n")))
+                    if isinstance(data[field], list):
+                        if field in ['stdout', 'stdout_lines', 'stderr']:
+                            print("{0}:".format(field))
+
+                        for element in data[field]:
+                            if isinstance(element, dict):
+                                output = self._format_output(data[field])
+                                print("{0}:\n{1}".format(field, output))
+                            else:
+                                output = self._format_output(element.encode('utf-8').decode('utf-8'))
+                                if field in ['stdout', 'stdout_lines', 'stderr']:
+                                    print("{0}".format(output.replace("\\n", "\n")))
+                                else:
+                                    print("{0}: {1}".format(field, output.replace("\\n", "\n")))
+
                     elif isinstance(data[field], dict):
                         output = self._format_output(data[field])
-                        print("{0}:\n{1}".format(field, output.replace("\\n","\n")))
+                        print("{0}:\n{1}".format(field, output))
+
                     else:
-                        for line in data[field]:
-                            output = self._format_output(line.encode('utf-8').decode('utf-8'))
-                            print("{0}: {1}".format(field, output.replace("\\n","\n")))
+                        if isinstance(data[field], unicode):
+                            output = self._format_output(
+                                data[field].encode('utf-8').decode('utf-8')
+                                )
+                            output = output.encode('ascii', 'replace')
+                        else:
+                            output = self._format_output(data[field])
+
+                        if field in ['stdout', 'stdout_lines', 'stderr']:
+                            print("{0}:\n{1}".format(field, output.replace("\\n", "\n")))
+                        else:
+                            print("{0}: {1}".format(field, output.replace("\\n", "\n")))
 
     def _format_output(self, output):
-        # Strip unicode
-        if type(output) == unicode:
-            output = output.encode('ascii', 'replace')
-
         # If output is a dict
-        if type(output) == dict:
+        if isinstance(output, list):
             return json.dumps(output, indent=2)
 
         # If output is a list of dicts
-        if type(output) == list and type(output[0]) == dict:
+        if isinstance(output, list) and isinstance(output[0], dict):
             # This gets a little complicated because it potentially means
             # nested results, usually because of with_items.
             real_output = list()
-            for index, item in enumerate(output):
+            for _, item in enumerate(output):
                 copy = item
-                if type(item) == dict:
+                if isinstance(item, dict):
                     for field in OUT_FIELDS:
                         if field in item.keys():
                             copy[field] = self._format_output(item[field])
@@ -96,7 +122,7 @@ class CallbackModule(CallbackBase):
             return json.dumps(output, indent=2)
 
         # If output is a list of strings
-        if type(output) == list and type(output[0]) != dict:
+        if isinstance(output, list) and not isinstance(output[0], dict):
             # Strip newline characters
             real_output = list()
             for item in output:
@@ -117,72 +143,144 @@ class CallbackModule(CallbackBase):
         return output
 
     def on_any(self, *args, **kwargs):
+        '''
+        on_any
+        '''
         pass
 
     def runner_on_failed(self, host, res, ignore_errors=False):
+        '''
+        runner_on_failed
+        '''
+        host = host
+        ignore_errors = ignore_errors
         self.human_log(res)
 
     def runner_on_ok(self, host, res):
+        '''
+        runner_on_ok
+        '''
+        host = host
         self.human_log(res)
 
     def runner_on_error(self, host, msg):
+        '''
+        runner_on_error
+        '''
         pass
 
     def runner_on_skipped(self, host, item=None):
+        '''
+        runner_on_skipped
+        '''
         pass
 
     def runner_on_unreachable(self, host, res):
+        '''
+        runner_on_unreachable
+        '''
+        host = host
         self.human_log(res)
 
     def runner_on_no_hosts(self):
+        '''
+        runner_on_no_hosts
+        '''
         pass
 
     def runner_on_async_poll(self, host, res, jid, clock):
+        '''
+        runner_on_async_poll
+        '''
+        host = host
+        jid = jid
+        clock = clock
         self.human_log(res)
 
     def runner_on_async_ok(self, host, res, jid):
+        '''
+        runner_on_async_ok
+        '''
+        host = host
+        jid = jid
         self.human_log(res)
 
     def runner_on_async_failed(self, host, res, jid):
+        '''
+        runner_on_async_failed
+        '''
+        host = host
+        jid = jid
         self.human_log(res)
 
     def playbook_on_start(self):
+        '''
+        playbook_on_start
+        '''
         pass
 
     def playbook_on_notify(self, host, handler):
+        '''
+        playbook_on_notify
+        '''
         pass
 
     def playbook_on_no_hosts_matched(self):
+        '''
+        playbook_on_no_hosts_matched
+        '''
         pass
 
     def playbook_on_no_hosts_remaining(self):
+        '''
+        playbook_on_no_hosts_remaining
+        '''
         pass
 
     def playbook_on_task_start(self, name, is_conditional):
-        pass
-
-    def v2_playbook_on_task_start(self, task, is_conditional):
+        '''
+        playbook_on_task_start
+        '''
+        is_conditional = is_conditional
         self._fields = None
-        if task and not isinstance(task, unicode):
-            if task.tags:
-                self._fields = self.extract_fields(task.tags, task.get_vars())
+        if name and not isinstance(name, unicode):
+            if name.tags:
+                self._fields = self.extract_fields(name.tags, name.get_vars())
 
     def playbook_on_vars_prompt(self, varname, private=True, prompt=None,
                                 encrypt=None, confirm=False, salt_size=None,
                                 salt=None, default=None):
+        '''
+        playbook_on_vars_prompt
+        '''
         pass
 
     def playbook_on_setup(self):
+        '''
+        playbook_on_setup
+        '''
         pass
 
     def playbook_on_import_for_host(self, host, imported_file):
+        '''
+        playbook_on_import_for_host
+        '''
         pass
 
     def playbook_on_not_import_for_host(self, host, missing_file):
+        '''
+        playbook_on_not_import_for_host
+        '''
         pass
 
     def playbook_on_play_start(self, pattern):
+        '''
+        playbook_on_play_start
+        '''
         pass
 
     def playbook_on_stats(self, stats):
+        '''
+        playbook_on_stats
+        '''
         pass
