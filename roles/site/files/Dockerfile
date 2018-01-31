@@ -6,7 +6,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-
 RUN DEBIAN_FRONTEND=noninteractive apt-get remove -y python3 && apt-get clean && apt-get clean
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
 
-# COPY etc/timezone /etc/timezone
+COPY etc/timezone /etc/timezone
 # RUN dpkg-reconfigure -f noninteractive tzdata
 RUN test -f /usr/bin/timedatectl && /usr/bin/timedatectl set-timezone "Europe/Berlin" || true
 RUN which timedatectl && /usr/bin/timedatectl || true
