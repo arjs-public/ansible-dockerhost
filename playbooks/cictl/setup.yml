@@ -22,27 +22,27 @@
     - debug: msg="{{ lookup('pipe', 'ls -la ' + vpf_file_path) }}"
       when: do_debug|bool
 
-    - include: '{{ common_tasks_base }}/debug.yml'
+    - include_tasks: '{{ common_tasks_base }}/debug.yml'
       when: do_debug|bool
 
-    - include: '{{ common_tasks_base }}check_connection.yml'
+    - include_tasks: '{{ common_tasks_base }}check_connection.yml'
       when: do_check_connection|bool
 
-    - include: '{{ common_tasks_base }}check_folders.yml'
+    - include_tasks: '{{ common_tasks_base }}check_folders.yml'
       when: do_check_folders|bool
 
   tasks:
     - name: JENKINS SETUP | Execute Setup task
-      include: '{{ tasks_base }}setup.yml'
+      include_tasks: '{{ tasks_base }}setup.yml'
 
     - name: JENKINS SETUP | Execute Configs task
-      include: '{{ tasks_base }}configs.yml'
+      include_tasks: '{{ tasks_base }}configs.yml'
 
     - name: JENKINS SETUP | Execute Plugins task
-      include: '{{ tasks_base }}plugins.yml'
+      include_tasks: '{{ tasks_base }}plugins.yml'
 
     - name: JENKINS SETUP | Execute Users task
-      include: '{{ tasks_base }}users.yml'
+      include_tasks: '{{ tasks_base }}users.yml'
 
     - name: JENKINS SETUP | Execute Jobs task
-      include: '{{ tasks_base }}jobs.yml'
+      include_tasks: '{{ tasks_base }}jobs.yml'

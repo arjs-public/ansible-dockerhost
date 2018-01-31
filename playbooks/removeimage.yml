@@ -15,15 +15,15 @@
     - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
-    - include: '{{ common_tasks_base }}/debug.yml'
+    - include_tasks: '{{ common_tasks_base }}/debug.yml'
       when: do_debug|bool
 
-    - include: '{{ common_tasks_base }}check_connection.yml'
+    - include_tasks: '{{ common_tasks_base }}check_connection.yml'
       when: do_check_connection|bool
 
-    - include: '{{ common_tasks_base }}check_docker.yml'
+    - include_tasks: '{{ common_tasks_base }}check_docker.yml'
       when: do_check_docker|bool
 
   tasks:
     - name: REMOVE IMAGE | Execute stats task
-      include: '{{ tasks_base }}removeimage.yml'
+      include_tasks: '{{ tasks_base }}removeimage.yml'

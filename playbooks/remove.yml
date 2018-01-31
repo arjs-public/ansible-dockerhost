@@ -17,33 +17,33 @@
     - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
-    - include: '{{ common_tasks_base }}/debug.yml'
+    - include_tasks: '{{ common_tasks_base }}/debug.yml'
       when: do_debug|bool
 
-    - include: '{{ common_tasks_base }}check_connection.yml'
+    - include_tasks: '{{ common_tasks_base }}check_connection.yml'
       when: do_check_connection|bool
 
-    - include: '{{ common_tasks_base }}check_folders.yml'
+    - include_tasks: '{{ common_tasks_base }}check_folders.yml'
       when: do_check_folders|bool
 
-    - include: '{{ common_tasks_base }}check_docker.yml'
+    - include_tasks: '{{ common_tasks_base }}check_docker.yml'
       when: do_check_docker|bool
 
   tasks:
     - name: REMOVE | Execute stats task
-      include: '{{ common_tasks_base }}stats.yml'
+      include_tasks: '{{ common_tasks_base }}stats.yml'
 
     - name: REMOVE | Get docker container information
-      include: '{{ common_tasks_base }}get_facts.yml'
+      include_tasks: '{{ common_tasks_base }}get_facts.yml'
 
     - name: REMOVE | Add docker container to inventory
-      include: '{{ common_tasks_base }}add_host.yml'
+      include_tasks: '{{ common_tasks_base }}add_host.yml'
 
     - name: REMOVE | Stop docker container
-      include: '{{ common_tasks_base }}stop.yml'
+      include_tasks: '{{ common_tasks_base }}stop.yml'
 
     - name: REMOVE | Execute remove task
-      include: '{{ common_tasks_base }}remove.yml'
+      include_tasks: '{{ common_tasks_base }}remove.yml'
 
     - name: REMOVE | Execute status task
-      include: '{{ common_tasks_base }}status.yml'
+      include_tasks: '{{ common_tasks_base }}status.yml'

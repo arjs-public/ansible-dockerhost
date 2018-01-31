@@ -15,21 +15,21 @@
     - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
-    - include: '{{ common_tasks_base }}/debug.yml'
+    - include_tasks: '{{ common_tasks_base }}/debug.yml'
       when: do_debug|bool
 
-    - include: '{{ common_tasks_base }}check_connection.yml'
+    - include_tasks: '{{ common_tasks_base }}check_connection.yml'
       when: do_check_connection|bool
 
-    - include: '{{ common_tasks_base }}check_folders.yml'
+    - include_tasks: '{{ common_tasks_base }}check_folders.yml'
       when: do_check_folders|bool
 
   tasks:
     - name: SITE SETUP | Check variables
-      include: '{{ tasks_base }}check_vars.yml'
+      include_tasks: '{{ tasks_base }}check_vars.yml'
       
     - name: SITE SETUP | Create "{{ volume_home }}" folder if not exists
-      include: '{{ tasks_base }}check_folders.yml'
+      include_tasks: '{{ tasks_base }}check_folders.yml'
 
     - name: SITE SETUP | Copy initial files
-      include: '{{ tasks_base }}setup.yml'
+      include_tasks: '{{ tasks_base }}setup.yml'

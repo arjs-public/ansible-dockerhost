@@ -15,18 +15,18 @@
     - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
-    - include: '{{ common_tasks_base }}/debug.yml'
+    - include_tasks: '{{ common_tasks_base }}/debug.yml'
       when: do_debug|bool
 
-    - include: '{{ common_tasks_base }}check_connection.yml'
+    - include_tasks: '{{ common_tasks_base }}check_connection.yml'
       when: do_check_connection|bool
 
-    - include: '{{ common_tasks_base }}check_docker.yml'
+    - include_tasks: '{{ common_tasks_base }}check_docker.yml'
       when: do_check_docker|bool
 
   tasks:
     - name: BUILD | Execute docker build on '{{ inventory_hostname }}'
-      include: '{{ common_tasks_base }}build.yml'
+      include_tasks: '{{ common_tasks_base }}build.yml'
     
     - name: BUILD | Execute docker images on '{{ inventory_hostname }}'
-      include: '{{ common_tasks_base }}images.yml'
+      include_tasks: '{{ common_tasks_base }}images.yml'

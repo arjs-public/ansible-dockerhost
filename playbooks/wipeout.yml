@@ -15,21 +15,21 @@
     - '{{ base_folder }}/roles/{{ image }}/vars/defaults.yml'
 
   pre_tasks:
-    - include: '{{ common_tasks_base }}/debug.yml'
+    - include_tasks: '{{ common_tasks_base }}/debug.yml'
       when: do_debug|bool
 
-    - include: '{{ common_tasks_base }}check_connection.yml'
+    - include_tasks: '{{ common_tasks_base }}check_connection.yml'
       when: do_check_connection|bool
 
-    - include: '{{ common_tasks_base }}check_docker.yml'
+    - include_tasks: '{{ common_tasks_base }}check_docker.yml'
       when: do_check_docker|bool
 
   tasks:
     - name: WIPEOUT | Execute stats task
-      include: '{{ common_tasks_base }}stats.yml'
+      include_tasks: '{{ common_tasks_base }}stats.yml'
 
     - name: WIPEOUT | Execute wipeout task
-      include: '{{ common_tasks_base }}wipeout.yml'
+      include_tasks: '{{ common_tasks_base }}wipeout.yml'
 
     - name: WIPEOUT | Execute status task
-      include: '{{ common_tasks_base }}status.yml'
+      include_tasks: '{{ common_tasks_base }}status.yml'

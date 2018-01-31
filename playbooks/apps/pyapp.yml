@@ -7,11 +7,11 @@
     - ../../../roles/dockerhost/vars/base.yml
 
   pre_tasks:
-    # - include: '{{ tasks_base }}debug_info.yml'
+    # - include_tasks: '{{ tasks_base }}debug_info.yml'
 
-    - include: '{{ tasks_base }}check_connection.yml'
+    - include_tasks: '{{ tasks_base }}check_connection.yml'
 
-    - include: '{{ tasks_base }}check_folders.yml'
+    - include_tasks: '{{ tasks_base }}check_folders.yml'
 
   tasks:
     # - name: Create "{{ volume_home }}/plugins" folder
