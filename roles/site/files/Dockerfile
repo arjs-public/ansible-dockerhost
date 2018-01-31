@@ -8,8 +8,8 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
 
 # COPY etc/timezone /etc/timezone
 # RUN dpkg-reconfigure -f noninteractive tzdata
-RUN test -f /usr/bin/timedatectl && timedatectl set-timezone "Europe/Berlin" || true
-RUN which timedatectl && timedatectl || true
+RUN test -f /usr/bin/timedatectl && /usr/bin/timedatectl set-timezone "Europe/Berlin" || true
+RUN which timedatectl && /usr/bin/timedatectl || true
 
 EXPOSE 80
 EXPOSE 443
