@@ -9,9 +9,8 @@ USER root
 # ADD keys/id_rsa.pub /root/.ssh/authorized_keys
 # COPY etc/smtp.conf /etc/ssmtp/ssmtp.conf
 # RUN apt-get update && apt-get install -y ssmtp && apt-get clean
-RUN apt-get update && apt-get install -y build-essential && apt-get clean
-COPY etc/timezone /etc/timezone
-RUN dpkg-reconfigure -f noninteractive tzdata
+RUN apt-get update && apt-get install -y build-essential tzdata && apt-get clean
+RUN ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 COPY get-pip.py /root/get-pip.py
 RUN python /root/get-pip.py
 RUN pip install virtualenv
