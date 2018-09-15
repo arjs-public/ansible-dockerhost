@@ -1,6 +1,6 @@
 ---
-- name: IMAGES | Execute docker images with an grep for name '{{ image }}'
-  shell: docker images | grep '{{ image }}'
+- name: IMAGES | Execute docker image ls with an grep for name '{{ image }}'
+  shell: docker image ls | grep '{{ image }}'
   when: image != ''
   register: checkout
   changed_when: checkout.rc != 0
@@ -8,8 +8,8 @@
 - debug: msg='IMAGES | {{ checkout }}'
   when: do_debug|bool and checkout is defined
 
-- name: IMAGES | Execute docker images
-  shell: docker images
+- name: IMAGES | Execute docker image ls
+  shell: docker image ls
   when: image == ''
   register: checkout
   changed_when: checkout.rc != 0

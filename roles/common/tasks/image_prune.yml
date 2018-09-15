@@ -1,0 +1,9 @@
+---
+- name: IMAGES | Execute docker image prune
+  shell: docker image prune --force
+  when: image == ''
+  register: checkout
+  changed_when: checkout.rc != 0
+  tags: human_log(stdout|stderr)
+- debug: msg='IMAGES | {{ checkout }}'
+  when: do_debug|bool and checkout is defined

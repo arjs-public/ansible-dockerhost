@@ -24,6 +24,6 @@
       when: do_check_docker|bool
 
   tasks:
-    - name: IMAGES | Execute docker build on '{{ inventory_hostname }}'
-      include_tasks: '{{ common_tasks_base }}images.yml'
+    - name: IMAGES | Execute docker command on '{{ inventory_hostname }}'
+      include_tasks: '{{ common_tasks_base }}image_ls.yml'
       tags: human_log(stdout|stderr)

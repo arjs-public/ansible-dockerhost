@@ -1,0 +1,29 @@
+---
+- name: IMAGES | Remove dangling images on docker host
+  hosts: dockerhost
+  gather_facts: no
+  become: no
+
+  vars:
+    - do_debug: False
+    - do_check_docker: False
+    - do_check_connection: False
+    - base_folder: ..
+
+  vars_files:
+    - '{{ base_folder }}/roles/common/vars/defaults.yml'
+
+  pre_tasks:
+    - include_tasks: '{{ common_tasks_base }}/debug.yml'
+      when: do_debug|bool
+
+    - include_tasks: '{{ common_tasks_base }}check_connection.yml'
+      when: do_check_connection|bool
+
+    - include_tasks: '{{ common_tasks_base }}check_docker.yml'
+      when: do_check_docker|bool
+
+  tasks:
+    - name: IMAGES | Execute docker command on '{{ inventory_hostname }}'
+      include_tasks: '{{ common_tasks_base }}image_prune.yml'
+      tags: human_log(stdout|stderr)
