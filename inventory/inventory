@@ -1,11 +1,19 @@
+localhost
+
 [local]
 servix
 
 [dockerhost]
 servix
 
-[inventoryhost]
-servix
+[inventoryhost:children]
+dockerhost
 
 [sites]
 try.v2.arjs.net ansible_ssh_host=ip
+
+[sites:vars]
+ansible_become=yes
+
+[all:vars]
+ansible_become=no
